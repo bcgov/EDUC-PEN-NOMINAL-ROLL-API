@@ -23,7 +23,7 @@ objects:
     template:
       metadata:
         annotations:
-          openshift.io/generated-by: penregbatchapi
+          openshift.io/generated-by: nominalrollapi
           prometheus.io/path: /actuator/prometheus
           prometheus.io/port: '8080'
           prometheus.io/scrape: 'true'
@@ -32,7 +32,7 @@ objects:
           deploymentConfig: "${APP_NAME}-${JOB_NAME}"
       spec:
         containers:
-        - image: docker-registry.default.svc:5000/${NAMESPACE}/${REPO_NAME}-${JOB_NAME}:${TAG}
+        - image: image-registry.openshift-image-registry.svc:5000/${NAMESPACE}/${REPO_NAME}-${JOB_NAME}:${TAG}
           imagePullPolicy: Always
           volumeMounts:
           - name: tls-certs
@@ -68,7 +68,7 @@ objects:
             limits:
               cpu: "${MAX_CPU}"
               memory: "${MAX_MEM}"
-        - image: fluent/fluent-bit
+        - image: docker-remote.artifacts.developer.gov.bc.ca/fluent/fluent-bit:1.5.7
           name: "${APP_NAME}-${JOB_NAME}-fluent-bit-sidecar"
           imagePullPolicy: Always
           volumeMounts:
@@ -107,7 +107,7 @@ objects:
         volumes:
         - name: tls-certs
           secret:
-            secretName: pen-reg-batch-api-cert
+            secretName: nominal-roll-api-cert
         - name: log-storage
           emptyDir: {}
         - name: flb-sc-config-volume
@@ -120,7 +120,7 @@ objects:
   kind: Service
   metadata:
     annotations:
-      service.alpha.openshift.io/serving-cert-secret-name: "pen-reg-batch-api-cert"
+      service.alpha.openshift.io/serving-cert-secret-name: "nominal-roll-api-cert"
     labels:
       app: "${APP_NAME}-${JOB_NAME}"
     name: "${APP_NAME}-${JOB_NAME}"
