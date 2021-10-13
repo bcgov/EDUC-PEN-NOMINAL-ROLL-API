@@ -1,17 +1,13 @@
 package ca.bc.gov.educ.pen.nominalroll.api.struct.v1;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -23,23 +19,34 @@ import java.time.LocalDate;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NominalRollStudent {
-  String iscSchoolNumber;
+  //DB PK for each row
+  String nominalRollStudentID; // guid for each student.
+  // fields from file
+  String schoolDistrictNumber;
+  String schoolNumber;
   String schoolName;
-  Integer schoolDistrictNumber;
-  String schoolDistrictName;
-  String tuitionAgreement;
+  String leaProvincial;
   String recipientNumber;
   String recipientName;
-  String familyName;
+  String identity;
+  String surname;
   String givenNames;
-  String aliasNames;
-  @JsonDeserialize(using = LocalDateDeserializer.class)
-  @JsonSerialize(using = LocalDateSerializer.class)
-  @JsonFormat(pattern = "yyyy-MM-dd")
-  LocalDate dateOfBirth;
+  String initial;
   String gender;
+  String birthDate;
+  String grade;
+  String fte;
   String bandOfResidence;
-  String gradeName;
-  Double fte;
 
+  //audit fields
+  String createUser;
+  String createDate;
+  String updateUser;
+  String updateDate;
+
+  // fields computed.
+  String yearOfProcessing;
+  String assignedPEN;
+
+  List<Map<String,String>> validationErrorsMap;
 }

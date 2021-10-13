@@ -83,7 +83,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
     if (rowNum == 0) {
       log.debug("Headers Map is populated as :: {}", headersMap);
       this.checkForValidHeaders(correlationID, headersMap);
-    } else if (nominalRollStudent.getDateOfBirth() != null) {
+    } else if (nominalRollStudent.getBirthDate() != null) {
       nominalRollStudents.add(nominalRollStudent);
     }
   }
@@ -136,20 +136,17 @@ public abstract class BaseExcelProcessor implements FileProcessor {
       val headerName = headerNamesOptional.get();
       val headerNames = headerName.getCode();
       switch (headerName) {
-        case ISC_SCHOOL_NO:
-          nominalRollStudent.setIscSchoolNumber(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+        case SCHOOL_DISTRICT_NUMBER:
+          nominalRollStudent.setSchoolDistrictNumber(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+          break;
+        case SCHOOL_NUMBER:
+          nominalRollStudent.setSchoolNumber(this.getCellValueString(cell, correlationID, rowNum, headerNames));
           break;
         case SCHOOL_NAME:
           nominalRollStudent.setSchoolName(this.getCellValueString(cell, correlationID, rowNum, headerNames));
           break;
-        case SCHOOL_DISTRICT_NUMBER:
-          nominalRollStudent.setSchoolDistrictNumber(this.getCellValueInteger(cell, correlationID, rowNum, headerNames));
-          break;
-        case SCHOOL_DISTRICT_NAME:
-          nominalRollStudent.setSchoolDistrictName(this.getCellValueString(cell, correlationID, rowNum, headerNames));
-          break;
-        case TUITION_AGREEMENT:
-          nominalRollStudent.setTuitionAgreement(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+        case LEA_PROV:
+          nominalRollStudent.setLeaProvincial(this.getCellValueString(cell, correlationID, rowNum, headerNames));
           break;
         case RECIPIENT_NUMBER:
           nominalRollStudent.setRecipientNumber(this.getCellValueString(cell, correlationID, rowNum, headerNames));
@@ -157,29 +154,32 @@ public abstract class BaseExcelProcessor implements FileProcessor {
         case RECIPIENT_NAME:
           nominalRollStudent.setRecipientName(this.getCellValueString(cell, correlationID, rowNum, headerNames));
           break;
-        case FAMILY_NAME:
-          nominalRollStudent.setFamilyName(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+        case IDENTITY:
+          nominalRollStudent.setIdentity(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+          break;
+        case SURNAME:
+          nominalRollStudent.setSurname(this.getCellValueString(cell, correlationID, rowNum, headerNames));
           break;
         case GIVEN_NAMES:
           nominalRollStudent.setGivenNames(this.getCellValueString(cell, correlationID, rowNum, headerNames));
           break;
-        case ALIAS_NAMES:
-          nominalRollStudent.setAliasNames(this.getCellValueString(cell, correlationID, rowNum, headerNames));
-          break;
-        case DATE_OF_BIRTH:
-          nominalRollStudent.setDateOfBirth(this.getCellValueLocalDate(cell, correlationID, rowNum, headerNames));
+        case INITIAL:
+          nominalRollStudent.setInitial(this.getCellValueString(cell, correlationID, rowNum, headerNames));
           break;
         case GENDER:
           nominalRollStudent.setGender(this.getCellValueString(cell, correlationID, rowNum, headerNames));
           break;
-        case BAND_OF_RESIDENCE:
-          nominalRollStudent.setBandOfResidence(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+        case BIRTH_DATE:
+          nominalRollStudent.setBirthDate(this.getCellValueString(cell, correlationID, rowNum, headerNames));
           break;
-        case GRADE_NAME:
-          nominalRollStudent.setGradeName(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+        case GRADE:
+          nominalRollStudent.setGrade(this.getCellValueString(cell, correlationID, rowNum, headerNames));
           break;
         case FTE:
-          nominalRollStudent.setFte(this.getCellValueDouble(cell, correlationID, rowNum, headerNames));
+          nominalRollStudent.setFte(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+          break;
+        case BAND_OF_RESIDENCE:
+          nominalRollStudent.setBandOfResidence(this.getCellValueString(cell, correlationID, rowNum, headerNames));
           break;
         default:
           log.debug("Header name from excel is :: {} is not present in configured headers.", headerNames);
@@ -269,19 +269,13 @@ public abstract class BaseExcelProcessor implements FileProcessor {
   }
 
   private String getCellValueString(final Cell cell, final String correlationID, final int rowNum, final String headerName) {
-    // Alternatively, get the value and format it yourself
     switch (cell.getCellType()) {
       case STRING:
         log.debug(STRING_TYPE, cell.getRichStringCellValue().getString());
         return cell.getRichStringCellValue().getString();
       case NUMERIC:
-        if (DateUtil.isCellDateFormatted(cell)) {
-          log.debug(DATE_TYPE, cell.getDateCellValue());
-          throw new FileUnProcessableException(FileError.INVALID_VALUE_FOR_FIELD, correlationID, String.valueOf(rowNum), headerName, "String", DATE);
-        } else {
-          log.debug(NUMBER_TYPE, cell.getNumericCellValue());
-          return String.valueOf((int) cell.getNumericCellValue());
-        }
+        log.debug(NUMBER_TYPE, cell.getNumericCellValue());
+        return String.valueOf(cell.getNumericCellValue());
       case BOOLEAN:
         log.debug("Boolean type :: {}", cell.getBooleanCellValue());
         return String.valueOf(cell.getBooleanCellValue());

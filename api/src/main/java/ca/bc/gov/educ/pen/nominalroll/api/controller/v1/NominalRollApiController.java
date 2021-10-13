@@ -31,9 +31,9 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   @Override
   public ResponseEntity<NominalRollFileProcessResponse> processNominalRollFile(final FileUpload fileUpload, final String correlationID) {
     NominalRollFileProcessResponse nominalRollFileProcessResponse = null;
-    if ("xlsx".equals(fileUpload.getFileExtension())) {
+    if (XLSX.getCode().equals(fileUpload.getFileExtension())) {
       nominalRollFileProcessResponse = this.fileProcessorsMap.get(XLSX).processFile(Base64.getDecoder().decode(fileUpload.getFileContents()), correlationID);
-    } else if ("xls".equals(fileUpload.getFileExtension())) {
+    } else if (XLS.getCode().equals(fileUpload.getFileExtension())) {
       nominalRollFileProcessResponse = this.fileProcessorsMap.get(XLS).processFile(Base64.getDecoder().decode(fileUpload.getFileContents()), correlationID);
     }
     if (nominalRollFileProcessResponse != null) {
