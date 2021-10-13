@@ -24,7 +24,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 public interface NominalRollApiEndpoint {
 
   @PostMapping
-  @PreAuthorize("hasAuthority('SCOPE_WRITE_STUDENT')") //FIXME change scope
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
   @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "CREATED"), @ApiResponse(responseCode = "400", description = "BAD REQUEST")})
   @ResponseStatus(CREATED)
   @Transactional

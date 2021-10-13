@@ -8,6 +8,7 @@ import lombok.Getter;
  * @author OM
  */
 public enum FileError {
+  FILE_ENCRYPTED("File is password protected"),
 
   NO_HEADING("Heading row is missing"),
 

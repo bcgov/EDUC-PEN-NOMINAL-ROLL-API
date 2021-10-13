@@ -2,10 +2,13 @@ package ca.bc.gov.educ.pen.nominalroll.api.controller.v1;
 
 import ca.bc.gov.educ.pen.nominalroll.api.constants.FileTypes;
 import ca.bc.gov.educ.pen.nominalroll.api.endpoint.v1.NominalRollApiEndpoint;
+import ca.bc.gov.educ.pen.nominalroll.api.exception.FileError;
+import ca.bc.gov.educ.pen.nominalroll.api.exception.FileUnProcessableException;
 import ca.bc.gov.educ.pen.nominalroll.api.processor.FileProcessor;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.FileUpload;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollFileProcessResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.openxml4j.exceptions.OLE2NotOfficeXmlFileException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,7 +35,12 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   public ResponseEntity<NominalRollFileProcessResponse> processNominalRollFile(final FileUpload fileUpload, final String correlationID) {
     NominalRollFileProcessResponse nominalRollFileProcessResponse = null;
     if (XLSX.getCode().equals(fileUpload.getFileExtension())) {
-      nominalRollFileProcessResponse = this.fileProcessorsMap.get(XLSX).processFile(Base64.getDecoder().decode(fileUpload.getFileContents()), correlationID);
+      try {
+        nominalRollFileProcessResponse = this.fileProcessorsMap.get(XLSX).processFile(Base64.getDecoder().decode(fileUpload.getFileContents()), correlationID);
+      } catch (final OLE2NotOfficeXmlFileException ole2NotOfficeXmlFileException) {
+        log.warn("OLE2NotOfficeXmlFileException during Nominal Roll file processing", ole2NotOfficeXmlFileException);
+        throw new FileUnProcessableException(FileError.FILE_ENCRYPTED, correlationID);
+      }
     } else if (XLS.getCode().equals(fileUpload.getFileExtension())) {
       nominalRollFileProcessResponse = this.fileProcessorsMap.get(XLS).processFile(Base64.getDecoder().decode(fileUpload.getFileContents()), correlationID);
     }

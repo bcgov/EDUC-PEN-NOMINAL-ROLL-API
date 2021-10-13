@@ -23,6 +23,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -137,7 +138,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
       val headerNames = headerName.getCode();
       switch (headerName) {
         case SCHOOL_DISTRICT_NUMBER:
-          nominalRollStudent.setSchoolDistrictNumber(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+          nominalRollStudent.setSchoolDistrictNumber(this.getCellValueString(cell, correlationID, rowNum, headerNames).replaceAll("\\.\\d+$", "")); // if it is a number in Excel, poi adds `.0` at the end.
           break;
         case SCHOOL_NUMBER:
           nominalRollStudent.setSchoolNumber(this.getCellValueString(cell, correlationID, rowNum, headerNames));
@@ -274,6 +275,11 @@ public abstract class BaseExcelProcessor implements FileProcessor {
         log.debug(STRING_TYPE, cell.getRichStringCellValue().getString());
         return cell.getRichStringCellValue().getString();
       case NUMERIC:
+        if (DateUtil.isCellDateFormatted(cell)) {
+          val dateValue = cell.getDateCellValue();
+          log.debug(DATE_TYPE, dateValue);
+          return new SimpleDateFormat("yyyy-MM-dd").format(dateValue);
+        }
         log.debug(NUMBER_TYPE, cell.getNumericCellValue());
         return String.valueOf(cell.getNumericCellValue());
       case BOOLEAN:
