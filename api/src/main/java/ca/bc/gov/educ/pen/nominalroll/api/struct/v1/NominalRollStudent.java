@@ -45,8 +45,7 @@ public class NominalRollStudent {
   String updateDate;
 
   // fields computed.
-  String yearOfProcessing;
   String assignedPEN;
 
-  List<Map<String,String>> validationErrorsMap;
+  Map<String,String> validationErrors; // key is field name and value is error for the field.
 }
