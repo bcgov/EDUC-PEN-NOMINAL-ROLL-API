@@ -1,12 +1,12 @@
-def performDeploy(String stageEnv, String projectEnv, String repoName, String appName, String jobName, String tag, String sourceEnv, String targetEnvironment, String appDomain, String rawApiDcURL, String minReplicas, String maxReplicas, String minCPU, String maxCPU, String minMem, String maxMem, String targetEnv, String NAMESPACE, String commonNamespace){
-  script{
-    deployStageNoEnv(stageEnv, projectEnv, repoName, appName, jobName,  tag, sourceEnv, targetEnvironment, appDomain, rawApiDcURL, minReplicas, maxReplicas, minCPU, maxCPU, minMem, maxMem, false)
+def performDeploy(String stageEnv, String projectEnv, String repoName, String appName, String jobName, String tag, String sourceEnv, String targetEnvironment, String appDomain, String rawApiDcURL, String minReplicas, String maxReplicas, String minCPU, String maxCPU, String minMem, String maxMem, String targetEnv, String NAMESPACE, String commonNamespace) {
+  script {
+    deployStageNoEnv(stageEnv, projectEnv, repoName, appName, jobName, tag, sourceEnv, targetEnvironment, appDomain, rawApiDcURL, minReplicas, maxReplicas, minCPU, maxCPU, minMem, maxMem, false)
   }
-  configMapSetup("${appName}","${appName}".toUpperCase(), NAMESPACE, "${targetEnv}", "${sourceEnv}");
+  configMapSetup("${appName}", "${appName}".toUpperCase(), NAMESPACE, "${targetEnv}", "${sourceEnv}");
   performStandardUpdateConfigMapStep("${repoName}", "${tag}", "${targetEnv}", "${appName}", "${NAMESPACE}", "${commonNamespace}");
   performStandardRollout(appName, projectEnv, jobName)
-  script{
-    deployStageNoEnv(stageEnv, projectEnv, repoName, appName, jobName,  tag, sourceEnv, targetEnvironment, appDomain, rawApiDcURL, minReplicas, maxReplicas, minCPU, maxCPU, minMem, maxMem, true)
+  script {
+    deployStageNoEnv(stageEnv, projectEnv, repoName, appName, jobName, tag, sourceEnv, targetEnvironment, appDomain, rawApiDcURL, minReplicas, maxReplicas, minCPU, maxCPU, minMem, maxMem, true)
   }
 }
 
@@ -14,7 +14,7 @@ def deployStageNoEnv(String stageEnv, String projectEnv, String repoName, String
   openshift.withCluster() {
     openshift.withProject(projectEnv) {
       def dcApp = openshift.selector('dc', "${appName}-${jobName}")
-      if(!dcApp.exists() || deployEvenIfExists){
+      if (!dcApp.exists() || deployEvenIfExists) {
         echo "Tagging ${appName} image with version ${tag}"
         openshift.tag("${sourceEnv}/${repoName}-${jobName}:${tag}", "${repoName}-${jobName}:${tag}")
         def dcTemplate = openshift.process('-f',
@@ -35,20 +35,20 @@ def deployStageNoEnv(String stageEnv, String projectEnv, String repoName, String
 
         echo "Applying Deployment for ${appName}"
         def dc = openshift.apply(dcTemplate).narrow('dc')
-      }else{
+      } else {
         echo "DC already exists for ${appName}-${jobName}, skipping initial rollout"
       }
     }
   }
 }
 
-def configMapSetup(String appName,String appNameUpper, String namespace, String targetEnv, String sourceEnv){
+def configMapSetup(String appName, String appNameUpper, String namespace, String targetEnv, String sourceEnv) {
   script {
 
-    try{
-      sh( script: "oc -n ${namespace}-${targetEnv} describe configmaps ${appName}-${targetEnv}-setup-config", returnStdout: true)
+    try {
+      sh(script: "oc -n ${namespace}-${targetEnv} describe configmaps ${appName}-${targetEnv}-setup-config", returnStdout: true)
       echo 'Config map already exists. Moving to next stage...'
-    } catch(e){
+    } catch (e) {
       configProperties = input(
         id: 'configProperties', message: "Please enter the required credentials to allow ${appName} to run:",
         parameters: [
@@ -74,10 +74,10 @@ def configMapSetup(String appName,String appNameUpper, String namespace, String 
   }
 }
 
-def performStandardUpdateConfigMapStep(String repoName,String tag, String targetEnv, String appName, String NAMESPACE, String commonNamespace){
-  script{
-    dir('tools/jenkins'){
-      if(tag == "latest") {
+def performStandardUpdateConfigMapStep(String repoName, String tag, String targetEnv, String appName, String NAMESPACE, String commonNamespace) {
+  script {
+    dir('tools/jenkins') {
+      if (tag == "latest") {
         sh "curl -s https://raw.githubusercontent.com/bcgov/${repoName}/main/tools/jenkins/update-configmap.sh | bash /dev/stdin \"${targetEnv}\" \"${appName}\" \"${NAMESPACE}\" \"${commonNamespace}\""
       } else {
         sh "curl -s https://raw.githubusercontent.com/bcgov/${repoName}/${tag}/tools/jenkins/update-configmap.sh | bash /dev/stdin \"${targetEnv}\" \"${appName}\" \"${NAMESPACE}\" \"${commonNamespace}\""
@@ -85,15 +85,17 @@ def performStandardUpdateConfigMapStep(String repoName,String tag, String target
     }
   }
 }
-def performStandardRollout(String appName, String projectEnv, String jobName){
-  script{
+
+def performStandardRollout(String appName, String projectEnv, String jobName) {
+  script {
     echo "Rolling out ${appName}-${jobName}"
     try {
       sh(script: "oc -n ${projectEnv} rollout latest dc/${appName}-${jobName}", returnStdout: true)
     }
-    catch(e){
+    catch (e) {
       //Do nothing
     }
   }
 }
+
 return this;
