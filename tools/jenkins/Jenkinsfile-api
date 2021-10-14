@@ -14,8 +14,8 @@ pipeline{
       OWNER = 'bcgov'
       JOB_NAME = 'main'
       TAG = 'latest'
-      TARGET_ENV = 'dev'
-      STAGING_ENV = 'Dev'
+      TARGET_ENV = 'tools'
+      STAGING_ENV = 'Tools'
       TARGET_ENVIRONMENT = "${NAMESPACE}-${TARGET_ENV}"
 
       APP_DOMAIN = 'apps.silver.devops.gov.bc.ca'
@@ -44,6 +44,46 @@ pipeline{
 
           sh "wget -O - https://raw.githubusercontent.com/bcgov/EDUC-INFRA-COMMON/master/openshift/common-deployment/deployHelpers.js > deployHelpers.js"
           extJSHelper = evaluate readFile('deployHelpers.js')
+        }
+      }
+    }
+    stage('Build App') {
+      steps {
+        script {
+          openshift.withCluster() {
+            openshift.withProject(TOOLS) {
+              try {
+                echo "Building API..."
+                def bcBackend = openshift.process('-f', 'tools/openshift/api.bc.yaml', "REPO_NAME=${REPO_NAME}-${JOB_NAME}", "JOB_NAME=${JOB_NAME}", "SOURCE_REPO_URL=${SOURCE_REPO_URL}", "SOURCE_REPO_REF=${SOURCE_REPO_REF}")
+                openshift.apply(bcBackend).narrow('bc').startBuild('-w').logs('-f')
+
+                openshift.tag("${REPO_NAME}-${JOB_NAME}:latest", "${REPO_NAME}-${JOB_NAME}:${JOB_NAME}")
+              } catch (e) {
+                echo "API build failed"
+                throw e
+              }
+            }
+          }
+        }
+      }
+      post {
+        success {
+          echo 'Cleanup BuildConfigs'
+          script {
+            openshift.withCluster() {
+              openshift.withProject(TOOLS) {
+                def bcApi = openshift.selector('bc', "${REPO_NAME}-${JOB_NAME}")
+
+                if(bcApi.exists()) {
+                  echo "Removing BuildConfig ${REPO_NAME}-${JOB_NAME}"
+                  bcApi.delete()
+                }
+              }
+            }
+          }
+        }
+        failure {
+          echo 'Build stage failed'
         }
       }
     }
