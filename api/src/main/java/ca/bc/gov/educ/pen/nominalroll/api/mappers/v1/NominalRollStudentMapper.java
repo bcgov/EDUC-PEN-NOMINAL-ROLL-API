@@ -16,7 +16,6 @@ public interface NominalRollStudentMapper {
   @Mapping(target = "validationErrors", ignore = true)
   NominalRollStudent toStruct(ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudent nominalRollStudent);
 
-  @Mapping(target = "yearOfProcessing", ignore = true)
   @Mapping(target = "status", constant = "LOADED")
   @Mapping(target = "nominalRollStudentValidationErrors", ignore = true)
   ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudent toModel(NominalRollStudent nominalRollStudent);
