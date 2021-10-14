@@ -8,9 +8,9 @@ RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
 FROM docker-remote.artifacts.developer.gov.bc.ca/openjdk:11-jdk
 RUN useradd -ms /bin/bash spring
-RUN mkdir -p /logs && mkdir -p /app
-RUN chown -R spring:spring /logs && chown -R spring:spring /app
-RUN chmod 755 /logs && chmod 755 /app
+RUN mkdir -p /logs && mkdir -p /temp
+RUN chown -R spring:spring /logs && chown -R spring:spring /temp
+RUN chmod 755 /logs && chmod 755 /temp
 USER spring
 VOLUME /tmp
 ARG DEPENDENCY=/workspace/app/target/dependency

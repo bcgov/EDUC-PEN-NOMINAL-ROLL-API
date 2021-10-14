@@ -49,9 +49,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
   private static final String BLANK_CELL = "blank cell";
 
   protected File getFile(final byte[] fileContents, final String code) throws URISyntaxException, IOException {
-    val uri = Objects.requireNonNull(this.getClass().getClassLoader().getResource("application.properties")).toURI();
-    final String mainPath = Paths.get(uri).toString().replaceAll("application.properties", "");
-    final Path path = Files.createTempFile(Paths.get(mainPath), "nr-", code);
+    final Path path = Files.createTempFile(Paths.get("/temp"), "nr-", code);
     Files.write(path, fileContents);
     final File outputFile = path.toFile();
     outputFile.deleteOnExit();

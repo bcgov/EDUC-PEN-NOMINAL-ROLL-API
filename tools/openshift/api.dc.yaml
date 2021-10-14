@@ -41,7 +41,7 @@ objects:
           - name: log-storage
             mountPath: /logs
           - name: app-storage
-            mountPath: /app
+            mountPath: /temp
           readinessProbe:
             tcpSocket:
               port: 8080
