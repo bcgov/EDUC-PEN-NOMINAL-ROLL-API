@@ -33,6 +33,15 @@ public interface NominalRollApiEndpoint {
   @Schema(name = "FileUpload", implementation = FileUpload.class)
   ResponseEntity<NominalRollFileProcessResponse> processNominalRollFile(@Validated @RequestBody FileUpload fileUpload, @RequestHeader(name = "correlationID") String correlationID);
 
+
+  @PostMapping(URL.PROCESSING)
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "202", description = "ACCEPTED")})
+  @Transactional
+  @Tag(name = "Endpoint to start processing of nominal roll students", description = "Endpoint to start processing of nominal roll students")
+  @Schema(name = "NominalRollStudent", implementation = NominalRollStudent.class)
+  ResponseEntity<Void> processNominalRollStudents(@Validated @RequestBody List<NominalRollStudent> nominalRollStudents, @RequestHeader(name = "correlationID") String correlationID);
+
   // heavy-weight get call
   @GetMapping
   @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")

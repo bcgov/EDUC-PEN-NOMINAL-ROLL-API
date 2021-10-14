@@ -39,4 +39,9 @@ public class NominalRollService {
   public void deleteAllNominalRollStudents() {
     this.repository.deleteAll();
   }
+
+  public void saveNominalRollStudents(final List<NominalRollStudent> nomRollStudentEntities, final String correlationID) {
+    log.debug("creating nominal roll entities in transient table for transaction ID :: {}", correlationID);
+    this.repository.saveAll(nomRollStudentEntities);
+  }
 }

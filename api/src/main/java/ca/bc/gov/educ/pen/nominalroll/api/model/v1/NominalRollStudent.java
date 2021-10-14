@@ -76,9 +76,6 @@ public class NominalRollStudent {
   @Column(name = "BAND_OF_RESIDENCE", length = 500)
   String bandOfResidence;
 
-  @Column(name = "YEAR_OF_PROCESSING", length = 4)
-  String yearOfProcessing;
-
   @Column(name = "ASSIGNED_PEN", length = 9)
   String assignedPEN;
 
