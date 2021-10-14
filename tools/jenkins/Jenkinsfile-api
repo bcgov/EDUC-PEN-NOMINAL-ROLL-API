@@ -2,7 +2,7 @@ pipeline{
    agent any
    environment{
       extJSHelper = '';
-      DEBUG_OUTPUT = 'true'
+      DEBUG_OUTPUT = 'false'
 
       NAMESPACE='8878b4'
       COMMON_NAMESPACE='75e61b'
