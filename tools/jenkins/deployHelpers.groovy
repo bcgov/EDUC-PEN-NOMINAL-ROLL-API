@@ -96,3 +96,4 @@ def performStandardRollout(String appName, String projectEnv, String jobName){
     }
   }
 }
+return this;

@@ -42,56 +42,17 @@ pipeline{
             echo sh(returnStdout: true, script: 'env')
           }
 
-          sh "wget -O - https://raw.githubusercontent.com/bcgov/EDUC-INFRA-COMMON/master/openshift/common-deployment/deployHelpers.js > deployHelpers.js"
-          extJSHelper = evaluate readFile('deployHelpers.js')
-        }
-      }
-    }
-    stage('Build App') {
-      steps {
-        script {
-          openshift.withCluster() {
-            openshift.withProject(TOOLS) {
-              try {
-                echo "Building API..."
-                def bcBackend = openshift.process('-f', 'tools/openshift/api.bc.yaml', "REPO_NAME=${REPO_NAME}-${JOB_NAME}", "JOB_NAME=${JOB_NAME}", "SOURCE_REPO_URL=${SOURCE_REPO_URL}", "SOURCE_REPO_REF=${SOURCE_REPO_REF}")
-                openshift.apply(bcBackend).narrow('bc').startBuild('-w').logs('-f')
-
-                openshift.tag("${REPO_NAME}-${JOB_NAME}:latest", "${REPO_NAME}-${JOB_NAME}:${JOB_NAME}")
-              } catch (e) {
-                echo "API build failed"
-                throw e
-              }
-            }
-          }
-        }
-      }
-      post {
-        success {
-          echo 'Cleanup BuildConfigs'
-          script {
-            openshift.withCluster() {
-              openshift.withProject(TOOLS) {
-                def bcApi = openshift.selector('bc', "${REPO_NAME}-${JOB_NAME}")
-
-                if(bcApi.exists()) {
-                  echo "Removing BuildConfig ${REPO_NAME}-${JOB_NAME}"
-                  bcApi.delete()
-                }
-              }
-            }
-          }
-        }
-        failure {
-          echo 'Build stage failed'
+          sh "wget -O - https://raw.githubusercontent.com/${OWNER}/${REPO_NAME}/main/tools/jenkins/deployHelpers.groovy > deployHelpers.groovy"
+          extJSHelper = evaluate readFile('deployHelpers.groovy')
         }
       }
     }
 
-	stage('Promote and configure DEV') {
+
+	stage('Promote and configure TOOLS') {
       steps{
         script{
-          extJSHelper.performPenRegApiDeploy(STAGING_ENV, TARGET_ENVIRONMENT, "${REPO_NAME}", "${APP_NAME}", JOB_NAME, TAG, TOOLS, TARGET_ENVIRONMENT, APP_DOMAIN, "${DC_URL}", "${MIN_REPLICAS}", "${MAX_REPLICAS}", "${MIN_CPU}", "${MAX_CPU}", "${MIN_MEM}", "${MAX_MEM}", "${TARGET_ENV}", "${NAMESPACE}", "${COMMON_NAMESPACE}")
+          extJSHelper.performDeploy(STAGING_ENV, TARGET_ENVIRONMENT, "${REPO_NAME}", "${APP_NAME}", JOB_NAME, TAG, TOOLS, TARGET_ENVIRONMENT, APP_DOMAIN, "${DC_URL}", "${MIN_REPLICAS}", "${MAX_REPLICAS}", "${MIN_CPU}", "${MAX_CPU}", "${MIN_MEM}", "${MAX_MEM}", "${TARGET_ENV}", "${NAMESPACE}", "${COMMON_NAMESPACE}")
         }
       }
       post{
