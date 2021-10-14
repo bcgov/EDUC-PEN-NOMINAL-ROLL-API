@@ -3,6 +3,7 @@ package ca.bc.gov.educ.pen.nominalroll.api.endpoint.v1;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.v1.URL;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.FileUpload;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollFileProcessResponse;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,7 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import static org.springframework.http.HttpStatus.CREATED;
+import java.util.List;
+import java.util.UUID;
 
 
 @RequestMapping(URL.BASE_URL)
@@ -26,9 +28,39 @@ public interface NominalRollApiEndpoint {
   @PostMapping
   @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
   @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "CREATED"), @ApiResponse(responseCode = "400", description = "BAD REQUEST")})
-  @ResponseStatus(CREATED)
   @Transactional
-  @Tag(name = "Endpoint to create Pen Request Batch Entity.", description = "Endpoint to upload a file to process nominal roll.")
+  @Tag(name = "Endpoint to Upload an excel file and convert to json structure.", description = "Endpoint to Upload an excel file and convert to json structure")
   @Schema(name = "FileUpload", implementation = FileUpload.class)
   ResponseEntity<NominalRollFileProcessResponse> processNominalRollFile(@Validated @RequestBody FileUpload fileUpload, @RequestHeader(name = "correlationID") String correlationID);
+
+
+  @PostMapping(URL.PROCESSING)
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "202", description = "ACCEPTED")})
+  @Transactional
+  @Tag(name = "Endpoint to start processing of nominal roll students", description = "Endpoint to start processing of nominal roll students")
+  @Schema(name = "NominalRollStudent", implementation = NominalRollStudent.class)
+  ResponseEntity<Void> processNominalRollStudents(@Validated @RequestBody List<NominalRollStudent> nominalRollStudents, @RequestHeader(name = "correlationID") String correlationID);
+
+  // heavy-weight get call
+  @GetMapping
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "202", description = "ACCEPTED"), @ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "NOT FOUND")})
+  @Transactional(readOnly = true)
+  @Tag(name = "Endpoint to get the status and details if processed for current year nominal roll", description = "Endpoint to get the status and details if processed for current year nominal roll")
+  ResponseEntity<List<NominalRollStudent>> getAllProcessingResults();
+
+  @GetMapping(URL.NOM_ROLL_STUDENT_ID)
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "NOT FOUND")})
+  @Transactional(readOnly = true)
+  @Tag(name = "Endpoint to get the  details of individual record in nominal roll", description = "Endpoint to get the  details of individual record in nominal roll")
+  ResponseEntity<NominalRollStudent> getProcessingResultOfStudent(@PathVariable UUID nomRollStudentID);
+
+  @DeleteMapping
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "NO CONTENT")})
+  @Transactional
+  @Tag(name = "Endpoint to Delete the entire data set from transient table", description = "Endpoint to Delete the entire data set from transient table")
+  ResponseEntity<Void> deleteAll();
 }

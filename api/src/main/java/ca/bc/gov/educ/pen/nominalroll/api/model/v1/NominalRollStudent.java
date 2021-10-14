@@ -7,6 +7,7 @@ import org.hibernate.annotations.Parameter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -38,7 +39,7 @@ public class NominalRollStudent {
   @Column(name = "SCHOOL_NAME", length = 500)
   String schoolName;
 
-  @Column(name = "LEA_PROVINICIAL", length = 500)
+  @Column(name = "LEA_PROVINCIAL", length = 500)
   String leaProvincial;
 
   @Column(name = "RECIPIENT_NUMBER", length = 500)
@@ -51,12 +52,12 @@ public class NominalRollStudent {
   String identity;
 
   @Column(name = "SURNAME", length = 500)
-  String surnmae;
+  String surname;
 
   @Column(name = "GIVEN_NAMES", length = 500)
   String givenNames;
 
-  @Column(name = "INITIAL", length = 500)
+  @Column(name = "INITIALS", length = 500)
   String initial;
 
   @Column(name = "GENDER", length = 500)
@@ -75,11 +76,11 @@ public class NominalRollStudent {
   @Column(name = "BAND_OF_RESIDENCE", length = 500)
   String bandOfResidence;
 
-  @Column(name = "YEAR_OF_PROCESSING", length = 4)
-  String yearOfProcessing;
-
   @Column(name = "ASSIGNED_PEN", length = 9)
   String assignedPEN;
+
+  @Column(name = "STATUS", length = 20)
+  String status;
 
   @Column(name = "CREATE_USER", updatable = false, length = 32)
   String createUser;
@@ -92,4 +93,12 @@ public class NominalRollStudent {
 
   @Column(name = "UPDATE_DATE")
   LocalDateTime updateDate;
+
+  /**
+   * The Pen request batch student entities.
+   */
+  @EqualsAndHashCode.Exclude
+  @ToString.Exclude
+  @OneToMany(mappedBy = "nominalRollStudent", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = NominalRollStudentValidationError.class)
+  Set<NominalRollStudentValidationError> nominalRollStudentValidationErrors;
 }
