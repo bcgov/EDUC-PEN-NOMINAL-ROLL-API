@@ -51,7 +51,7 @@ public interface NominalRollApiEndpoint {
   @DeleteMapping
   @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
   @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "NO CONTENT")})
-  @Transactional(readOnly = true)
+  @Transactional
   @Tag(name = "Endpoint to Delete the entire data set from transient table", description = "Endpoint to Delete the entire data set from transient table")
   ResponseEntity<Void> deleteAll();
 }
