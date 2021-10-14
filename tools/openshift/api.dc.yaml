@@ -40,6 +40,8 @@ objects:
             readOnly: true
           - name: log-storage
             mountPath: /logs
+          - name: app-storage
+            mountPath: /app
           readinessProbe:
             tcpSocket:
               port: 8080
@@ -109,6 +111,8 @@ objects:
           secret:
             secretName: nominal-roll-api-cert
         - name: log-storage
+          emptyDir: {}
+        - name: app-storage
           emptyDir: {}
         - name: flb-sc-config-volume
           configMap:
