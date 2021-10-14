@@ -2,7 +2,7 @@ pipeline{
    agent any
    environment{
       deployHelper = '';
-      DEBUG_OUTPUT = 'false'
+      DEBUG_OUTPUT = 'true'
 
       NAMESPACE='8878b4'
       COMMON_NAMESPACE='75e61b'
@@ -42,51 +42,12 @@ pipeline{
             echo sh(returnStdout: true, script: 'env')
           }
 
-          sh "wget -O - https://raw.githubusercontent.com/bcgov/EDUC-PEN-NOMINAL-ROLL-API/main/tools/jenkins/deployHelpers.groovy > deployHelpers.groovy"
-          deployHelper = evaluate readFile('deployHelpers.groovy')
+          sh "wget -O - https://raw.githubusercontent.com/bcgov/EDUC-PEN-NOMINAL-ROLL-API/main/tools/jenkins/deployHelpers.groovy > deployHelpers.js"
+          deployHelper = evaluate readFile('deployHelpers.js')
         }
       }
     }
-    stage('Build App') {
-      steps {
-        script {
-          openshift.withCluster() {
-            openshift.withProject(TOOLS) {
-              try {
-                echo "Building API..."
-                def bcBackend = openshift.process('-f', 'tools/openshift/api.bc.yaml', "REPO_NAME=${REPO_NAME}-${JOB_NAME}", "JOB_NAME=${JOB_NAME}", "SOURCE_REPO_URL=${SOURCE_REPO_URL}", "SOURCE_REPO_REF=${SOURCE_REPO_REF}")
-                openshift.apply(bcBackend).narrow('bc').startBuild('-w').logs('-f')
-
-                openshift.tag("${REPO_NAME}-${JOB_NAME}:latest", "${REPO_NAME}-${JOB_NAME}:${JOB_NAME}")
-              } catch (e) {
-                echo "API build failed"
-                throw e
-              }
-            }
-          }
-        }
-      }
-      post {
-        success {
-          echo 'Cleanup BuildConfigs'
-          script {
-              openshift.withCluster() {
-                openshift.withProject(TOOLS) {
-                  def bcApi = openshift.selector('bc', "${REPO_NAME}-${JOB_NAME}")
-
-                  if(bcApi.exists()) {
-                      echo "Removing BuildConfig ${REPO_NAME}-${JOB_NAME}"
-                      bcApi.delete()
-                  }
-                }
-              }
-            }
-        }
-        failure {
-          echo 'Build stage failed'
-        }
-      }
-    }
+   
 	stage('Promote and configure DEV') {
       steps{
         script{
