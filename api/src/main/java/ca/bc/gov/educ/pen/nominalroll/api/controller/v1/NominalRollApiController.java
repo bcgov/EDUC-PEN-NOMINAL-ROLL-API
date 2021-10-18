@@ -92,4 +92,9 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
     this.service.deleteAllNominalRollStudents();
     return ResponseEntity.noContent().build();
   }
+
+  @Override
+  public ResponseEntity<Boolean> checkForDuplicateNominalRollStudents(String correlationID) {
+    return ResponseEntity.ok(this.service.hasDuplicateRecords());
+  }
 }

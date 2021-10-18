@@ -28,7 +28,6 @@ public class NominalRollStudent {
   String leaProvincial;
   String recipientNumber;
   String recipientName;
-  String identity;
   String surname;
   String givenNames;
   String initial;
