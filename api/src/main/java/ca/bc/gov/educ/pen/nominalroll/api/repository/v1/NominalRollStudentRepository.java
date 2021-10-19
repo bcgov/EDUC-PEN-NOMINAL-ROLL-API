@@ -12,7 +12,7 @@ public interface NominalRollStudentRepository extends JpaRepository<NominalRollS
 
   long countByStatus(String status);
 
-  @Query("SELECT " +
+  @Query(value = "SELECT " +
           "COUNT(nominal_roll_student_id) " +
           "FROM " +
           "nominal_roll_student " +
@@ -21,7 +21,7 @@ public interface NominalRollStudentRepository extends JpaRepository<NominalRollS
           "GROUP BY " +
           "assigned_pen " +
           "HAVING " +
-          "COUNT(nominal_roll_student_id) > 1")
+          "COUNT(nominal_roll_student_id) > 1", nativeQuery = true)
   long countForDuplicateAssignedPENs(String processingYear);
 
 }
