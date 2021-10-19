@@ -33,9 +33,9 @@ public class NominalRollStudentValidationError {
    */
   @ToString.Exclude
   @EqualsAndHashCode.Exclude
-  @ManyToOne(optional = false, targetEntity = NominalRollStudent.class)
+  @ManyToOne(optional = false, targetEntity = NominalRollStudentEntity.class)
   @JoinColumn(name = "NOMINAL_ROLL_STUDENT_ID", referencedColumnName = "NOMINAL_ROLL_STUDENT_ID", updatable = false)
-  NominalRollStudent nominalRollStudent;
+  NominalRollStudentEntity nominalRollStudent;
 
   @Column(name = "FIELD_NAME", length = 50)
   String fieldName;

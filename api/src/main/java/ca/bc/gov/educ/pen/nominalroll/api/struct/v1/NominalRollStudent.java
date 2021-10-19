@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.Map;
 
 
@@ -30,12 +29,12 @@ public class NominalRollStudent {
   String recipientName;
   String surname;
   String givenNames;
-  String initial;
   String gender;
   String birthDate;
   String grade;
   String fte;
   String bandOfResidence;
+  String status;
 
   //audit fields
   String createUser;
