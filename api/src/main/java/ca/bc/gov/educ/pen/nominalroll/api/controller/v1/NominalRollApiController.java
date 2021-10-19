@@ -6,22 +6,28 @@ import ca.bc.gov.educ.pen.nominalroll.api.exception.EntityNotFoundException;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.FileError;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.FileUnProcessableException;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.processor.FileProcessor;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
+import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollStudentSearchService;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.FileUpload;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollFileProcessResponse;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
+import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.poi.openxml4j.exceptions.OLE2NotOfficeXmlFileException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,10 +40,13 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   private final Map<FileTypes, FileProcessor> fileProcessorsMap;
 
   private final NominalRollService service;
+  private final NominalRollStudentSearchService searchService;
+  private static final NominalRollStudentMapper mapper = NominalRollStudentMapper.mapper;
 
-  public NominalRollApiController(final List<FileProcessor> fileProcessors, final NominalRollService service) {
+  public NominalRollApiController(final List<FileProcessor> fileProcessors, final NominalRollService service, final NominalRollStudentSearchService searchService) {
     this.fileProcessorsMap = fileProcessors.stream().collect(Collectors.toMap(FileProcessor::getFileType, Function.identity()));
     this.service = service;
+    this.searchService  = searchService;
   }
 
   @Override
@@ -96,5 +105,13 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   @Override
   public ResponseEntity<Boolean> checkForDuplicateNominalRollStudents(String correlationID) {
     return ResponseEntity.ok(this.service.hasDuplicateRecords());
+  }
+
+  @Override
+  @Transactional(propagation = Propagation.SUPPORTS)
+  public CompletableFuture<Page<NominalRollStudent>> findAll(Integer pageNumber, Integer pageSize, String sortCriteriaJson, String searchCriteriaListJson) {
+    final List<Sort.Order> sorts = new ArrayList<>();
+    Specification<NominalRollStudentEntity> studentSpecs = searchService.setSpecificationAndSortCriteria(sortCriteriaJson, searchCriteriaListJson, JsonUtil.mapper, sorts);
+    return service.findAll(studentSpecs, pageNumber, pageSize, sorts).thenApplyAsync(studentEntities -> studentEntities.map(mapper::toStructure));
   }
 }

@@ -159,9 +159,6 @@ public abstract class BaseExcelProcessor implements FileProcessor {
         case GIVEN_NAMES:
           nominalRollStudent.setGivenNames(this.getCellValueString(cell, correlationID, rowNum, headerNames));
           break;
-        case INITIAL:
-          nominalRollStudent.setInitial(this.getCellValueString(cell, correlationID, rowNum, headerNames));
-          break;
         case GENDER:
           nominalRollStudent.setGender(this.getCellValueString(cell, correlationID, rowNum, headerNames));
           break;
