@@ -153,9 +153,6 @@ public abstract class BaseExcelProcessor implements FileProcessor {
         case RECIPIENT_NAME:
           nominalRollStudent.setRecipientName(this.getCellValueString(cell, correlationID, rowNum, headerNames));
           break;
-        case IDENTITY:
-          nominalRollStudent.setIdentity(this.getCellValueString(cell, correlationID, rowNum, headerNames));
-          break;
         case SURNAME:
           nominalRollStudent.setSurname(this.getCellValueString(cell, correlationID, rowNum, headerNames));
           break;

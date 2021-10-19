@@ -48,9 +48,6 @@ public class NominalRollStudent {
   @Column(name = "RECIPIENT_NAME", length = 500)
   String recipientName;
 
-  @Column(name = "IDENTITY", length = 500)
-  String identity;
-
   @Column(name = "SURNAME", length = 500)
   String surname;
 
@@ -66,7 +63,6 @@ public class NominalRollStudent {
   @Column(name = "BIRTH_DATE", length = 500)
   String birthDate;
 
-
   @Column(name = "GRADE", length = 500)
   String grade;
 
@@ -81,6 +77,9 @@ public class NominalRollStudent {
 
   @Column(name = "STATUS", length = 20)
   String status;
+
+  @Column(name = "PROCESSING_YEAR", length = 4)
+  String processingYear;
 
   @Column(name = "CREATE_USER", updatable = false, length = 32)
   String createUser;

@@ -12,7 +12,6 @@ public enum HeaderNames {
   LEA_PROV("LEA/Provincial"),
   RECIPIENT_NUMBER("Recipient Number"),
   RECIPIENT_NAME("Recipient Name"),
-  IDENTITY("Identity"),
   SURNAME("Surname"),
   GIVEN_NAMES("Given Name(s)"),
   INITIAL("Initial"),

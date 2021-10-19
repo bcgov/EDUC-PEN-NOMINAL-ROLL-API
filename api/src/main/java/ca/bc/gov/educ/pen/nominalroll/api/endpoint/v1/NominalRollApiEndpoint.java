@@ -63,4 +63,11 @@ public interface NominalRollApiEndpoint {
   @Transactional
   @Tag(name = "Endpoint to Delete the entire data set from transient table", description = "Endpoint to Delete the entire data set from transient table")
   ResponseEntity<Void> deleteAll();
+
+  @GetMapping(URL.DUPLICATES)
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
+  @Transactional(readOnly = true)
+  @Tag(name = "Endpoint to check for duplicate nominal roll students", description = "Endpoint to check for duplicate nominal roll students")
+  ResponseEntity<Boolean> checkForDuplicateNominalRollStudents(@RequestHeader(name = "correlationID") String correlationID);
 }
