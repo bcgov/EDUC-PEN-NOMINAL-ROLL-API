@@ -13,16 +13,19 @@ public interface NominalRollStudentRepository extends JpaRepository<NominalRollS
 
   long countByStatus(String status);
 
+  long countAllByProcessingYear(String processingYear);
+
   @Query(value = "SELECT " +
-          "COUNT(nominal_roll_student_id) " +
-          "FROM " +
-          "nominal_roll_student " +
-          "WHERE " +
-          "processing_year = ?1 " +
-          "GROUP BY " +
-          "assigned_pen " +
-          "HAVING " +
-          "COUNT(nominal_roll_student_id) > 1", nativeQuery = true)
+    "COUNT(nominal_roll_student_id) " +
+    "FROM " +
+    "nominal_roll_student " +
+    "WHERE " +
+    "processing_year = ?1 " +
+    "GROUP BY " +
+    "assigned_pen " +
+    "HAVING " +
+    "COUNT(nominal_roll_student_id) > 1", nativeQuery = true)
   long countForDuplicateAssignedPENs(String processingYear);
 
+  void deleteAllByProcessingYear(String processingYear);
 }

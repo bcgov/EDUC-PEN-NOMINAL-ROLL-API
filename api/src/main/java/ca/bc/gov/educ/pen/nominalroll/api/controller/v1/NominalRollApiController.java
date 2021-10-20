@@ -37,16 +37,15 @@ import static ca.bc.gov.educ.pen.nominalroll.api.constants.FileTypes.XLSX;
 @RestController
 @Slf4j
 public class NominalRollApiController implements NominalRollApiEndpoint {
+  private static final NominalRollStudentMapper mapper = NominalRollStudentMapper.mapper;
   private final Map<FileTypes, FileProcessor> fileProcessorsMap;
-
   private final NominalRollService service;
   private final NominalRollStudentSearchService searchService;
-  private static final NominalRollStudentMapper mapper = NominalRollStudentMapper.mapper;
 
   public NominalRollApiController(final List<FileProcessor> fileProcessors, final NominalRollService service, final NominalRollStudentSearchService searchService) {
     this.fileProcessorsMap = fileProcessors.stream().collect(Collectors.toMap(FileProcessor::getFileType, Function.identity()));
     this.service = service;
-    this.searchService  = searchService;
+    this.searchService = searchService;
   }
 
   @Override
@@ -73,15 +72,9 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   }
 
   @Override
-  public ResponseEntity<List<NominalRollStudent>> getAllProcessingResults() {
-    if (this.service.isCurrentYearFileBeingProcessed()) {
-      if (this.service.isAllRecordsProcessed()) {
-        val students = this.service.getAllNominalRollStudents();
-        val studentStructs = students.stream().map(NominalRollStudentMapper.mapper::toStruct).collect(Collectors.toList());
-        return ResponseEntity.ok(studentStructs);
-      } else {
-        return ResponseEntity.accepted().build();
-      }
+  public ResponseEntity<Void> isBeingProcessed(final String processingYear) {
+    if (this.service.countAllNominalRollStudents(processingYear) > 0) {
+      return ResponseEntity.accepted().build();
     } else {
       return ResponseEntity.notFound().build();
     }
@@ -94,21 +87,21 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   }
 
   @Override
-  public ResponseEntity<Void> deleteAll() {
-    this.service.deleteAllNominalRollStudents();
+  public ResponseEntity<Void> deleteAll(final String processingYear) {
+    this.service.deleteAllNominalRollStudents(processingYear);
     return ResponseEntity.noContent().build();
   }
 
   @Override
-  public ResponseEntity<Boolean> checkForDuplicateNominalRollStudents(String correlationID) {
+  public ResponseEntity<Boolean> checkForDuplicateNominalRollStudents(final String correlationID) {
     return ResponseEntity.ok(this.service.hasDuplicateRecords());
   }
 
   @Override
-  @Transactional(propagation = Propagation.SUPPORTS)
-  public CompletableFuture<Page<NominalRollStudent>> findAll(Integer pageNumber, Integer pageSize, String sortCriteriaJson, String searchCriteriaListJson) {
+  @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+  public CompletableFuture<Page<NominalRollStudent>> findAll(final Integer pageNumber, final Integer pageSize, final String sortCriteriaJson, final String searchCriteriaListJson) {
     final List<Sort.Order> sorts = new ArrayList<>();
-    Specification<NominalRollStudentEntity> studentSpecs = searchService.setSpecificationAndSortCriteria(sortCriteriaJson, searchCriteriaListJson, JsonUtil.mapper, sorts);
-    return service.findAll(studentSpecs, pageNumber, pageSize, sorts).thenApplyAsync(studentEntities -> studentEntities.map(mapper::toStructure));
+    final Specification<NominalRollStudentEntity> studentSpecs = this.searchService.setSpecificationAndSortCriteria(sortCriteriaJson, searchCriteriaListJson, JsonUtil.mapper, sorts);
+    return this.service.findAll(studentSpecs, pageNumber, pageSize, sorts).thenApplyAsync(studentEntities -> studentEntities.map(mapper::toStructure));
   }
 }
