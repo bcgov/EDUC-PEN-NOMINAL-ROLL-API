@@ -85,6 +85,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
       }
       this.populateRowData(correlationID, headersMap, nominalRollStudents, rowNum, nominalRollStudent);
     }
+    log.info("contains for invalid counter map is {}", invalidValueCounterMap);
     val isThresholdReached = invalidValueCounterMap.values().stream().filter(value -> value > this.applicationProperties.getNominalRollInvalidFieldThreshold()).findAny();
     if (isThresholdReached.isPresent()) {
       throw new FileUnProcessableException(FileError.FILE_THRESHOLD_CHECK_FAILED, correlationID);
@@ -96,7 +97,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
     if (rowNum == 0) {
       log.debug("Headers Map is populated as :: {}", headersMap);
       this.checkForValidHeaders(correlationID, headersMap);
-    } else if (nominalRollStudent.getBirthDate() != null) {
+    } else {
       nominalRollStudents.add(nominalRollStudent);
     }
   }
