@@ -29,8 +29,8 @@ import java.util.concurrent.Executor;
 public class NominalRollService {
   private final NominalRollStudentRepository repository;
   private final Executor paginatedQueryExecutor = new EnhancedQueueExecutor.Builder()
-          .setThreadFactory(new ThreadFactoryBuilder().setNameFormat("async-pagination-query-executor-%d").build())
-          .setCorePoolSize(2).setMaximumPoolSize(10).setKeepAliveTime(Duration.ofSeconds(60)).build();
+    .setThreadFactory(new ThreadFactoryBuilder().setNameFormat("async-pagination-query-executor-%d").build())
+    .setCorePoolSize(2).setMaximumPoolSize(10).setKeepAliveTime(Duration.ofSeconds(60)).build();
 
   public NominalRollService(final NominalRollStudentRepository repository) {
     this.repository = repository;
@@ -41,9 +41,6 @@ public class NominalRollService {
     return count < 1;
   }
 
-  public boolean isCurrentYearFileBeingProcessed() {
-    return this.repository.count() > 0;
-  }
 
   public boolean hasDuplicateRecords() {
     final long count = this.repository.countForDuplicateAssignedPENs(Integer.toString(LocalDateTime.now().getYear()));
@@ -54,14 +51,19 @@ public class NominalRollService {
     return this.repository.findAll();
   }
 
+  public long countAllNominalRollStudents(final String processingYear) {
+    return this.repository.countAllByProcessingYear(processingYear);
+  }
+
   public Optional<NominalRollStudentEntity> getNominalRollStudentByID(final UUID nominalRollStudentID) {
     return this.repository.findById(nominalRollStudentID);
   }
 
-  public void deleteAllNominalRollStudents() {
-    this.repository.deleteAll();
+  public void deleteAllNominalRollStudents(final String processingYear) {
+    this.repository.deleteAllByProcessingYear(processingYear);
   }
 
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void saveNominalRollStudents(final List<NominalRollStudentEntity> nomRollStudentEntities, final String correlationID) {
     log.debug("creating nominal roll entities in transient table for transaction ID :: {}", correlationID);
     this.repository.saveAll(nomRollStudentEntities);
@@ -77,15 +79,15 @@ public class NominalRollService {
    * @return the completable future
    */
   @Transactional(propagation = Propagation.SUPPORTS)
-  public CompletableFuture<Page<NominalRollStudentEntity>> findAll(Specification<NominalRollStudentEntity> studentSpecs, final Integer pageNumber, final Integer pageSize, final List<Sort.Order> sorts) {
+  public CompletableFuture<Page<NominalRollStudentEntity>> findAll(final Specification<NominalRollStudentEntity> studentSpecs, final Integer pageNumber, final Integer pageSize, final List<Sort.Order> sorts) {
     return CompletableFuture.supplyAsync(() -> {
-      Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by(sorts));
+      final Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by(sorts));
       try {
         return this.repository.findAll(studentSpecs, paging);
       } catch (final Exception ex) {
         throw new CompletionException(ex);
       }
-    }, paginatedQueryExecutor);
+    }, this.paginatedQueryExecutor);
 
   }
 }
