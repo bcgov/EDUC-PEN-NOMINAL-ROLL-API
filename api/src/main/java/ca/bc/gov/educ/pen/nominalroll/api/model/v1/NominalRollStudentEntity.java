@@ -21,7 +21,7 @@ import java.util.UUID;
 @Table(name = "NOMINAL_ROLL_STUDENT")
 @DynamicUpdate
 @ToString
-public class NominalRollStudent {
+public class NominalRollStudentEntity {
 
   @Id
   @GeneratedValue(generator = "UUID")
@@ -53,9 +53,6 @@ public class NominalRollStudent {
 
   @Column(name = "GIVEN_NAMES", length = 500)
   String givenNames;
-
-  @Column(name = "INITIALS", length = 500)
-  String initial;
 
   @Column(name = "GENDER", length = 500)
   String gender;

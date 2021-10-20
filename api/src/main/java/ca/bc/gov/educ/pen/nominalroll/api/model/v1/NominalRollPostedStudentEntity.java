@@ -21,7 +21,7 @@ import java.util.UUID;
 @Table(name = "NOMINAL_ROLL_POSTED_STUDENT")
 @DynamicUpdate
 @ToString
-public class NominalRollPostedStudent {
+public class NominalRollPostedStudentEntity {
 
   @Id
   @GeneratedValue(generator = "UUID")

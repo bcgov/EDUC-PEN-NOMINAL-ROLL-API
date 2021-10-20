@@ -14,7 +14,6 @@ public enum HeaderNames {
   RECIPIENT_NAME("Recipient Name"),
   SURNAME("Surname"),
   GIVEN_NAMES("Given Name(s)"),
-  INITIAL("Initial"),
   GENDER("Gender"),
   BIRTH_DATE("Birth Date"),
   GRADE("Grade"),
