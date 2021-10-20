@@ -9,6 +9,7 @@ import lombok.Getter;
  */
 public enum FileError {
   FILE_ENCRYPTED("File is password protected"),
+  FILE_THRESHOLD_CHECK_FAILED("File Threshold check failed."),
 
   NO_HEADING("Heading row is missing"),
 

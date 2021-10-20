@@ -45,13 +45,12 @@ public interface NominalRollApiEndpoint {
   @Schema(name = "NominalRollStudent", implementation = NominalRollStudent.class)
   ResponseEntity<Void> processNominalRollStudents(@Validated @RequestBody List<NominalRollStudent> nominalRollStudents, @RequestHeader(name = "correlationID") String correlationID);
 
-  // heavy-weight get call
   @GetMapping
   @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
   @ApiResponses(value = {@ApiResponse(responseCode = "202", description = "ACCEPTED"), @ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "NOT FOUND")})
   @Transactional(readOnly = true)
-  @Tag(name = "Endpoint to get the status and details if processed for current year nominal roll", description = "Endpoint to get the status and details if processed for current year nominal roll")
-  ResponseEntity<List<NominalRollStudent>> getAllProcessingResults();
+  @Tag(name = "Endpoint to check if provided processing year nominal roll is already in progress", description = "Endpoint to check if provided processing year nominal roll is already in progress")
+  ResponseEntity<Void> isBeingProcessed(@RequestParam(name = "processingYear") String processingYear);
 
   @GetMapping(URL.NOM_ROLL_STUDENT_ID)
   @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
@@ -64,8 +63,8 @@ public interface NominalRollApiEndpoint {
   @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
   @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "NO CONTENT")})
   @Transactional
-  @Tag(name = "Endpoint to Delete the entire data set from transient table", description = "Endpoint to Delete the entire data set from transient table")
-  ResponseEntity<Void> deleteAll();
+  @Tag(name = "Endpoint to Delete the entire data set from transient table for the processing year provided", description = "Endpoint to Delete the entire data set from transient table for the processing year provided")
+  ResponseEntity<Void> deleteAll(@RequestParam(name = "processingYear") String processingYear);
 
   @GetMapping(URL.DUPLICATES)
   @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
@@ -90,7 +89,7 @@ public interface NominalRollApiEndpoint {
   @Transactional(readOnly = true)
   @Tag(name = "Endpoint to support data table view in frontend, with sort, filter and pagination.", description = "This API endpoint exposes flexible way to query the entity by leveraging JPA specifications.")
   CompletableFuture<Page<NominalRollStudent>> findAll(@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
-                                           @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
-                                           @RequestParam(name = "sort", defaultValue = "") String sortCriteriaJson,
-                                           @RequestParam(name = "searchCriteriaList", required = false) String searchCriteriaListJson);
+                                                      @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+                                                      @RequestParam(name = "sort", defaultValue = "") String sortCriteriaJson,
+                                                      @RequestParam(name = "searchCriteriaList", required = false) String searchCriteriaListJson);
 }

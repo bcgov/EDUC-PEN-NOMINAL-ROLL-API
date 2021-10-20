@@ -38,9 +38,11 @@ public class ApplicationProperties {
   private Boolean isHttpRampUp;
   @Value("${nats.url}")
   String natsUrl;
-
   @Value("${nats.maxReconnect}")
   Integer natsMaxReconnect;
+  @Value("${nom.roll.field.invalid.threshold}")
+  private Integer nominalRollInvalidFieldThreshold;
+
   public boolean getIsHttpRampUp() {
     return isHttpRampUp != null && isHttpRampUp;
   }
