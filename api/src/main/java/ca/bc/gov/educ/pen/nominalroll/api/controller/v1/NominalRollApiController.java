@@ -51,21 +51,18 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
 
   @Override
   public ResponseEntity<NominalRollFileProcessResponse> processNominalRollFile(final FileUpload fileUpload, final String correlationID) {
-    NominalRollFileProcessResponse nominalRollFileProcessResponse = null;
+    Optional<NominalRollFileProcessResponse> nominalRollFileProcessResponseOptional = Optional.empty();
     if (XLSX.getCode().equals(fileUpload.getFileExtension())) {
       try {
-        nominalRollFileProcessResponse = this.fileProcessorsMap.get(XLSX).processFile(Base64.getDecoder().decode(fileUpload.getFileContents()), correlationID);
+        nominalRollFileProcessResponseOptional = Optional.of(this.fileProcessorsMap.get(XLSX).processFile(Base64.getDecoder().decode(fileUpload.getFileContents()), correlationID));
       } catch (final OLE2NotOfficeXmlFileException ole2NotOfficeXmlFileException) {
         log.warn("OLE2NotOfficeXmlFileException during Nominal Roll file processing", ole2NotOfficeXmlFileException);
         throw new FileUnProcessableException(FileError.FILE_ENCRYPTED, correlationID);
       }
     } else if (XLS.getCode().equals(fileUpload.getFileExtension())) {
-      nominalRollFileProcessResponse = this.fileProcessorsMap.get(XLS).processFile(Base64.getDecoder().decode(fileUpload.getFileContents()), correlationID);
+      nominalRollFileProcessResponseOptional = Optional.of(this.fileProcessorsMap.get(XLS).processFile(Base64.getDecoder().decode(fileUpload.getFileContents()), correlationID));
     }
-    if (nominalRollFileProcessResponse != null) {
-      return ResponseEntity.ok(nominalRollFileProcessResponse);
-    }
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    return nominalRollFileProcessResponseOptional.map(ResponseEntity::ok).orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
   }
 
   @Override

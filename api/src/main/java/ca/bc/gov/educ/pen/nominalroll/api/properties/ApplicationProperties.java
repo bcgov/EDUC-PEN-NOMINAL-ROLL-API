@@ -37,6 +37,9 @@ public class ApplicationProperties {
   @Value("${ramp.up.http}")
   private Boolean isHttpRampUp;
 
+  @Value("${nom.roll.field.invalid.threshold}")
+  private Integer nominalRollInvalidFieldThreshold;
+
   public boolean getIsHttpRampUp() {
     return isHttpRampUp != null && isHttpRampUp;
   }
