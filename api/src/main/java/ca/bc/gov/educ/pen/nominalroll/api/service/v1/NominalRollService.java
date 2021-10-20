@@ -54,12 +54,7 @@ public class NominalRollService {
   }
 
   public NominalRollStudentEntity getNominalRollStudentByID(final UUID nominalRollStudentID) {
-    Optional<NominalRollStudentEntity> result = repository.findById(nominalRollStudentID);
-    if (result.isPresent()) {
-      return result.get();
-    } else {
-      throw new EntityNotFoundException(NominalRollStudentEntity.class, STUDENT_ID_ATTRIBUTE, nominalRollStudentID.toString());
-    }
+    return repository.findById(nominalRollStudentID).orElseThrow(()-> new EntityNotFoundException(NominalRollStudentEntity.class, STUDENT_ID_ATTRIBUTE, nominalRollStudentID.toString()));
   }
 
   public long countAllNominalRollStudents(final String processingYear) {
