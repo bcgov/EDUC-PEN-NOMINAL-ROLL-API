@@ -2,7 +2,6 @@ package ca.bc.gov.educ.pen.nominalroll.api.controller.v1;
 
 import ca.bc.gov.educ.pen.nominalroll.api.constants.FileTypes;
 import ca.bc.gov.educ.pen.nominalroll.api.endpoint.v1.NominalRollApiEndpoint;
-import ca.bc.gov.educ.pen.nominalroll.api.exception.EntityNotFoundException;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.FileError;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.FileUnProcessableException;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
@@ -14,6 +13,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.FileUpload;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollFileProcessResponse;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
+import ca.bc.gov.educ.pen.nominalroll.api.util.TransformUtil;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.poi.openxml4j.exceptions.OLE2NotOfficeXmlFileException;
@@ -66,7 +66,7 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
 
   @Override
   public ResponseEntity<Void> processNominalRollStudents(final List<NominalRollStudent> nominalRollStudents, final String correlationID) {
-    val nomRollStudentEntities = nominalRollStudents.stream().map(NominalRollStudentMapper.mapper::toModel).collect(Collectors.toList());
+    val nomRollStudentEntities = nominalRollStudents.stream().map(NominalRollStudentMapper.mapper::toModel).map(TransformUtil::uppercaseFields).collect(Collectors.toList());
     this.service.saveNominalRollStudents(nomRollStudentEntities, correlationID);
     return ResponseEntity.accepted().build();
   }
