@@ -6,6 +6,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.filter.FilterOperation;
 import ca.bc.gov.educ.pen.nominalroll.api.filter.NominalRollStudentFilterSpecs;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.*;
+import ca.bc.gov.educ.pen.nominalroll.api.util.TransformUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,7 +61,7 @@ public class NominalRollStudentSearchService {
       for (SearchCriteria criteria : criteriaList) {
         if (criteria.getKey() != null && criteria.getOperation() != null && criteria.getValueType() != null) {
           var criteriaValue = criteria.getValue();
-          if(StringUtils.isNotBlank(criteria.getValue())) {
+          if(StringUtils.isNotBlank(criteria.getValue()) && TransformUtil.isUppercaseField(NominalRollStudentEntity.class, criteria.getKey())) {
             criteriaValue = criteriaValue.toUpperCase();
           }
           Specification<NominalRollStudentEntity> typeSpecification = getTypeSpecification(criteria.getKey(), criteria.getOperation(), criteriaValue, criteria.getValueType());

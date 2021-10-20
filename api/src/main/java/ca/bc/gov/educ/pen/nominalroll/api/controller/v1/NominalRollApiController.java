@@ -92,7 +92,7 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
 
   @Override
   public ResponseEntity<NominalRollStudent> getProcessingResultOfStudent(final UUID nomRollStudentID) {
-    val nomRollStudent = this.service.getNominalRollStudentByID(nomRollStudentID).orElseThrow(EntityNotFoundException::new);
+    val nomRollStudent = this.service.getNominalRollStudentByID(nomRollStudentID);
     return ResponseEntity.ok(NominalRollStudentMapper.mapper.toStruct(nomRollStudent));
   }
 

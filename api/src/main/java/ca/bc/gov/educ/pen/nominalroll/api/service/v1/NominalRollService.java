@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.pen.nominalroll.api.service.v1;
 
 import ca.bc.gov.educ.pen.nominalroll.api.constants.v1.NominalRollStudentStatus;
+import ca.bc.gov.educ.pen.nominalroll.api.exception.EntityNotFoundException;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -27,6 +28,7 @@ import java.util.concurrent.Executor;
 @Service
 @Slf4j
 public class NominalRollService {
+  private static final String STUDENT_ID_ATTRIBUTE = "nominalRollStudentID";
   private final NominalRollStudentRepository repository;
   private final Executor paginatedQueryExecutor = new EnhancedQueueExecutor.Builder()
           .setThreadFactory(new ThreadFactoryBuilder().setNameFormat("async-pagination-query-executor-%d").build())
@@ -54,8 +56,13 @@ public class NominalRollService {
     return this.repository.findAll();
   }
 
-  public Optional<NominalRollStudentEntity> getNominalRollStudentByID(final UUID nominalRollStudentID) {
-    return this.repository.findById(nominalRollStudentID);
+  public NominalRollStudentEntity getNominalRollStudentByID(final UUID nominalRollStudentID) {
+    Optional<NominalRollStudentEntity> result = repository.findById(nominalRollStudentID);
+    if (result.isPresent()) {
+      return result.get();
+    } else {
+      throw new EntityNotFoundException(NominalRollStudentEntity.class, STUDENT_ID_ATTRIBUTE, nominalRollStudentID.toString());
+    }
   }
 
   public void deleteAllNominalRollStudents() {

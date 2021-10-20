@@ -36,7 +36,11 @@ public class ApplicationProperties {
   private String schoolApiURL;
   @Value("${ramp.up.http}")
   private Boolean isHttpRampUp;
+  @Value("${nats.url}")
+  String natsUrl;
 
+  @Value("${nats.maxReconnect}")
+  Integer natsMaxReconnect;
   public boolean getIsHttpRampUp() {
     return isHttpRampUp != null && isHttpRampUp;
   }
