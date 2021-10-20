@@ -22,6 +22,9 @@ public final class NominalRollHelper {
   private static final Map<String, String> gradeCodeMap = new HashMap<>();
 
   private NominalRollHelper() {
+
+  }
+  static {
     gradeCodeMap.put("1", "01");
     gradeCodeMap.put("01", "01");
     gradeCodeMap.put("2", "02");
