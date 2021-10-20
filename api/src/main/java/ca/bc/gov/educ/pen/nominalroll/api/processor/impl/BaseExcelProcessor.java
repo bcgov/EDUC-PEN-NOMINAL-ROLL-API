@@ -1,11 +1,13 @@
 package ca.bc.gov.educ.pen.nominalroll.api.processor.impl;
 
+import ca.bc.gov.educ.pen.nominalroll.api.constants.GradeCodes;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.HeaderNames;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.FileError;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.FileUnProcessableException;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.InvalidPayloadException;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.errors.ApiError;
 import ca.bc.gov.educ.pen.nominalroll.api.processor.FileProcessor;
+import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollFileProcessResponse;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +21,6 @@ import org.springframework.http.HttpStatus;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,10 +30,12 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.time.format.SignStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.HeaderNames.*;
 import static java.time.temporal.ChronoField.*;
 
 @Slf4j
@@ -47,8 +50,14 @@ public abstract class BaseExcelProcessor implements FileProcessor {
   private static final String NOT_A_DATE = "Not a Date";
   private static final String FORMULA_TYPE = "Formula type :: {} :: {}";
   private static final String BLANK_CELL = "blank cell";
+  protected final Set<String> gradeCodes = Arrays.stream(GradeCodes.values()).map(GradeCodes::getCode).collect(Collectors.toSet());
+  protected final ApplicationProperties applicationProperties;
 
-  protected File getFile(final byte[] fileContents, final String code) throws URISyntaxException, IOException {
+  protected BaseExcelProcessor(final ApplicationProperties applicationProperties) {
+    this.applicationProperties = applicationProperties;
+  }
+
+  protected File getFile(final byte[] fileContents, final String code) throws IOException {
     final Path path = Files.createTempFile(Paths.get("/temp"), "nr-", code);
     Files.write(path, fileContents);
     final File outputFile = path.toFile();
@@ -58,6 +67,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
 
   protected NominalRollFileProcessResponse processSheet(final Sheet sheet, final String correlationID) {
     final Map<Integer, String> headersMap = new HashMap<>();
+    final Map<HeaderNames, Integer> invalidValueCounterMap = new EnumMap<>(HeaderNames.class);
     final int rowEnd = sheet.getLastRowNum();
     final List<NominalRollStudent> nominalRollStudents = new ArrayList<>();
     for (int rowNum = 0; rowNum <= rowEnd; rowNum++) {
@@ -71,9 +81,13 @@ public abstract class BaseExcelProcessor implements FileProcessor {
       final NominalRollStudent nominalRollStudent = NominalRollStudent.builder().build();
       final int lastColumn = r.getLastCellNum();
       for (int cn = 0; cn < lastColumn; cn++) {
-        this.processEachColumn(correlationID, headersMap, rowNum, r, nominalRollStudent, cn);
+        this.processEachColumn(correlationID, headersMap, rowNum, r, nominalRollStudent, cn, invalidValueCounterMap);
       }
       this.populateRowData(correlationID, headersMap, nominalRollStudents, rowNum, nominalRollStudent);
+    }
+    val isThresholdReached = invalidValueCounterMap.values().stream().filter(value -> value > this.applicationProperties.getNominalRollInvalidFieldThreshold()).findAny();
+    if (isThresholdReached.isPresent()) {
+      throw new FileUnProcessableException(FileError.FILE_THRESHOLD_CHECK_FAILED, correlationID);
     }
     return NominalRollFileProcessResponse.builder().headers(new ArrayList<>(headersMap.values())).nominalRollStudents(nominalRollStudents).build();
   }
@@ -87,7 +101,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
     }
   }
 
-  private void processEachColumn(final String correlationID, final Map<Integer, String> headersMap, final int rowNum, final Row r, final NominalRollStudent nominalRollStudent, final int cn) {
+  private void processEachColumn(final String correlationID, final Map<Integer, String> headersMap, final int rowNum, final Row r, final NominalRollStudent nominalRollStudent, final int cn, final Map<HeaderNames, Integer> invalidValueCounterMap) {
     if (rowNum == 0) {
       this.handleHeaderRow(r, cn, correlationID, headersMap);
     } else if (StringUtils.isNotBlank(headersMap.get(cn))) {
@@ -95,7 +109,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
       if (cell == null) {
         log.debug("empty cell at row :: {} and column :: {} for correlation :: {}", rowNum, cn, correlationID);
       } else {
-        this.handleEachCell(rowNum, r, cn, correlationID, headersMap, nominalRollStudent);
+        this.handleEachCell(rowNum, r, cn, correlationID, headersMap, nominalRollStudent, invalidValueCounterMap);
       }
     }
   }
@@ -128,7 +142,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
 
   }
 
-  private void handleEachCell(final int rowNum, final Row r, final int cn, final String correlationID, final Map<Integer, String> headersMap, final NominalRollStudent nominalRollStudent) {
+  private void handleEachCell(final int rowNum, final Row r, final int cn, final String correlationID, final Map<Integer, String> headersMap, final NominalRollStudent nominalRollStudent, final Map<HeaderNames, Integer> invalidValueCounterMap) {
     final Cell cell = r.getCell(cn, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
     val headerNamesOptional = HeaderNames.fromString(headersMap.get(cn));
     if (headerNamesOptional.isPresent()) {
@@ -136,46 +150,43 @@ public abstract class BaseExcelProcessor implements FileProcessor {
       val headerNames = headerName.getCode();
       switch (headerName) {
         case SCHOOL_DISTRICT_NUMBER:
-          nominalRollStudent.setSchoolDistrictNumber(this.getCellValueString(cell, correlationID, rowNum, headerNames).replaceAll("\\.\\d+$", "")); // if it is a number in Excel, poi adds `.0` at the end.
+          this.setSchoolDistrictNumber(rowNum, correlationID, nominalRollStudent, invalidValueCounterMap, cell, headerNames);
           break;
         case SCHOOL_NUMBER:
-          nominalRollStudent.setSchoolNumber(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+          this.setSchoolNumber(rowNum, correlationID, nominalRollStudent, invalidValueCounterMap, cell, headerNames);
           break;
         case SCHOOL_NAME:
-          nominalRollStudent.setSchoolName(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+          this.setSchoolName(rowNum, correlationID, nominalRollStudent, invalidValueCounterMap, cell, headerNames);
           break;
         case LEA_PROV:
-          nominalRollStudent.setLeaProvincial(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+          this.setLeaProv(rowNum, correlationID, nominalRollStudent, invalidValueCounterMap, cell, headerNames);
           break;
         case RECIPIENT_NUMBER:
-          nominalRollStudent.setRecipientNumber(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+          this.setRecipientNumber(rowNum, correlationID, nominalRollStudent, invalidValueCounterMap, cell, headerNames);
           break;
         case RECIPIENT_NAME:
-          nominalRollStudent.setRecipientName(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+          this.setRecipientName(rowNum, correlationID, nominalRollStudent, cell, headerNames, invalidValueCounterMap);
           break;
         case SURNAME:
-          nominalRollStudent.setSurname(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+          this.setSurname(rowNum, correlationID, nominalRollStudent, cell, headerNames, invalidValueCounterMap);
           break;
         case GIVEN_NAMES:
           nominalRollStudent.setGivenNames(this.getCellValueString(cell, correlationID, rowNum, headerNames));
           break;
-        case INITIAL:
-          nominalRollStudent.setInitial(this.getCellValueString(cell, correlationID, rowNum, headerNames));
-          break;
         case GENDER:
-          nominalRollStudent.setGender(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+          this.setGender(rowNum, correlationID, nominalRollStudent, cell, headerNames, invalidValueCounterMap);
           break;
         case BIRTH_DATE:
-          nominalRollStudent.setBirthDate(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+          this.setBirthDate(rowNum, correlationID, nominalRollStudent, cell, headerNames, invalidValueCounterMap);
           break;
         case GRADE:
-          nominalRollStudent.setGrade(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+          this.setGrade(rowNum, correlationID, nominalRollStudent, cell, headerNames, invalidValueCounterMap);
           break;
         case FTE:
-          nominalRollStudent.setFte(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+          this.setFTE(rowNum, correlationID, nominalRollStudent, cell, headerNames, invalidValueCounterMap);
           break;
         case BAND_OF_RESIDENCE:
-          nominalRollStudent.setBandOfResidence(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+          this.setBandOfResidence(rowNum, correlationID, nominalRollStudent, cell, headerNames, invalidValueCounterMap);
           break;
         default:
           log.debug("Header name from excel is :: {} is not present in configured headers.", headerNames);
@@ -186,6 +197,137 @@ public abstract class BaseExcelProcessor implements FileProcessor {
     }
 
 
+  }
+
+  private void setBandOfResidence(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Cell cell, final String headerNames, final Map<HeaderNames, Integer> invalidValueCounterMap) {
+    val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames);
+    if (StringUtils.isBlank(fieldValue)) {
+      this.addToInvalidCounterMap(invalidValueCounterMap, BAND_OF_RESIDENCE);
+    }
+    nominalRollStudent.setBandOfResidence(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+  }
+
+  private void setFTE(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Cell cell, final String headerNames, final Map<HeaderNames, Integer> invalidValueCounterMap) {
+    val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames);
+    if (StringUtils.isBlank(fieldValue)) {
+      this.addToInvalidCounterMap(invalidValueCounterMap, FTE);
+    }
+    nominalRollStudent.setFte(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+  }
+
+  private void setGrade(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Cell cell, final String headerNames, final Map<HeaderNames, Integer> invalidValueCounterMap) {
+    val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames);
+    if (StringUtils.isBlank(fieldValue) || !this.gradeCodes.contains(fieldValue.trim().toUpperCase())) {
+      this.addToInvalidCounterMap(invalidValueCounterMap, GRADE);
+    }
+    nominalRollStudent.setGrade(this.getCellValueString(cell, correlationID, rowNum, headerNames));
+  }
+
+  private void setBirthDate(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Cell cell, final String headerNames, final Map<HeaderNames, Integer> invalidValueCounterMap) {
+    val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames);
+    if (StringUtils.isBlank(fieldValue) || this.isInvalidBirthDate(fieldValue)) {
+      this.addToInvalidCounterMap(invalidValueCounterMap, BIRTH_DATE);
+    }
+    nominalRollStudent.setBirthDate(fieldValue);
+  }
+
+  private boolean isInvalidBirthDate(final String birthDate) {
+    try {
+      LocalDate.parse(birthDate); // yyyy-MM-dd
+      return true;
+    } catch (final DateTimeParseException dateTimeParseException) {
+      val yyyySlashMMSlashDdFormatter = new DateTimeFormatterBuilder()
+        .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
+        .appendLiteral("/")
+        .appendValue(MONTH_OF_YEAR, 2)
+        .appendLiteral("/")
+        .appendValue(DAY_OF_MONTH, 2).toFormatter();
+      try {
+        LocalDate.parse(birthDate, yyyySlashMMSlashDdFormatter);// yyyy/MM/dd
+        return true;
+      } catch (final DateTimeParseException dateTimeParseException2) {
+        val yyyyMMDdFormatter = new DateTimeFormatterBuilder()
+          .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
+          .appendValue(MONTH_OF_YEAR, 2)
+          .appendValue(DAY_OF_MONTH, 2).toFormatter();
+        try {
+          LocalDate.parse(birthDate, yyyyMMDdFormatter);// yyyyMMdd
+        } catch (final DateTimeParseException dateTimeParseException3) {
+          return false;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  private void setGender(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Cell cell, final String headerNames, final Map<HeaderNames, Integer> invalidValueCounterMap) {
+    val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames);
+    if (StringUtils.isBlank(fieldValue) || !(fieldValue.trim().equalsIgnoreCase("M") || fieldValue.trim().equalsIgnoreCase("F"))) {
+      this.addToInvalidCounterMap(invalidValueCounterMap, GENDER);
+    }
+    nominalRollStudent.setGender(fieldValue);
+  }
+
+  private void setSurname(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Cell cell, final String headerNames, final Map<HeaderNames, Integer> invalidValueCounterMap) {
+    val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames);
+    if (StringUtils.isBlank(fieldValue)) {
+      this.addToInvalidCounterMap(invalidValueCounterMap, SURNAME);
+    }
+    nominalRollStudent.setSurname(fieldValue);
+  }
+
+  private void setRecipientName(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Cell cell, final String headerNames, final Map<HeaderNames, Integer> invalidValueCounterMap) {
+    val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames);
+    if (StringUtils.isBlank(fieldValue)) {
+      this.addToInvalidCounterMap(invalidValueCounterMap, RECIPIENT_NAME);
+    }
+    nominalRollStudent.setRecipientName(fieldValue);
+  }
+
+  private void setRecipientNumber(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Map<HeaderNames, Integer> invalidValueCounterMap, final Cell cell, final String headerNames) {
+    val recipientNum = this.getCellValueString(cell, correlationID, rowNum, headerNames);
+    if (StringUtils.isBlank(recipientNum)) {
+      this.addToInvalidCounterMap(invalidValueCounterMap, RECIPIENT_NUMBER);
+    }
+    nominalRollStudent.setRecipientNumber(recipientNum);
+  }
+
+  private void setLeaProv(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Map<HeaderNames, Integer> invalidValueCounterMap, final Cell cell, final String headerNames) {
+    val leaProv = this.getCellValueString(cell, correlationID, rowNum, headerNames);
+    if (StringUtils.isBlank(leaProv)) {
+      this.addToInvalidCounterMap(invalidValueCounterMap, LEA_PROV);
+    }
+    nominalRollStudent.setLeaProvincial(leaProv);
+  }
+
+  private void setSchoolName(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Map<HeaderNames, Integer> invalidValueCounterMap, final Cell cell, final String headerNames) {
+    val schoolName = this.getCellValueString(cell, correlationID, rowNum, headerNames);
+    if (StringUtils.isBlank(schoolName)) {
+      this.addToInvalidCounterMap(invalidValueCounterMap, SCHOOL_NAME);
+    }
+    nominalRollStudent.setSchoolName(schoolName);
+  }
+
+  private void setSchoolNumber(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Map<HeaderNames, Integer> invalidValueCounterMap, final Cell cell, final String headerNames) {
+    val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames);
+    if (StringUtils.isBlank(fieldValue)) {
+      this.addToInvalidCounterMap(invalidValueCounterMap, SCHOOL_NUMBER);
+    }
+    nominalRollStudent.setSchoolNumber(fieldValue);
+  }
+
+  private void setSchoolDistrictNumber(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Map<HeaderNames, Integer> invalidValueCounterMap, final Cell cell, final String headerNames) {
+    val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames).replaceAll("\\.\\d+$", "");
+    if (StringUtils.isBlank(fieldValue)) {
+      this.addToInvalidCounterMap(invalidValueCounterMap, SCHOOL_DISTRICT_NUMBER);
+    }
+    nominalRollStudent.setSchoolDistrictNumber(fieldValue); // if it is a number in Excel, poi adds `.0` at the end.
+  }
+
+  private void addToInvalidCounterMap(final Map<HeaderNames, Integer> invalidValueCounterMap, final HeaderNames headerName) {
+    invalidValueCounterMap.computeIfPresent(headerName, (k, v) -> v + 1);
+    invalidValueCounterMap.putIfAbsent(headerName, 1);
   }
 
   private Double getCellValueDouble(final Cell cell, final String correlationID, final int rowNum, final String headerName) {
