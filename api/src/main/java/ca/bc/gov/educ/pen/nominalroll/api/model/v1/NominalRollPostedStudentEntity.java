@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.pen.nominalroll.api.model.v1;
 
+import ca.bc.gov.educ.pen.nominalroll.api.util.UpperCase;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
@@ -37,24 +38,30 @@ public class NominalRollPostedStudentEntity {
   String federalSchoolNumber;
 
   @Column(name = "FEDERAL_SCHOOL_NAME", length = 255)
+  @UpperCase
   String federalSchoolName;
 
   @Column(name = "AGREEMENT_TYPE", length = 1)
+  @UpperCase
   String agreementType;
 
   @Column(name = "FEDERAL_BAND_CODE", length = 5)
   String federalBandCode;
 
   @Column(name = "FEDERAL_RECIPIENT_BAND_NAME", length = 255)
+  @UpperCase
   String federalRecipientName;
 
   @Column(name = "SURNAME", length = 255)
+  @UpperCase
   String surname;
 
   @Column(name = "GIVEN_NAMES", length = 255)
+  @UpperCase
   String givenNames;
 
   @Column(name = "GENDER", length = 1)
+  @UpperCase
   String gender;
 
   @Column(name = "BIRTH_DATE")
@@ -73,6 +80,7 @@ public class NominalRollPostedStudentEntity {
   String assignedPEN;
 
   @Column(name = "STATUS", length = 20)
+  @UpperCase
   String status;
 
   @Column(name = "RECORD_NUMBER", length = 5)
