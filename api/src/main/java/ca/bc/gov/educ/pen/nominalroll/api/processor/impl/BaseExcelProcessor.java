@@ -1,12 +1,12 @@
 package ca.bc.gov.educ.pen.nominalroll.api.processor.impl;
 
-import ca.bc.gov.educ.pen.nominalroll.api.constants.GradeCodes;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.HeaderNames;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.FileError;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.FileUnProcessableException;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.InvalidPayloadException;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.errors.ApiError;
 import ca.bc.gov.educ.pen.nominalroll.api.helpers.NominalRollHelper;
+import ca.bc.gov.educ.pen.nominalroll.api.mappers.LocalDateMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.processor.FileProcessor;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollFileProcessResponse;
@@ -31,7 +31,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.DateTimeParseException;
 import java.time.format.SignStyle;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -227,12 +226,20 @@ public abstract class BaseExcelProcessor implements FileProcessor {
 
   private void setBirthDate(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Cell cell, final String headerNames, final Map<HeaderNames, Integer> invalidValueCounterMap) {
     val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames);
-    if (StringUtils.isBlank(fieldValue) || !NominalRollHelper.isValidBirthDate(fieldValue)) {
+    if (StringUtils.isBlank(fieldValue)) {
       this.addToInvalidCounterMap(invalidValueCounterMap, BIRTH_DATE);
+      nominalRollStudent.setBirthDate(fieldValue);
+    } else {
+      val birthDate = NominalRollHelper.getBirthDateFromString(fieldValue);
+      if (birthDate.isPresent()) {
+        nominalRollStudent.setBirthDate(new LocalDateMapper().map(birthDate.get()));
+      } else {
+        this.addToInvalidCounterMap(invalidValueCounterMap, BIRTH_DATE);
+        nominalRollStudent.setBirthDate(null);
+      }
     }
-    nominalRollStudent.setBirthDate(fieldValue);
-  }
 
+  }
 
 
   private void setGender(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Cell cell, final String headerNames, final Map<HeaderNames, Integer> invalidValueCounterMap) {
