@@ -9,10 +9,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.format.SignStyle;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoField.*;
@@ -24,6 +21,7 @@ public final class NominalRollHelper {
   private NominalRollHelper() {
 
   }
+
   static {
     gradeCodeMap.put("1", "01");
     gradeCodeMap.put("01", "01");
@@ -54,10 +52,9 @@ public final class NominalRollHelper {
     gradeCodeMap.put("SU", "SU");
   }
 
-  public static boolean isValidBirthDate(String birthDate) {
+  public static Optional<LocalDate> getBirthDateFromString(final String birthDate) {
     try {
-      LocalDate.parse(birthDate); // yyyy-MM-dd
-      return true;
+      return Optional.of(LocalDate.parse(birthDate)); // yyyy-MM-dd
     } catch (final DateTimeParseException dateTimeParseException) {
       val yyyySlashMMSlashDdFormatter = new DateTimeFormatterBuilder()
         .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
@@ -66,24 +63,22 @@ public final class NominalRollHelper {
         .appendLiteral("/")
         .appendValue(DAY_OF_MONTH, 2).toFormatter();
       try {
-        LocalDate.parse(birthDate, yyyySlashMMSlashDdFormatter);// yyyy/MM/dd
-        return true;
+        return Optional.of(LocalDate.parse(birthDate, yyyySlashMMSlashDdFormatter));// yyyy/MM/dd
       } catch (final DateTimeParseException dateTimeParseException2) {
         val yyyyMMDdFormatter = new DateTimeFormatterBuilder()
           .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
           .appendValue(MONTH_OF_YEAR, 2)
           .appendValue(DAY_OF_MONTH, 2).toFormatter();
         try {
-          LocalDate.parse(birthDate, yyyyMMDdFormatter);// yyyyMMdd
-          return true;
+          return Optional.of(LocalDate.parse(birthDate, yyyyMMDdFormatter));// yyyyMMdd
         } catch (final DateTimeParseException dateTimeParseException3) {
-          return false;
+          return Optional.empty();
         }
       }
     }
   }
 
-  public static boolean isValidGradeCode(@NonNull String gradeCode) {
+  public static boolean isValidGradeCode(@NonNull final String gradeCode) {
     return gradeCodes.contains(gradeCodeMap.get(StringUtils.upperCase(gradeCode)));
   }
 }
