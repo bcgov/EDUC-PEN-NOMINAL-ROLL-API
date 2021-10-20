@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.pen.nominalroll.api.service.v1;
 
 import ca.bc.gov.educ.pen.nominalroll.api.constants.v1.NominalRollStudentStatus;
+import ca.bc.gov.educ.pen.nominalroll.api.exception.EntityNotFoundException;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
