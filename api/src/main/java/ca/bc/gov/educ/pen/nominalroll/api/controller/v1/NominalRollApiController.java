@@ -102,6 +102,6 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   public CompletableFuture<Page<NominalRollStudent>> findAll(final Integer pageNumber, final Integer pageSize, final String sortCriteriaJson, final String searchCriteriaListJson) {
     final List<Sort.Order> sorts = new ArrayList<>();
     final Specification<NominalRollStudentEntity> studentSpecs = this.searchService.setSpecificationAndSortCriteria(sortCriteriaJson, searchCriteriaListJson, JsonUtil.mapper, sorts);
-    return this.service.findAll(studentSpecs, pageNumber, pageSize, sorts).thenApplyAsync(studentEntities -> studentEntities.map(mapper::toStructure));
+    return this.service.findAll(studentSpecs, pageNumber, pageSize, sorts).thenApplyAsync(studentEntities -> studentEntities.map(mapper::toStruct));
   }
 }

@@ -41,7 +41,7 @@ public class NominalRollStudent {
   String createDate;
   String updateUser;
   String updateDate;
-
+  String processingYear;
   // fields computed.
   String assignedPEN;
 
