@@ -98,7 +98,6 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   }
 
   @Override
-  @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
   public CompletableFuture<Page<NominalRollStudent>> findAll(final Integer pageNumber, final Integer pageSize, final String sortCriteriaJson, final String searchCriteriaListJson) {
     final List<Sort.Order> sorts = new ArrayList<>();
     final Specification<NominalRollStudentEntity> studentSpecs = this.searchService.setSpecificationAndSortCriteria(sortCriteriaJson, searchCriteriaListJson, JsonUtil.mapper, sorts);

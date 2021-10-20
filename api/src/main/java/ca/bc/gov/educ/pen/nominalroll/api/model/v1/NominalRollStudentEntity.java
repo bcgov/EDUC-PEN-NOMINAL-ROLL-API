@@ -103,6 +103,6 @@ public class NominalRollStudentEntity {
    */
   @EqualsAndHashCode.Exclude
   @ToString.Exclude
-  @OneToMany(mappedBy = "nominalRollStudent", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = NominalRollStudentValidationError.class)
+  @OneToMany(mappedBy = "nominalRollStudent", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = NominalRollStudentValidationError.class)
   Set<NominalRollStudentValidationError> nominalRollStudentValidationErrors;
 }
