@@ -6,6 +6,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.exception.FileError;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.FileUnProcessableException;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.InvalidPayloadException;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.errors.ApiError;
+import ca.bc.gov.educ.pen.nominalroll.api.helpers.NominalRollHelper;
 import ca.bc.gov.educ.pen.nominalroll.api.processor.FileProcessor;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollFileProcessResponse;
@@ -50,7 +51,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
   private static final String NOT_A_DATE = "Not a Date";
   private static final String FORMULA_TYPE = "Formula type :: {} :: {}";
   private static final String BLANK_CELL = "blank cell";
-  protected final Set<String> gradeCodes = Arrays.stream(GradeCodes.values()).map(GradeCodes::getCode).collect(Collectors.toSet());
+
   protected final ApplicationProperties applicationProperties;
 
   protected BaseExcelProcessor(final ApplicationProperties applicationProperties) {
@@ -218,7 +219,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
 
   private void setGrade(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Cell cell, final String headerNames, final Map<HeaderNames, Integer> invalidValueCounterMap) {
     val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames);
-    if (StringUtils.isBlank(fieldValue) || !this.gradeCodes.contains(fieldValue.trim().toUpperCase())) {
+    if (StringUtils.isBlank(fieldValue) || !NominalRollHelper.isValidGradeCode(fieldValue)) {
       this.addToInvalidCounterMap(invalidValueCounterMap, GRADE);
     }
     nominalRollStudent.setGrade(this.getCellValueString(cell, correlationID, rowNum, headerNames));
@@ -226,41 +227,13 @@ public abstract class BaseExcelProcessor implements FileProcessor {
 
   private void setBirthDate(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Cell cell, final String headerNames, final Map<HeaderNames, Integer> invalidValueCounterMap) {
     val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames);
-    if (StringUtils.isBlank(fieldValue) || this.isInvalidBirthDate(fieldValue)) {
+    if (StringUtils.isBlank(fieldValue) || !NominalRollHelper.isValidBirthDate(fieldValue)) {
       this.addToInvalidCounterMap(invalidValueCounterMap, BIRTH_DATE);
     }
     nominalRollStudent.setBirthDate(fieldValue);
   }
 
-  private boolean isInvalidBirthDate(final String birthDate) {
-    try {
-      LocalDate.parse(birthDate); // yyyy-MM-dd
-      return true;
-    } catch (final DateTimeParseException dateTimeParseException) {
-      val yyyySlashMMSlashDdFormatter = new DateTimeFormatterBuilder()
-        .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-        .appendLiteral("/")
-        .appendValue(MONTH_OF_YEAR, 2)
-        .appendLiteral("/")
-        .appendValue(DAY_OF_MONTH, 2).toFormatter();
-      try {
-        LocalDate.parse(birthDate, yyyySlashMMSlashDdFormatter);// yyyy/MM/dd
-        return true;
-      } catch (final DateTimeParseException dateTimeParseException2) {
-        val yyyyMMDdFormatter = new DateTimeFormatterBuilder()
-          .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-          .appendValue(MONTH_OF_YEAR, 2)
-          .appendValue(DAY_OF_MONTH, 2).toFormatter();
-        try {
-          LocalDate.parse(birthDate, yyyyMMDdFormatter);// yyyyMMdd
-        } catch (final DateTimeParseException dateTimeParseException3) {
-          return false;
-        }
-      }
-    }
 
-    return false;
-  }
 
   private void setGender(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Cell cell, final String headerNames, final Map<HeaderNames, Integer> invalidValueCounterMap) {
     val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames);
