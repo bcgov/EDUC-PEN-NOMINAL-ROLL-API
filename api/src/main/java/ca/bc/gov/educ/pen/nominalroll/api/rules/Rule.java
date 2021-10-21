@@ -13,5 +13,5 @@ public interface Rule {
    * @param nominalRollStudentEntity the object to be validated.
    * @return the List of Errors Map, the map
    */
-  List<Map<String, String>> validate(NominalRollStudentEntity nominalRollStudentEntity);
+  Map<String, String> validate(NominalRollStudentEntity nominalRollStudentEntity);
 }

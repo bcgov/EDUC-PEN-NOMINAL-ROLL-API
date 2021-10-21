@@ -238,13 +238,12 @@ public abstract class BaseExcelProcessor implements FileProcessor {
         nominalRollStudent.setBirthDate(null);
       }
     }
-
   }
 
 
   private void setGender(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Cell cell, final String headerNames, final Map<HeaderNames, Integer> invalidValueCounterMap) {
     val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames);
-    if (StringUtils.isBlank(fieldValue) || !(fieldValue.trim().equalsIgnoreCase("M") || fieldValue.trim().equalsIgnoreCase("F"))) {
+    if (StringUtils.isBlank(fieldValue) || !(fieldValue.trim().equalsIgnoreCase("M") || fieldValue.trim().equalsIgnoreCase("X") || fieldValue.trim().equalsIgnoreCase("F"))) {
       this.addToInvalidCounterMap(invalidValueCounterMap, GENDER);
     }
     nominalRollStudent.setGender(fieldValue);

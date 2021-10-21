@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -54,7 +53,7 @@ public class NominalRollService {
   }
 
   public NominalRollStudentEntity getNominalRollStudentByID(final UUID nominalRollStudentID) {
-    return repository.findById(nominalRollStudentID).orElseThrow(()-> new EntityNotFoundException(NominalRollStudentEntity.class, STUDENT_ID_ATTRIBUTE, nominalRollStudentID.toString()));
+    return this.repository.findById(nominalRollStudentID).orElseThrow(() -> new EntityNotFoundException(NominalRollStudentEntity.class, STUDENT_ID_ATTRIBUTE, nominalRollStudentID.toString()));
   }
 
   public long countAllNominalRollStudents(final String processingYear) {
@@ -91,5 +90,9 @@ public class NominalRollService {
       }
     }, this.paginatedQueryExecutor);
 
+  }
+
+  public NominalRollStudentEntity updateNominalRollStudent(final NominalRollStudentEntity entity) {
+    return this.repository.save(entity);
   }
 }
