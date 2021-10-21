@@ -16,7 +16,7 @@ import static java.time.temporal.ChronoField.*;
 
 public final class NominalRollHelper {
   private static final Set<String> gradeCodes = Arrays.stream(GradeCodes.values()).map(GradeCodes::getCode).collect(Collectors.toSet());
-  public static final Map<String, String> gradeCodeMap = new HashMap<>();
+  public static final Map<String, String> GRADE_CODE_MAP = new HashMap<>();
   public static final DateTimeFormatter YYYY_MM_DD_SLASH_FORMATTER = new DateTimeFormatterBuilder()
     .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
     .appendLiteral("/")
@@ -33,33 +33,33 @@ public final class NominalRollHelper {
   }
 
   static {
-    gradeCodeMap.put("1", "01");
-    gradeCodeMap.put("01", "01");
-    gradeCodeMap.put("2", "02");
-    gradeCodeMap.put("02", "02");
-    gradeCodeMap.put("3", "03");
-    gradeCodeMap.put("03", "03");
-    gradeCodeMap.put("4", "04");
-    gradeCodeMap.put("04", "04");
-    gradeCodeMap.put("5", "05");
-    gradeCodeMap.put("05", "05");
-    gradeCodeMap.put("6", "06");
-    gradeCodeMap.put("06", "06");
-    gradeCodeMap.put("7", "07");
-    gradeCodeMap.put("07", "07");
-    gradeCodeMap.put("8", "08");
-    gradeCodeMap.put("08", "08");
-    gradeCodeMap.put("9", "09");
-    gradeCodeMap.put("09", "09");
-    gradeCodeMap.put("10", "10");
-    gradeCodeMap.put("11", "11");
-    gradeCodeMap.put("12", "12");
-    gradeCodeMap.put("K", "KF");
-    gradeCodeMap.put("KF", "KF");
-    gradeCodeMap.put("UE", "EU");
-    gradeCodeMap.put("EU", "EU");
-    gradeCodeMap.put("US", "SU");
-    gradeCodeMap.put("SU", "SU");
+    GRADE_CODE_MAP.put("1", "01");
+    GRADE_CODE_MAP.put("01", "01");
+    GRADE_CODE_MAP.put("2", "02");
+    GRADE_CODE_MAP.put("02", "02");
+    GRADE_CODE_MAP.put("3", "03");
+    GRADE_CODE_MAP.put("03", "03");
+    GRADE_CODE_MAP.put("4", "04");
+    GRADE_CODE_MAP.put("04", "04");
+    GRADE_CODE_MAP.put("5", "05");
+    GRADE_CODE_MAP.put("05", "05");
+    GRADE_CODE_MAP.put("6", "06");
+    GRADE_CODE_MAP.put("06", "06");
+    GRADE_CODE_MAP.put("7", "07");
+    GRADE_CODE_MAP.put("07", "07");
+    GRADE_CODE_MAP.put("8", "08");
+    GRADE_CODE_MAP.put("08", "08");
+    GRADE_CODE_MAP.put("9", "09");
+    GRADE_CODE_MAP.put("09", "09");
+    GRADE_CODE_MAP.put("10", "10");
+    GRADE_CODE_MAP.put("11", "11");
+    GRADE_CODE_MAP.put("12", "12");
+    GRADE_CODE_MAP.put("K", "KF");
+    GRADE_CODE_MAP.put("KF", "KF");
+    GRADE_CODE_MAP.put("UE", "EU");
+    GRADE_CODE_MAP.put("EU", "EU");
+    GRADE_CODE_MAP.put("US", "SU");
+    GRADE_CODE_MAP.put("SU", "SU");
   }
 
   public static Optional<LocalDate> getBirthDateFromString(final String birthDate) {
@@ -91,16 +91,8 @@ public final class NominalRollHelper {
     }
   }
 
-  public static boolean isValidDate(final String date, final DateTimeFormatter formatter) {
-    try {
-      LocalDate.parse(date, formatter);
-      return true;
-    } catch (final DateTimeParseException dateTimeParseException3) {
-      return false;
-    }
-  }
 
   public static boolean isValidGradeCode(@NonNull final String gradeCode) {
-    return gradeCodes.contains(gradeCodeMap.get(StringUtils.upperCase(gradeCode)));
+    return gradeCodes.contains(GRADE_CODE_MAP.get(StringUtils.upperCase(gradeCode)));
   }
 }
