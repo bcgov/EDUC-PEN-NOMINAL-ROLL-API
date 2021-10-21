@@ -2,10 +2,10 @@ package ca.bc.gov.educ.pen.nominalroll.api.helpers;
 
 import ca.bc.gov.educ.pen.nominalroll.api.constants.GradeCodes;
 import lombok.NonNull;
-import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.format.SignStyle;
@@ -16,7 +16,17 @@ import static java.time.temporal.ChronoField.*;
 
 public final class NominalRollHelper {
   private static final Set<String> gradeCodes = Arrays.stream(GradeCodes.values()).map(GradeCodes::getCode).collect(Collectors.toSet());
-  private static final Map<String, String> gradeCodeMap = new HashMap<>();
+  public static final Map<String, String> gradeCodeMap = new HashMap<>();
+  public static final DateTimeFormatter YYYY_MM_DD_SLASH_FORMATTER = new DateTimeFormatterBuilder()
+    .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
+    .appendLiteral("/")
+    .appendValue(MONTH_OF_YEAR, 2)
+    .appendLiteral("/")
+    .appendValue(DAY_OF_MONTH, 2).toFormatter();
+  public static final DateTimeFormatter YYYY_MM_DD_FORMATTER = new DateTimeFormatterBuilder()
+    .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
+    .appendValue(MONTH_OF_YEAR, 2)
+    .appendValue(DAY_OF_MONTH, 2).toFormatter();
 
   private NominalRollHelper() {
 
@@ -56,25 +66,37 @@ public final class NominalRollHelper {
     try {
       return Optional.of(LocalDate.parse(birthDate)); // yyyy-MM-dd
     } catch (final DateTimeParseException dateTimeParseException) {
-      val yyyySlashMMSlashDdFormatter = new DateTimeFormatterBuilder()
-        .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-        .appendLiteral("/")
-        .appendValue(MONTH_OF_YEAR, 2)
-        .appendLiteral("/")
-        .appendValue(DAY_OF_MONTH, 2).toFormatter();
       try {
-        return Optional.of(LocalDate.parse(birthDate, yyyySlashMMSlashDdFormatter));// yyyy/MM/dd
+        return Optional.of(LocalDate.parse(birthDate, YYYY_MM_DD_SLASH_FORMATTER));// yyyy/MM/dd
       } catch (final DateTimeParseException dateTimeParseException2) {
-        val yyyyMMDdFormatter = new DateTimeFormatterBuilder()
-          .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-          .appendValue(MONTH_OF_YEAR, 2)
-          .appendValue(DAY_OF_MONTH, 2).toFormatter();
         try {
-          return Optional.of(LocalDate.parse(birthDate, yyyyMMDdFormatter));// yyyyMMdd
+          return Optional.of(LocalDate.parse(birthDate, YYYY_MM_DD_FORMATTER));// yyyyMMdd
         } catch (final DateTimeParseException dateTimeParseException3) {
           return Optional.empty();
         }
       }
+    }
+  }
+
+  /**
+   * @param date the string date to be validated.
+   * @return true if it is yyyy-MM-dd format false otherwise.
+   */
+  public static boolean isValidDate(final String date) {
+    try {
+      LocalDate.parse(date);
+      return true;
+    } catch (final DateTimeParseException dateTimeParseException3) {
+      return false;
+    }
+  }
+
+  public static boolean isValidDate(final String date, final DateTimeFormatter formatter) {
+    try {
+      LocalDate.parse(date, formatter);
+      return true;
+    } catch (final DateTimeParseException dateTimeParseException3) {
+      return false;
     }
   }
 
