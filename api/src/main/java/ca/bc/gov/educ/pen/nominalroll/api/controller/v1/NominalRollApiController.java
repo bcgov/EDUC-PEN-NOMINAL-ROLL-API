@@ -18,6 +18,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.util.TransformUtil;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.poi.openxml4j.exceptions.OLE2NotOfficeXmlFileException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -110,5 +111,23 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
     val errorsMap = this.rulesProcessor.processRules(NominalRollStudentMapper.mapper.toModel(nominalRollStudent));
     nominalRollStudent.setValidationErrors(errorsMap);
     return ResponseEntity.ok(nominalRollStudent);
+  }
+
+  @Override
+  public ResponseEntity<NominalRollStudent> updateNominalRollStudent(final UUID nomRollStudentID, final NominalRollStudent nominalRollStudent) {
+    val dbEntity = this.service.getNominalRollStudentByID(nomRollStudentID);
+    val entity = NominalRollStudentMapper.mapper.toModel(nominalRollStudent);
+    val errorsMap = this.rulesProcessor.processRules(entity);
+    if (errorsMap.isEmpty()) {
+      BeanUtils.copyProperties(entity, dbEntity, "createDate", "createUser", "nominalRollStudentID", "nominalRollStudentValidationErrors");
+      // no validation errors so remove existing ones.
+      if (dbEntity.getNominalRollStudentValidationErrors() != null) {
+        dbEntity.getNominalRollStudentValidationErrors().clear();
+      }
+      return ResponseEntity.ok(NominalRollStudentMapper.mapper.toStruct(this.service.updateNominalRollStudent(dbEntity)));
+    } else {
+      nominalRollStudent.setValidationErrors(errorsMap);
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(nominalRollStudent);
+    }
   }
 }

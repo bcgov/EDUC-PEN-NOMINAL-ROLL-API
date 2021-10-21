@@ -92,6 +92,7 @@ public interface NominalRollApiEndpoint {
                                                       @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
                                                       @RequestParam(name = "sort", defaultValue = "") String sortCriteriaJson,
                                                       @RequestParam(name = "searchCriteriaList", required = false) String searchCriteriaListJson);
+
   @PostMapping(URL.VALIDATE)
   @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
@@ -99,4 +100,11 @@ public interface NominalRollApiEndpoint {
   @Tag(name = "Endpoint to validate the given nominal roll student", description = "Endpoint to validate the given nominal roll student")
   @Schema(name = "NominalRollStudent", implementation = NominalRollStudent.class)
   ResponseEntity<NominalRollStudent> validateNomRollStudent(NominalRollStudent nominalRollStudent);
+
+  @PutMapping(URL.NOM_ROLL_STUDENT_ID)
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "NOT FOUND")})
+  @Transactional
+  @Tag(name = "Endpoint to update the nominal roll student", description = "Endpoint to update the nominal roll student")
+  ResponseEntity<NominalRollStudent> updateNominalRollStudent(@PathVariable UUID nomRollStudentID, @Validated @RequestBody NominalRollStudent nominalRollStudent);
 }
