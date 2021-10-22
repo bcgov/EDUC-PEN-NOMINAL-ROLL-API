@@ -3,7 +3,6 @@ package ca.bc.gov.educ.pen.nominalroll.api.service.events;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Event;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
