@@ -17,7 +17,7 @@ public class AgreementTypeRule extends BaseRule {
   public Map<String, String> validate(final NominalRollStudentEntity nominalRollStudentEntity) {
     final Map<String, String> errorsMap = new LinkedHashMap<>();
     if (StringUtils.isBlank(nominalRollStudentEntity.getLeaProvincial())) {
-      errorsMap.put(HeaderNames.LEA_PROV.getCode(), "Field value is missing");
+      errorsMap.put(HeaderNames.LEA_PROV.getCode(), "Field value is missing.");
     } else if (!this.agreementTypes.contains(nominalRollStudentEntity.getLeaProvincial())) {
       errorsMap.put(HeaderNames.LEA_PROV.getCode(), String.format("Invalid LEA/Provincial value %s", nominalRollStudentEntity.getLeaProvincial()));
     }

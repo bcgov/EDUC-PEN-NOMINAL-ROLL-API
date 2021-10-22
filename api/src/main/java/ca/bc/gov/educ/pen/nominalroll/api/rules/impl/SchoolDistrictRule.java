@@ -21,7 +21,7 @@ public class SchoolDistrictRule extends BaseRule {
   public Map<String, String> validate(final NominalRollStudentEntity nominalRollStudentEntity) {
     final Map<String, String> errorsMap = new LinkedHashMap<>();
     if (StringUtils.isBlank(nominalRollStudentEntity.getSchoolDistrictNumber())) {
-      errorsMap.put(HeaderNames.SCHOOL_DISTRICT_NUMBER.getCode(), "Field value is missing");
+      errorsMap.put(HeaderNames.SCHOOL_DISTRICT_NUMBER.getCode(), "Field value is missing.");
     } else {
       val schoolDistNumber = StringUtils.leftPad(nominalRollStudentEntity.getSchoolDistrictNumber(), 3, "0");
       if (!this.restUtils.districtCodes().contains(schoolDistNumber)) {

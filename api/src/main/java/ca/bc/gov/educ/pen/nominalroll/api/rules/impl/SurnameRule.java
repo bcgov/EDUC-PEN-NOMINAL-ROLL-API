@@ -13,9 +13,9 @@ public class SurnameRule extends BaseRule {
   public Map<String, String> validate(final NominalRollStudentEntity nominalRollStudentEntity) {
     final Map<String, String> errorsMap = new LinkedHashMap<>();
     if (StringUtils.isBlank(nominalRollStudentEntity.getSurname())) {
-      errorsMap.put(HeaderNames.SURNAME.getCode(), "Field value is missing");
+      errorsMap.put(HeaderNames.SURNAME.getCode(), "Field value is missing.");
     } else if (StringUtils.length(nominalRollStudentEntity.getSurname()) > 500) {
-      errorsMap.put(HeaderNames.SURNAME.getCode(), "Field value is too large");
+      errorsMap.put(HeaderNames.SURNAME.getCode(), "Field value is too large.");
     }
     return errorsMap;
   }
