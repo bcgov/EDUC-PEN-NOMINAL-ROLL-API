@@ -2,7 +2,6 @@ package ca.bc.gov.educ.pen.nominalroll.api.rules;
 
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 
-import java.util.List;
 import java.util.Map;
 
 @FunctionalInterface

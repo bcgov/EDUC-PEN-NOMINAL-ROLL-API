@@ -14,6 +14,7 @@
     <sonar.exclusions>
       src/test/**,
       src/main/resources/**,
+      src/main/java/ca/bc/gov/educ/pen/nominalroll/api/adapter/**,
       src/main/java/ca/bc/gov/educ/pen/nominalroll/api/endpoint/**,
       src/main/java/ca/bc/gov/educ/pen/nominalroll/api/config/**,
       src/main/java/ca/bc/gov/educ/pen/nominalroll/api/mappers/**,
