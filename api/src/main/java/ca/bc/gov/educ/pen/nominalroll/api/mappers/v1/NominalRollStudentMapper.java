@@ -21,5 +21,4 @@ public interface NominalRollStudentMapper {
   @Mapping(target = "nominalRollStudentValidationErrors", ignore = true)
   NominalRollStudentEntity toModel(NominalRollStudent nominalRollStudent);
 
-  NominalRollStudent toStructure(NominalRollStudentEntity studentEntity);
 }

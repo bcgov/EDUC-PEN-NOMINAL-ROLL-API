@@ -34,6 +34,8 @@ public class ApplicationProperties {
 
   @Value("${url.api.school}")
   private String schoolApiURL;
+  @Value("${url.api.student}")
+  private String studentApiURL;
   @Value("${ramp.up.http}")
   private Boolean isHttpRampUp;
   @Value("${nats.server}")

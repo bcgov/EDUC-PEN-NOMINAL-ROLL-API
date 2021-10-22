@@ -1,11 +1,12 @@
 package ca.bc.gov.educ.pen.nominalroll.api.processor.impl;
 
-import ca.bc.gov.educ.pen.nominalroll.api.constants.GradeCodes;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.HeaderNames;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.FileError;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.FileUnProcessableException;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.InvalidPayloadException;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.errors.ApiError;
+import ca.bc.gov.educ.pen.nominalroll.api.helpers.NominalRollHelper;
+import ca.bc.gov.educ.pen.nominalroll.api.mappers.LocalDateMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.processor.FileProcessor;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollFileProcessResponse;
@@ -30,7 +31,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.DateTimeParseException;
 import java.time.format.SignStyle;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -50,7 +50,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
   private static final String NOT_A_DATE = "Not a Date";
   private static final String FORMULA_TYPE = "Formula type :: {} :: {}";
   private static final String BLANK_CELL = "blank cell";
-  protected final Set<String> gradeCodes = Arrays.stream(GradeCodes.values()).map(GradeCodes::getCode).collect(Collectors.toSet());
+
   protected final ApplicationProperties applicationProperties;
 
   protected BaseExcelProcessor(final ApplicationProperties applicationProperties) {
@@ -85,6 +85,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
       }
       this.populateRowData(correlationID, headersMap, nominalRollStudents, rowNum, nominalRollStudent);
     }
+    log.info("contains for invalid counter map is {}", invalidValueCounterMap);
     val isThresholdReached = invalidValueCounterMap.values().stream().filter(value -> value > this.applicationProperties.getNominalRollInvalidFieldThreshold()).findAny();
     if (isThresholdReached.isPresent()) {
       throw new FileUnProcessableException(FileError.FILE_THRESHOLD_CHECK_FAILED, correlationID);
@@ -96,7 +97,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
     if (rowNum == 0) {
       log.debug("Headers Map is populated as :: {}", headersMap);
       this.checkForValidHeaders(correlationID, headersMap);
-    } else if (nominalRollStudent.getBirthDate() != null) {
+    } else {
       nominalRollStudents.add(nominalRollStudent);
     }
   }
@@ -217,7 +218,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
 
   private void setGrade(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Cell cell, final String headerNames, final Map<HeaderNames, Integer> invalidValueCounterMap) {
     val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames);
-    if (StringUtils.isBlank(fieldValue) || !this.gradeCodes.contains(fieldValue.trim().toUpperCase())) {
+    if (StringUtils.isBlank(fieldValue) || !NominalRollHelper.isValidGradeCode(fieldValue)) {
       this.addToInvalidCounterMap(invalidValueCounterMap, GRADE);
     }
     nominalRollStudent.setGrade(this.getCellValueString(cell, correlationID, rowNum, headerNames));
@@ -225,45 +226,24 @@ public abstract class BaseExcelProcessor implements FileProcessor {
 
   private void setBirthDate(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Cell cell, final String headerNames, final Map<HeaderNames, Integer> invalidValueCounterMap) {
     val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames);
-    if (StringUtils.isBlank(fieldValue) || this.isInvalidBirthDate(fieldValue)) {
+    if (StringUtils.isBlank(fieldValue)) {
       this.addToInvalidCounterMap(invalidValueCounterMap, BIRTH_DATE);
-    }
-    nominalRollStudent.setBirthDate(fieldValue);
-  }
-
-  private boolean isInvalidBirthDate(final String birthDate) {
-    try {
-      LocalDate.parse(birthDate); // yyyy-MM-dd
-      return true;
-    } catch (final DateTimeParseException dateTimeParseException) {
-      val yyyySlashMMSlashDdFormatter = new DateTimeFormatterBuilder()
-        .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-        .appendLiteral("/")
-        .appendValue(MONTH_OF_YEAR, 2)
-        .appendLiteral("/")
-        .appendValue(DAY_OF_MONTH, 2).toFormatter();
-      try {
-        LocalDate.parse(birthDate, yyyySlashMMSlashDdFormatter);// yyyy/MM/dd
-        return true;
-      } catch (final DateTimeParseException dateTimeParseException2) {
-        val yyyyMMDdFormatter = new DateTimeFormatterBuilder()
-          .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
-          .appendValue(MONTH_OF_YEAR, 2)
-          .appendValue(DAY_OF_MONTH, 2).toFormatter();
-        try {
-          LocalDate.parse(birthDate, yyyyMMDdFormatter);// yyyyMMdd
-        } catch (final DateTimeParseException dateTimeParseException3) {
-          return false;
-        }
+      nominalRollStudent.setBirthDate(fieldValue);
+    } else {
+      val birthDate = NominalRollHelper.getBirthDateFromString(fieldValue);
+      if (birthDate.isPresent()) {
+        nominalRollStudent.setBirthDate(new LocalDateMapper().map(birthDate.get()));
+      } else {
+        this.addToInvalidCounterMap(invalidValueCounterMap, BIRTH_DATE);
+        nominalRollStudent.setBirthDate(null);
       }
     }
-
-    return false;
   }
+
 
   private void setGender(final int rowNum, final String correlationID, final NominalRollStudent nominalRollStudent, final Cell cell, final String headerNames, final Map<HeaderNames, Integer> invalidValueCounterMap) {
     val fieldValue = this.getCellValueString(cell, correlationID, rowNum, headerNames);
-    if (StringUtils.isBlank(fieldValue) || !(fieldValue.trim().equalsIgnoreCase("M") || fieldValue.trim().equalsIgnoreCase("F"))) {
+    if (StringUtils.isBlank(fieldValue) || !(fieldValue.trim().equalsIgnoreCase("M") || fieldValue.trim().equalsIgnoreCase("X") || fieldValue.trim().equalsIgnoreCase("F"))) {
       this.addToInvalidCounterMap(invalidValueCounterMap, GENDER);
     }
     nominalRollStudent.setGender(fieldValue);

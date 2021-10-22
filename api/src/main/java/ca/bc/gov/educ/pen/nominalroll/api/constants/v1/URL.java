@@ -6,6 +6,7 @@ public final class URL {
   public static final String PROCESSING = "/process";
   public static final String DUPLICATES = "/duplicates";
   public static final String PAGINATED = "/paginated";
+  public static final String VALIDATE = "/validate";
 
   private URL() {
 
