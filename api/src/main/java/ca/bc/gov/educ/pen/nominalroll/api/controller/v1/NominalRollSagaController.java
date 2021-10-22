@@ -25,10 +25,6 @@ import static lombok.AccessLevel.PRIVATE;
 public class NominalRollSagaController implements NominalRollSagaEndpoint {
 
   /**
-   * The constant sagaMapper.
-   */
-  //private static final SagaMapper sagaMapper = SagaMapper.mapper;
-  /**
    * The Saga service.
    */
   @Getter(PRIVATE)

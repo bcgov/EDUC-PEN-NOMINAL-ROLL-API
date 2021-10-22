@@ -5,7 +5,12 @@ package ca.bc.gov.educ.pen.nominalroll.api.constants;
  */
 public enum TopicsEnum {
   /**
-   * Nominal Roll post saga topic topics enum.
+   * Nominal Roll API topic topics enum.
    */
-  NOMINAL_ROLL_API_TOPIC
+  NOMINAL_ROLL_API_TOPIC,
+
+  /**
+   * Nominal Roll post topic enum.
+   */
+  NOMINAL_ROLL_POST_SAGA_TOPIC
 }

@@ -13,18 +13,12 @@ public enum EventType {
   /**
    * Get student event type.
    */
-  GET_STUDENT,
+  CREATE_DIA_STUDENTS,
 
   /**
    * Create student event type.
    */
-  CREATE_STUDENT,
-
-  /**
-   * Update Student.
-   */
-  UPDATE_STUDENT,
-
+  CREATE_POSTED_STUDENTS,
 
   /**
    * Mark saga complete event type.

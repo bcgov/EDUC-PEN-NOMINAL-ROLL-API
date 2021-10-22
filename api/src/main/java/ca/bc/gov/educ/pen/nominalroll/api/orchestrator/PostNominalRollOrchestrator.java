@@ -3,18 +3,15 @@ package ca.bc.gov.educ.pen.nominalroll.api.orchestrator;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.Saga;
-import ca.bc.gov.educ.pen.nominalroll.api.model.v1.SagaEventStates;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.SagaService;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Event;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollPostSagaData;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.UPDATE_STUDENT;
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.CREATE_DIA_STUDENTS;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaEnum.NOMINAL_ROLL_POST_SAGA;
-import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaStatusEnum.IN_PROGRESS;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum.NOMINAL_ROLL_API_TOPIC;
 
 /**
@@ -28,11 +25,6 @@ public class PostNominalRollOrchestrator extends BaseUserActionsOrchestrator<Nom
    * The constant studentMapper.
    */
   protected static final NominalRollStudentMapper studentMapper = NominalRollStudentMapper.mapper;
-
-  /**
-   * The Ob mapper.
-   */
-  private final ObjectMapper obMapper = new ObjectMapper();
 
   /**
    * Instantiates a new Base orchestrator.
@@ -49,7 +41,7 @@ public class PostNominalRollOrchestrator extends BaseUserActionsOrchestrator<Nom
    */
   @Override
   public void populateStepsToExecuteMap() {
-    this.stepBuilder().begin(UPDATE_STUDENT, this::updateOriginalStudent);
+    this.stepBuilder().begin(CREATE_DIA_STUDENTS, this::updateOriginalStudent);
   }
 
   /**
@@ -61,8 +53,8 @@ public class PostNominalRollOrchestrator extends BaseUserActionsOrchestrator<Nom
    * @throws JsonProcessingException the json processing exception
    */
   public void updateOriginalStudent(final Event event, final Saga saga, final NominalRollPostSagaData nominalRollPostSagaData) throws JsonProcessingException {
-    final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
-    saga.setStatus(IN_PROGRESS.toString());
+//    final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+//    saga.setStatus(IN_PROGRESS.toString());
     //DO MORE!
   }
 
