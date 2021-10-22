@@ -36,10 +36,12 @@ public class ApplicationProperties {
   private String schoolApiURL;
   @Value("${ramp.up.http}")
   private Boolean isHttpRampUp;
-  @Value("${nats.url}")
-  String natsUrl;
+  @Value("${nats.server}")
+  private String server;
   @Value("${nats.maxReconnect}")
-  Integer natsMaxReconnect;
+  private int maxReconnect;
+  @Value("NOMINAL-ROLL-API")
+  private String connectionName;
   @Value("${nom.roll.field.invalid.threshold}")
   private Integer nominalRollInvalidFieldThreshold;
 
