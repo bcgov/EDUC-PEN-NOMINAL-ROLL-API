@@ -4,6 +4,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.constants.CacheNames;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.LocalDateTimeMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.FedProvSchoolCodes;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.School;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GenderCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GradeCode;
 import lombok.extern.slf4j.Slf4j;
@@ -95,4 +96,19 @@ public class RestUtils {
   }
 
 
+  @Retryable(value = {Exception.class}, backoff = @Backoff(multiplier = 2, delay = 2000))
+  @Cacheable(CacheNames.SCHOOL_CODES)
+  public List<School> getSchools() {
+    return this.webClient.get()
+      .uri(this.props.getSchoolApiURL())
+      .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+      .retrieve()
+      .bodyToFlux(School.class)
+      .collectList()
+      .block();
+  }
+
+  public List<String> districtCodes() {
+    return this.getSchools().stream().map(School::getDistNo).filter(Objects::nonNull).collect(Collectors.toList());
+  }
 }

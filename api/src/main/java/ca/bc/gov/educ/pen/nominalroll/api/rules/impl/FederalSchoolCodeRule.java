@@ -42,7 +42,7 @@ public class FederalSchoolCodeRule extends BaseRule {
     final Map<String, String> errorsMap = new LinkedHashMap<>();
     val schoolNum = nominalRollStudentEntity.getSchoolNumber();
     if (StringUtils.isBlank(schoolNum)) {
-      errorsMap.put(HeaderNames.SCHOOL_NUMBER.getCode(), "Field value is missing");
+      errorsMap.put(HeaderNames.SCHOOL_NUMBER.getCode(), "Field value is missing.");
     } else {
       String mincode = this.restUtils.getFedProvSchoolCodes().get(schoolNum);
       if (StringUtils.isBlank(mincode)) {

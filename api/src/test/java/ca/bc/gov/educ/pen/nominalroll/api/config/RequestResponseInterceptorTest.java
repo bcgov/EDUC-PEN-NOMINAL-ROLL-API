@@ -1,26 +1,21 @@
 package ca.bc.gov.educ.pen.nominalroll.api.config;
 
+import ca.bc.gov.educ.pen.nominalroll.api.BaseNominalRollAPITest;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
-@ActiveProfiles("test")
-@SpringBootTest
-public class RequestResponseInterceptorTest {
+public class RequestResponseInterceptorTest extends BaseNominalRollAPITest {
   @Autowired
   private RequestResponseInterceptor requestInterceptor;
 
   @Test
-  public void testPreHandle_givenRequest_shouldLogMessage() throws Exception{
+  public void testPreHandle_givenRequest_shouldLogMessage() throws Exception {
     var request = mock(HttpServletRequest.class);
     var response = mock(HttpServletResponse.class);
     when(request.getMethod()).thenReturn("get");

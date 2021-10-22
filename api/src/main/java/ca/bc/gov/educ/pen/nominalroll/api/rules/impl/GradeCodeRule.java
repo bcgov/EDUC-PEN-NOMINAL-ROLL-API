@@ -44,7 +44,7 @@ public class GradeCodeRule extends BaseRule {
     final List<String> gradeCodes = this.restUtils.getActiveGradeCodes().stream().map(GradeCode::getGradeCode).collect(Collectors.toList());
     final Map<String, String> errorsMap = new LinkedHashMap<>();
     if (StringUtils.isBlank(nominalRollStudentEntity.getGrade())) {
-      errorsMap.put(HeaderNames.GRADE.getCode(), "Field value is missing");
+      errorsMap.put(HeaderNames.GRADE.getCode(), "Field value is missing.");
     } else if (!gradeCodes.contains(NominalRollHelper.GRADE_CODE_MAP.get(nominalRollStudentEntity.getGrade().toUpperCase()))) {
       errorsMap.put(HeaderNames.GRADE.getCode(), String.format("Grade code %s is not recognized.", nominalRollStudentEntity.getGrade()));
     }

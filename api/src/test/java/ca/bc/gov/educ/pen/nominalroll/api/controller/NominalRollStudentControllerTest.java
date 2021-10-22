@@ -1,30 +1,25 @@
 package ca.bc.gov.educ.pen.nominalroll.api.controller;
 
-import ca.bc.gov.educ.pen.nominalroll.api.NominalRollApiApplication;
+import ca.bc.gov.educ.pen.nominalroll.api.BaseNominalRollAPITest;
 import ca.bc.gov.educ.pen.nominalroll.api.controller.v1.NominalRollApiController;
 import ca.bc.gov.educ.pen.nominalroll.api.filter.FilterOperation;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
-import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.*;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Search;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.SearchCriteria;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.ValueType;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.val;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -32,25 +27,21 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ca.bc.gov.educ.pen.nominalroll.api.constants.v1.URL.*;
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.v1.URL.BASE_URL;
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.v1.URL.PAGINATED;
 import static ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Condition.AND;
 import static ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Condition.OR;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
-@ActiveProfiles("testWebclient")
-@SpringBootTest(classes = NominalRollApiApplication.class)
-@AutoConfigureMockMvc
-public class NominalRollStudentControllerTest {
+
+public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
   private static final NominalRollStudentMapper mapper = NominalRollStudentMapper.mapper;
   @Autowired
   private MockMvc mockMvc;
@@ -82,7 +73,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final var file = new File(
-            Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -97,7 +88,7 @@ public class NominalRollStudentControllerTest {
     final ObjectMapper objectMapper = new ObjectMapper();
     final String criteriaJSON = objectMapper.writeValueAsString(searches);
     this.mockMvc.perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-            .contentType(APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
+      .contentType(APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
   }
 
   @Test
@@ -105,7 +96,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final var file = new File(
-            Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -120,7 +111,7 @@ public class NominalRollStudentControllerTest {
     final ObjectMapper objectMapper = new ObjectMapper();
     final String criteriaJSON = objectMapper.writeValueAsString(searches);
     this.mockMvc.perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-            .contentType(APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
+      .contentType(APPLICATION_JSON)).andDo(print()).andExpect(status().isOk());
   }
 
   @Test
@@ -128,15 +119,15 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
-        Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
     this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     final MvcResult result = this.mockMvc
-        .perform(get(BASE_URL+PAGINATED+"?pageSize=2").with(mockAuthority)
-            .contentType(APPLICATION_JSON))
-        .andReturn();
+      .perform(get(BASE_URL + PAGINATED + "?pageSize=2").with(mockAuthority)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(2)));
   }
 
@@ -145,9 +136,9 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final MvcResult result = this.mockMvc
-        .perform(get(BASE_URL + PAGINATED).with(mockAuthority)
-            .contentType(APPLICATION_JSON))
-        .andReturn();
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(0)));
   }
 
@@ -156,7 +147,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
-        Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -166,9 +157,9 @@ public class NominalRollStudentControllerTest {
     sortMap.put("givenNames", "DESC");
     final String sort = new ObjectMapper().writeValueAsString(sortMap);
     final MvcResult result = this.mockMvc
-        .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("pageNumber", "1").param("pageSize", "5").param("sort", sort)
-            .contentType(APPLICATION_JSON))
-        .andReturn();
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("pageNumber", "1").param("pageSize", "5").param("sort", sort)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
 
@@ -177,7 +168,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
-        Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -191,9 +182,9 @@ public class NominalRollStudentControllerTest {
     System.out.println(criteriaJSON);
     this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     final MvcResult result = this.mockMvc
-        .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-            .contentType(APPLICATION_JSON))
-        .andReturn();
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
 
@@ -202,7 +193,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
-        Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -216,9 +207,9 @@ public class NominalRollStudentControllerTest {
     System.out.println(criteriaJSON);
     this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     final MvcResult result = this.mockMvc
-        .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-            .contentType(APPLICATION_JSON))
-        .andReturn();
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
 
@@ -227,7 +218,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
-        Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -243,9 +234,9 @@ public class NominalRollStudentControllerTest {
     System.out.println(criteriaJSON);
     this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     final MvcResult result = this.mockMvc
-        .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-            .contentType(APPLICATION_JSON))
-        .andReturn();
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
 
@@ -254,7 +245,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
-        Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -274,9 +265,9 @@ public class NominalRollStudentControllerTest {
     System.out.println(criteriaJSON);
     this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     final MvcResult result = this.mockMvc
-        .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-            .contentType(APPLICATION_JSON))
-        .andReturn();
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(3)));
   }
 
@@ -285,7 +276,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
-            Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -305,9 +296,9 @@ public class NominalRollStudentControllerTest {
     System.out.println(criteriaJSON);
     this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     final MvcResult result = this.mockMvc
-            .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-                    .contentType(APPLICATION_JSON))
-            .andReturn();
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(0)));
   }
 
@@ -316,7 +307,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
-        Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -342,9 +333,9 @@ public class NominalRollStudentControllerTest {
     System.out.println(criteriaJSON);
     this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     final MvcResult result = this.mockMvc
-        .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-            .contentType(APPLICATION_JSON))
-        .andReturn();
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(6)));
   }
 
@@ -353,7 +344,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
-        Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -379,9 +370,9 @@ public class NominalRollStudentControllerTest {
     System.out.println(criteriaJSON);
     this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     final MvcResult result = this.mockMvc
-        .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-            .contentType(APPLICATION_JSON))
-        .andReturn();
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(5)));
   }
 
@@ -390,7 +381,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
-        Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -404,9 +395,9 @@ public class NominalRollStudentControllerTest {
     System.out.println(criteriaJSON);
     this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     final MvcResult result = this.mockMvc
-        .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-            .contentType(APPLICATION_JSON))
-        .andReturn();
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(2)));
   }
 
@@ -415,7 +406,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
-        Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -429,9 +420,9 @@ public class NominalRollStudentControllerTest {
     System.out.println(criteriaJSON);
     this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     final MvcResult result = this.mockMvc
-        .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-            .contentType(APPLICATION_JSON))
-        .andReturn();
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
 
@@ -440,7 +431,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
-            Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -454,9 +445,9 @@ public class NominalRollStudentControllerTest {
     System.out.println(criteriaJSON);
     this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     final MvcResult result = this.mockMvc
-            .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-                    .contentType(APPLICATION_JSON))
-            .andReturn();
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(5)));
   }
 
@@ -465,7 +456,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
-        Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -479,9 +470,9 @@ public class NominalRollStudentControllerTest {
     System.out.println(criteriaJSON);
     this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     final MvcResult result = this.mockMvc
-        .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-            .contentType(APPLICATION_JSON))
-        .andReturn();
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(0)));
   }
 
@@ -490,7 +481,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
-        Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -505,9 +496,9 @@ public class NominalRollStudentControllerTest {
     final ObjectMapper objectMapper = new ObjectMapper();
     final String criteriaJSON = objectMapper.writeValueAsString(searches);
     final MvcResult result = this.mockMvc
-        .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-            .contentType(APPLICATION_JSON))
-        .andReturn();
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(1)));
   }
 
@@ -516,7 +507,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
-        Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -530,9 +521,9 @@ public class NominalRollStudentControllerTest {
     System.out.println(criteriaJSON);
     this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     final MvcResult result = this.mockMvc
-        .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-            .contentType(APPLICATION_JSON))
-        .andReturn();
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(2)));
   }
 
@@ -541,7 +532,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
-        Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -555,9 +546,9 @@ public class NominalRollStudentControllerTest {
     System.out.println(criteriaJSON);
     this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     final MvcResult result = this.mockMvc
-        .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-            .contentType(APPLICATION_JSON))
-        .andReturn();
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
+        .contentType(APPLICATION_JSON))
+      .andReturn();
     this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.content", hasSize(0)));
   }
 
@@ -566,7 +557,7 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final var file = new File(
-        Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
@@ -581,7 +572,7 @@ public class NominalRollStudentControllerTest {
     final ObjectMapper objectMapper = new ObjectMapper();
     final String criteriaJSON = objectMapper.writeValueAsString(searches);
     this.mockMvc.perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", criteriaJSON)
-        .contentType(APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest());
+      .contentType(APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest());
   }
 
   @Test
@@ -589,8 +580,8 @@ public class NominalRollStudentControllerTest {
     final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     this.mockMvc
-        .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", "{test}")
-            .contentType(APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest());
+      .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", "{test}")
+        .contentType(APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest());
   }
 
   private NominalRollStudentEntity createNominalRollStudent() {
