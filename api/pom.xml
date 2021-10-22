@@ -20,7 +20,7 @@
       src/main/java/ca/bc/gov/educ/pen/nominalroll/api/exception/**,
       src/main/java/ca/bc/gov/educ/pen/nominalroll/api/model/**,
       src/main/java/ca/bc/gov/educ/pen/nominalroll/api/struct/**,
-      src/main/java/ca/bc/gov/educ/pen/nominalroll/api/rest
+      src/main/java/ca/bc/gov/educ/pen/nominalroll/api/rest/**,
       src/main/java/ca/bc/gov/educ/pen/nominalroll/api/service/v1/CacheService.java,
     </sonar.exclusions>
     <java.version>11</java.version>
