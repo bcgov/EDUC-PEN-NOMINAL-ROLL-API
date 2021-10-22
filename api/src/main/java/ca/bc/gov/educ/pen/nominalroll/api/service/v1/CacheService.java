@@ -36,6 +36,7 @@ public class CacheService {
     this.restUtils.getActiveGenderCodes();
     this.restUtils.getActiveGradeCodes();
     this.restUtils.getFedProvSchoolCodes();
+    this.restUtils.getSchools();
     log.debug("Cache refreshed successfully");
   }
 
