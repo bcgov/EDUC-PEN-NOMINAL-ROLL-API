@@ -39,7 +39,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: create temp directory
-        run: mkdir /home/runner/work/EDUC-PEN-NOMINAL-ROLL-API/EDUC-PEN-NOMINAL-ROLL-API/temp
+        run: mkdir -p /home/runner/work/EDUC-PEN-NOMINAL-ROLL-API/EDUC-PEN-NOMINAL-ROLL-API/temp
       - name: Run unit tests
         run: mvn clean package
         env:
