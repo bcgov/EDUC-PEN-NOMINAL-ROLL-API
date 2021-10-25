@@ -1,5 +1,4 @@
 ![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_EDUC-PEN-NOMINAL-ROLL-API&metric=alert_status)](https://sonarcloud.io/dashboard?id=bcgov_EDUC-PEN-NOMINAL-ROLL-API)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=bcgov_EDUC-PEN-NOMINAL-ROLL-API&metric=coverage)](https://sonarcloud.io/dashboard?id=bcgov_EDUC-PEN-NOMINAL-ROLL-API)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=bcgov_EDUC-PEN-NOMINAL-ROLL-API&metric=ncloc)](https://sonarcloud.io/dashboard?id=bcgov_EDUC-PEN-NOMINAL-ROLL-API)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=bcgov_EDUC-PEN-NOMINAL-ROLL-API&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=bcgov_EDUC-PEN-NOMINAL-ROLL-API)
