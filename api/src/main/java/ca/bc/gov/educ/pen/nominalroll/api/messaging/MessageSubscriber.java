@@ -67,6 +67,7 @@ public class MessageSubscriber {
    * @param eventHandler the orchestrator
    * @return the message handler
    */
+  @java.lang.SuppressWarnings("squid:S2142")
   private static MessageHandler onMessageForSAGA(final EventHandler eventHandler) {
     return (Message message) -> {
       if (message != null) {
