@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.pen.nominalroll.api.orchestrator;
 
+import ca.bc.gov.educ.pen.nominalroll.api.constants.EventOutcome;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.Saga;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.CREATE_DIA_STUDENTS;
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.MARK_SAGA_COMPLETE;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaEnum.NOMINAL_ROLL_POST_SAGA;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum.NOMINAL_ROLL_API_TOPIC;
 
@@ -41,7 +43,8 @@ public class PostNominalRollOrchestrator extends BaseUserActionsOrchestrator<Nom
    */
   @Override
   public void populateStepsToExecuteMap() {
-    this.stepBuilder().begin(CREATE_DIA_STUDENTS, this::updateOriginalStudent);
+    this.stepBuilder().begin(CREATE_DIA_STUDENTS, this::createDIAStudents)
+      .step(CREATE_DIA_STUDENTS, EventOutcome.DIA_STUDENTS_CREATED, MARK_SAGA_COMPLETE, this::markSagaComplete);
   }
 
   /**
@@ -52,7 +55,7 @@ public class PostNominalRollOrchestrator extends BaseUserActionsOrchestrator<Nom
    * @param nominalRollPostSagaData  the split pen saga data
    * @throws JsonProcessingException the json processing exception
    */
-  public void updateOriginalStudent(final Event event, final Saga saga, final NominalRollPostSagaData nominalRollPostSagaData) throws JsonProcessingException {
+  public void createDIAStudents(final Event event, final Saga saga, final NominalRollPostSagaData nominalRollPostSagaData) throws JsonProcessingException {
 //    final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
 //    saga.setStatus(IN_PROGRESS.toString());
     //DO MORE!
