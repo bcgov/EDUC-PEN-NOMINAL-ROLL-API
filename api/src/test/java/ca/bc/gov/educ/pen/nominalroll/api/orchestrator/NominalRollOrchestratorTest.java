@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.pen.nominalroll.api.orchestrator;
 
+import ca.bc.gov.educ.pen.nominalroll.api.BaseNominalRollAPITest;
 import ca.bc.gov.educ.pen.nominalroll.api.NominalRollApiApplication;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.EventOutcome;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.EventType;
@@ -37,11 +38,7 @@ import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
-@ActiveProfiles("test")
-@SpringBootTest(classes = {NominalRollApiApplication.class})
-@AutoConfigureMockMvc
-public class NominalRollOrchestratorTest {
+public class NominalRollOrchestratorTest extends BaseNominalRollAPITest {
   /**
    * The Repository.
    */
