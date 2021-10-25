@@ -39,7 +39,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: create temp directory
-        run: mkdir temp      
+        run: mkdir /temp
       - name: Run unit tests
         run: mvn clean package
       - name: Cache SonarCloud packages
