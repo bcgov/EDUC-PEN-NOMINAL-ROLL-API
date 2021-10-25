@@ -52,7 +52,7 @@ public class ApplicationProperties {
   private String folderBasePath;
 
   public String getFolderBasePath() {
-    return StringUtils.isBlank(this.folderBasePath) ? "/temp" : this.folderBasePath; // used to cover UT for IOException. by, default it will always be `temp`.
+    return StringUtils.isBlank(this.folderBasePath) ? "/temp" : this.folderBasePath;
   }
 
   public void setFolderBasePath(String folderBasePath) {
