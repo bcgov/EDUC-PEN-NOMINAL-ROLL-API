@@ -6,15 +6,12 @@ import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
 import ca.bc.gov.educ.pen.nominalroll.api.rules.BaseRule;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.CacheService;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import static lombok.AccessLevel.PRIVATE;
 
 /**
  * The type Gender rule.
@@ -25,10 +22,8 @@ public class FederalSchoolCodeRule extends BaseRule {
   /**
    * The Rest utils.
    */
-  @Getter(PRIVATE)
   private final RestUtils restUtils;
 
-  @Getter(PRIVATE)
   private final CacheService cacheService;
 
   public FederalSchoolCodeRule(final RestUtils restUtils, final CacheService cacheService) {

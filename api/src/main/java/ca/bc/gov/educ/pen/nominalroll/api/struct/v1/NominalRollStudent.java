@@ -18,6 +18,7 @@ import java.util.Map;
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NominalRollStudent {
+  private static final NominalRollStudent EMPTY = new NominalRollStudent();
   //DB PK for each row
   String nominalRollStudentID; // guid for each student.
   // fields from file
@@ -46,4 +47,7 @@ public class NominalRollStudent {
   String assignedPEN;
 
   Map<String,String> validationErrors; // key is field name and value is error for the field.
+  public boolean isEmpty() {
+    return this.equals(EMPTY);
+  }
 }

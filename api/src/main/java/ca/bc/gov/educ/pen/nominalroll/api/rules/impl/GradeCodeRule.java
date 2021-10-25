@@ -6,7 +6,6 @@ import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
 import ca.bc.gov.educ.pen.nominalroll.api.rules.BaseRule;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GradeCode;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -14,8 +13,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static lombok.AccessLevel.PRIVATE;
 
 /**
  * The type Gender rule.
@@ -26,7 +23,6 @@ public class GradeCodeRule extends BaseRule {
   /**
    * The Rest utils.
    */
-  @Getter(PRIVATE)
   private final RestUtils restUtils;
 
   /**

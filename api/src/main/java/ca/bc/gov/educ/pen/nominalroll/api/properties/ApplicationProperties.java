@@ -2,6 +2,7 @@ package ca.bc.gov.educ.pen.nominalroll.api.properties;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -46,6 +47,17 @@ public class ApplicationProperties {
   private String connectionName;
   @Value("${nom.roll.field.invalid.threshold}")
   private Integer nominalRollInvalidFieldThreshold;
+
+  @Value("${folder.base.path}")
+  private String folderBasePath;
+
+  public String getFolderBasePath() {
+    return StringUtils.isBlank(this.folderBasePath) ? "/temp" : this.folderBasePath;
+  }
+
+  public void setFolderBasePath(String folderBasePath) {
+    this.folderBasePath = folderBasePath;
+  }
 
   public boolean getIsHttpRampUp() {
     return isHttpRampUp != null && isHttpRampUp;

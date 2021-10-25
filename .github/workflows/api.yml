@@ -1,7 +1,7 @@
 name: API CI
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -39,7 +39,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: create temp directory
-        run: mkdir temp
+        run: mkdir -p /home/runner/work/EDUC-PEN-NOMINAL-ROLL-API/EDUC-PEN-NOMINAL-ROLL-API/temp
       - name: Run unit tests
         run: mvn clean package
       - name: Cache SonarCloud packages

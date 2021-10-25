@@ -5,25 +5,32 @@ import ca.bc.gov.educ.pen.nominalroll.api.controller.v1.NominalRollApiController
 import ca.bc.gov.educ.pen.nominalroll.api.filter.FilterOperation;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
+import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Search;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.SearchCriteria;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.ValueType;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.*;
+import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 import lombok.val;
-import org.junit.After;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.test.context.junit4.rules.SpringClassRule;
+import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,41 +38,48 @@ import static ca.bc.gov.educ.pen.nominalroll.api.constants.v1.URL.BASE_URL;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.v1.URL.PAGINATED;
 import static ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Condition.AND;
 import static ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Condition.OR;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
+@RunWith(JUnitParamsRunner.class)
 public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
+  @ClassRule
+  public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+
+  @Rule
+  public final SpringMethodRule springMethodRule = new SpringMethodRule();
   private static final NominalRollStudentMapper mapper = NominalRollStudentMapper.mapper;
+  @Autowired
+  NominalRollApiController controller;
+  @Autowired
+  NominalRollStudentRepository repository;
+  @Autowired
+  NominalRollService studentService;
   @Autowired
   private MockMvc mockMvc;
 
   @Autowired
-  NominalRollApiController controller;
+  ApplicationProperties applicationProperties;
 
-  @Autowired
-  NominalRollStudentRepository repository;
-
-  @Autowired
-  NominalRollService studentService;
+  public static String asJsonString(final Object obj) {
+    try {
+      return new ObjectMapper().writeValueAsString(obj);
+    } catch (final Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   @Before
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-  }
-
-  /**
-   * need to delete the records to make it working in unit tests assertion, else the records will keep growing and assertions will fail.
-   */
-  @After
-  public void after() {
-    this.repository.deleteAll();
   }
 
   @Test
@@ -102,7 +116,6 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
     });
 
     this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
-    val entitiesFromDB = this.repository.findAll();
     final SearchCriteria criteria = SearchCriteria.builder().key("localID").operation(FilterOperation.NOT_EQUAL).value(null).valueType(ValueType.STRING).build();
     final List<SearchCriteria> criteriaList = new ArrayList<>();
     criteriaList.add(criteria);
@@ -584,6 +597,101 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
         .contentType(APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest());
   }
 
+  @Test
+  public void testProcessNominalRollFile_givenValidPayload_ShouldReturnStatusOk() throws Exception {
+    final FileInputStream fis = new FileInputStream("src/test/resources/test-data.xlsx");
+    final String fileContents = Base64.getEncoder().encodeToString(IOUtils.toByteArray(fis));
+    assertThat(fileContents).isNotEmpty();
+    val body = FileUpload.builder().fileContents(fileContents).fileExtension("xlsx").createUser("test").updateUser("test").build();
+    this.mockMvc.perform(post(BASE_URL)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+      .header("correlationID", UUID.randomUUID().toString())
+      .content(JsonUtil.getJsonStringFromObject(body))
+      .contentType(APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.nominalRollStudents", hasSize(6872))).andExpect(jsonPath("$.nominalRollStudents[0].validationErrors", is(nullValue())));
+  }
+
+  @Test
+  public void testProcessNominalRollFile_givenValidPayload2_ShouldReturnStatusOk() throws Exception {
+    final FileInputStream fis = new FileInputStream("src/test/resources/test-data-xls.xls");
+    final String fileContents = Base64.getEncoder().encodeToString(IOUtils.toByteArray(fis));
+    assertThat(fileContents).isNotEmpty();
+    val body = FileUpload.builder().fileContents(fileContents).fileExtension("xls").createUser("test").updateUser("test").build();
+    this.mockMvc.perform(post(BASE_URL)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+      .header("correlationID", UUID.randomUUID().toString())
+      .content(JsonUtil.getJsonStringFromObject(body))
+      .contentType(APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.nominalRollStudents", hasSize(6872))).andExpect(jsonPath("$.nominalRollStudents[0].validationErrors", is(nullValue())));
+  }
+
+  @Test
+  @Parameters({
+    "src/test/resources/test-data-with-password.xlsx, File is password protected",
+    "src/test/resources/test-data-missing-header.xlsx, Missing required header Surname",
+    "src/test/resources/test-data-header-not-configured.xlsx, Missing required header Given Name(s)",
+    "src/test/resources/test-data-header-blank.xlsx, Heading row has a blank cell at column 7",
+  })
+  public void testProcessNominalRollFile_givenEncryptedFile_ShouldReturnStatusBadRequest(final String filePath, final String errorMessage) throws Exception {
+    final FileInputStream fis = new FileInputStream(filePath);
+    final String fileContents = Base64.getEncoder().encodeToString(IOUtils.toByteArray(fis));
+    assertThat(fileContents).isNotEmpty();
+    val body = FileUpload.builder().fileContents(fileContents).fileExtension("xlsx").createUser("test").updateUser("test").build();
+    this.mockMvc.perform(post(BASE_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+        .header("correlationID", UUID.randomUUID().toString())
+        .content(JsonUtil.getJsonStringFromObject(body))
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isBadRequest())
+      .andExpect(jsonPath("$.message", is(equalToIgnoringCase(errorMessage))));
+  }
+
+
+  @Test
+  public void testProcessNominalRollFile_givenInvalidFileDirectory_ShouldThrowInternalServerError() throws Exception {
+    final FileInputStream fis = new FileInputStream("src/test/resources/test-data-invalid-birthdate.xlsx");
+    val basePath = this.applicationProperties.getFolderBasePath();
+    this.applicationProperties.setFolderBasePath("test");
+    final String fileContents = Base64.getEncoder().encodeToString(IOUtils.toByteArray(fis));
+    assertThat(fileContents).isNotEmpty();
+    val body = FileUpload.builder().fileContents(fileContents).fileExtension("xlsx").createUser("test").updateUser("test").build();
+    this.mockMvc.perform(post(BASE_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+        .header("correlationID", UUID.randomUUID().toString())
+        .content(JsonUtil.getJsonStringFromObject(body))
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isBadRequest());
+    final FileInputStream fis2 = new FileInputStream("src/test/resources/test-data-xls.xls");
+    final String fileContents2 = Base64.getEncoder().encodeToString(IOUtils.toByteArray(fis2));
+    assertThat(fileContents2).isNotEmpty();
+    val body2 = FileUpload.builder().fileContents(fileContents2).fileExtension("xls").createUser("test").updateUser("test").build();
+    this.mockMvc.perform(post(BASE_URL)
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+        .header("correlationID", UUID.randomUUID().toString())
+        .content(JsonUtil.getJsonStringFromObject(body2))
+        .contentType(APPLICATION_JSON))
+      .andExpect(status().isBadRequest());
+    this.applicationProperties.setFolderBasePath(basePath);// reset to original value here
+  }
+
+
+  @Test
+  public void testProcessNominalRollFile_givenInvalidPayload_ShouldReturnStatusBadRequest() throws Exception {
+    val body = FileUpload.builder().fileExtension("xlsx").createUser("test").updateUser("test").build();
+    this.mockMvc.perform(post(BASE_URL)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+      .header("correlationID", UUID.randomUUID().toString())
+      .content(JsonUtil.getJsonStringFromObject(body))
+      .contentType(APPLICATION_JSON)).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void testProcessNominalRollFile_givenMissingCorrelationID_ShouldReturnStatusBadRequest() throws Exception {
+    val body = FileUpload.builder().fileExtension("xlsx").createUser("test").updateUser("test").build();
+    this.mockMvc.perform(post(BASE_URL)
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+      .content(JsonUtil.getJsonStringFromObject(body))
+      .contentType(APPLICATION_JSON)).andExpect(status().isBadRequest());
+  }
+
   private NominalRollStudentEntity createNominalRollStudent() {
     final NominalRollStudentEntity student = new NominalRollStudentEntity();
     student.setGivenNames("John");
@@ -602,14 +710,6 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
     student.setRecipientNumber("8554");
     student.setStatus("LOADED");
     return student;
-  }
-
-  public static String asJsonString(final Object obj) {
-    try {
-      return new ObjectMapper().writeValueAsString(obj);
-    } catch (final Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 
 }

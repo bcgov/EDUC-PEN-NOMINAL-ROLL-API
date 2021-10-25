@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.pen.nominalroll.api.controller;
 
+import ca.bc.gov.educ.pen.nominalroll.api.BaseNominalRollAPITest;
 import ca.bc.gov.educ.pen.nominalroll.api.NominalRollApiApplication;
 import ca.bc.gov.educ.pen.nominalroll.api.controller.v1.NominalRollSagaController;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.SagaEventRepository;
@@ -25,15 +26,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * The Pen services saga controller tests
- */
-@RunWith(SpringRunner.class)
-@ActiveProfiles("test")
-@SpringBootTest(classes = {NominalRollApiApplication.class})
-@AutoConfigureMockMvc
-@Slf4j
-public class NominalRollSagaControllerTest {
+
+public class NominalRollSagaControllerTest extends BaseNominalRollAPITest {
   @Autowired
   private MockMvc mockMvc;
 
