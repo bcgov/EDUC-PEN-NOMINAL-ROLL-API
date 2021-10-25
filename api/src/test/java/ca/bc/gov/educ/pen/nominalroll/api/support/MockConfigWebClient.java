@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.pen.nominalroll.api.support;
 
+import ca.bc.gov.educ.pen.nominalroll.api.messaging.NatsConnection;
 import io.nats.client.Connection;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
@@ -30,4 +31,9 @@ public class MockConfigWebClient {
     return Mockito.mock(Connection.class);
   }
 
+  @Bean
+  @Primary
+  public NatsConnection natsConnection() {
+    return Mockito.mock(NatsConnection.class);
+  }
 }
