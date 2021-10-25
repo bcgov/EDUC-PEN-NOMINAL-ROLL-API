@@ -648,6 +648,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
   @Test
   public void testProcessNominalRollFile_givenInvalidFileDirectory_ShouldThrowInternalServerError() throws Exception {
     final FileInputStream fis = new FileInputStream("src/test/resources/test-data-invalid-birthdate.xlsx");
+    val basePath = this.applicationProperties.getFolderBasePath();
     this.applicationProperties.setFolderBasePath("test");
     final String fileContents = Base64.getEncoder().encodeToString(IOUtils.toByteArray(fis));
     assertThat(fileContents).isNotEmpty();
@@ -668,7 +669,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
         .content(JsonUtil.getJsonStringFromObject(body2))
         .contentType(APPLICATION_JSON))
       .andExpect(status().isBadRequest());
-    this.applicationProperties.setFolderBasePath(null);// reset to null here
+    this.applicationProperties.setFolderBasePath(basePath);// reset to original value here
   }
 
 
