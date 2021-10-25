@@ -42,8 +42,6 @@ jobs:
         run: mkdir -p /home/runner/work/EDUC-PEN-NOMINAL-ROLL-API/EDUC-PEN-NOMINAL-ROLL-API/temp
       - name: Run unit tests
         run: mvn clean package
-        env:
-          SPRING_ACTIVE_PROFILE: git
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
