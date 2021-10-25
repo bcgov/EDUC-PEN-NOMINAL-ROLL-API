@@ -48,6 +48,7 @@ public class ApplicationProperties {
   @Value("${nom.roll.field.invalid.threshold}")
   private Integer nominalRollInvalidFieldThreshold;
 
+  @Value("${folder.base.path}")
   private String folderBasePath;
 
   public String getFolderBasePath() {
