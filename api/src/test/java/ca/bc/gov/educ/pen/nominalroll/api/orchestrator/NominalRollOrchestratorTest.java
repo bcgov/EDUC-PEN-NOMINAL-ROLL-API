@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.pen.nominalroll.api.orchestrator;
 
 import ca.bc.gov.educ.pen.nominalroll.api.BaseNominalRollAPITest;
-import ca.bc.gov.educ.pen.nominalroll.api.NominalRollApiApplication;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.EventOutcome;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.EventType;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
@@ -16,25 +15,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.CREATE_DIA_STUDENTS;
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.MARK_SAGA_COMPLETE;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaEnum.NOMINAL_ROLL_POST_SAGA;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaStatusEnum.COMPLETED;
-import static ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum.*;
-import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.*;
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum.NOMINAL_ROLL_API_TOPIC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 

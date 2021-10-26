@@ -18,6 +18,7 @@ import java.util.List;
  */
 @Component
 @Slf4j
+@SuppressWarnings("java:S2142")
 public class MessageSubscriber {
 
 

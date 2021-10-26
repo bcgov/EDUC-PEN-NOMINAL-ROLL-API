@@ -18,6 +18,7 @@
       src/main/java/ca/bc/gov/educ/pen/nominalroll/api/endpoint/**,
       src/main/java/ca/bc/gov/educ/pen/nominalroll/api/config/**,
       src/main/java/ca/bc/gov/educ/pen/nominalroll/api/mappers/**,
+      src/main/java/ca/bc/gov/educ/pen/nominalroll/api/messaging/**,
       src/main/java/ca/bc/gov/educ/pen/nominalroll/api/exception/**,
       src/main/java/ca/bc/gov/educ/pen/nominalroll/api/model/**,
       src/main/java/ca/bc/gov/educ/pen/nominalroll/api/struct/**,
