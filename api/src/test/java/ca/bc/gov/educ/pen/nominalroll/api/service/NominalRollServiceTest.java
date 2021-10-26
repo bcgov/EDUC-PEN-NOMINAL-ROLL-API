@@ -2,12 +2,15 @@ package ca.bc.gov.educ.pen.nominalroll.api.service;
 
 import ca.bc.gov.educ.pen.nominalroll.api.exception.EntityNotFoundException;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
+import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
+import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollPostedStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -26,12 +29,16 @@ public class NominalRollServiceTest {
 
   @Autowired
   NominalRollStudentRepository repository;
-
+  @Autowired
+  NominalRollPostedStudentRepository postedStudentRepository;
   NominalRollService service;
+
+  @Mock
+  MessagePublisher messagePublisher;
 
   @Before
   public void before() {
-    service = new NominalRollService(repository);
+    this.service = new NominalRollService(this.messagePublisher, this.repository, this.postedStudentRepository);
   }
 
 //  @Test
@@ -43,8 +50,8 @@ public class NominalRollServiceTest {
 
   @Test
   public void testRetrieveStudent_WhenStudentDoesNotExistInDB_ShouldThrowEntityNotFoundException() {
-    var studentID = UUID.fromString("00000000-0000-0000-0000-f3b2d4f20000");
-    assertThrows(EntityNotFoundException.class, () -> service.getNominalRollStudentByID(studentID));
+    final var studentID = UUID.fromString("00000000-0000-0000-0000-f3b2d4f20000");
+    assertThrows(EntityNotFoundException.class, () -> this.service.getNominalRollStudentByID(studentID));
   }
 
 //  @Test
@@ -89,7 +96,7 @@ public class NominalRollServiceTest {
 
   @Test
   public void testFindAllStudent_WhenPayloadIsValid_ShouldReturnAllStudentsObject() throws ExecutionException, InterruptedException {
-    assertNotNull(service.findAll(null, 0, 5, new ArrayList<>()).get());
+    assertNotNull(this.service.findAll(null, 0, 5, new ArrayList<>()).get());
   }
 
   private NominalRollStudentEntity createNominalRollStudent() {

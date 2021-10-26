@@ -24,7 +24,7 @@ public class JsonUtil {
    * @return the json string from object
    * @throws JsonProcessingException the json processing exception
    */
-  public static String getJsonStringFromObject(Object payload) throws JsonProcessingException {
+  public static String getJsonStringFromObject(final Object payload) throws JsonProcessingException {
     return mapper.writeValueAsString(payload);
   }
 
@@ -37,7 +37,7 @@ public class JsonUtil {
    * @return the json object from string
    * @throws JsonProcessingException the json processing exception
    */
-  public static <T> T getJsonObjectFromString(Class<T> clazz, String payload) throws JsonProcessingException {
+  public static <T> T getJsonObjectFromString(final Class<T> clazz, final String payload) throws JsonProcessingException {
     return mapper.readValue(payload, clazz);
   }
 
@@ -48,7 +48,7 @@ public class JsonUtil {
    * @return the byte [ ]
    * @throws JsonProcessingException the json processing exception
    */
-  public static byte[] getJsonBytesFromObject(Object payload) throws JsonProcessingException {
+  public static byte[] getJsonBytesFromObject(final Object payload) throws JsonProcessingException {
     return mapper.writeValueAsBytes(payload);
   }
 
@@ -61,7 +61,7 @@ public class JsonUtil {
    * @return the json object from byte []
    * @throws JsonProcessingException the json processing exception
    */
-  public static <T> T getObjectFromJsonBytes(Class<T> clazz, byte[] payload) throws IOException {
+  public static <T> T getObjectFromJsonBytes(final Class<T> clazz, final byte[] payload) throws IOException {
     return mapper.readValue(payload, clazz);
   }
 
@@ -73,7 +73,7 @@ public class JsonUtil {
    */
   public static Optional<String> getJsonString(final Object payload) {
     try {
-      return Optional.ofNullable(new ObjectMapper().writeValueAsString(payload));
+      return Optional.ofNullable(mapper.writeValueAsString(payload));
     } catch (final Exception ex) {
       log.error("Exception while converting object to JSON String :: {}", payload);
     }

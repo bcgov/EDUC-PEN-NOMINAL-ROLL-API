@@ -113,7 +113,7 @@ public class NominalRollOrchestratorTest extends BaseNominalRollAPITest {
       .eventType(CREATE_DIA_STUDENTS)
       .eventOutcome(EventOutcome.DIA_STUDENTS_CREATED)
       .sagaId(saga.getSagaId())
-      .studentID(studentID)
+      .nominalRollStudentID(studentID)
       .build();
 
     orchestrator.handleEvent(event);

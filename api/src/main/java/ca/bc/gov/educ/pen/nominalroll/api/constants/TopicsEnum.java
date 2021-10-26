@@ -12,5 +12,7 @@ public enum TopicsEnum {
   /**
    * Nominal Roll post topic enum.
    */
-  NOMINAL_ROLL_POST_SAGA_TOPIC
+  NOMINAL_ROLL_POST_SAGA_TOPIC,
+  NOMINAL_ROLL_PROCESS_STUDENT_SAGA_TOPIC,
+  PEN_MATCH_API_TOPIC
 }

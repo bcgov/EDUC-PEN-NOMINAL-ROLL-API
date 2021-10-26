@@ -18,9 +18,10 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @Entity
-@Table(name = "PEN_SERVICES_SAGA_EVENT_STATES")
+@Table(name = "NOMINAL_ROLL_SAGA_EVENT_STATES")
 @DynamicUpdate
 public class SagaEventStates {
 

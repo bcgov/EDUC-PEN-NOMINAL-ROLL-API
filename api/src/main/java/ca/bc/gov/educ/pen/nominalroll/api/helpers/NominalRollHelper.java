@@ -1,22 +1,30 @@
 package ca.bc.gov.educ.pen.nominalroll.api.helpers;
 
 import ca.bc.gov.educ.pen.nominalroll.api.constants.GradeCodes;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollPostedStudentEntity;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentValidationError;
+import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
+import lombok.Getter;
 import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 import java.time.format.SignStyle;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoField.*;
 
 public final class NominalRollHelper {
-  private static final Set<String> gradeCodes = Arrays.stream(GradeCodes.values()).map(GradeCodes::getCode).collect(Collectors.toSet());
-  public static final Map<String, String> GRADE_CODE_MAP = new HashMap<>();
+  @Getter
+  private static final Map<String, String> gradeCodeMap = new HashMap<>();
   public static final DateTimeFormatter YYYY_MM_DD_SLASH_FORMATTER = new DateTimeFormatterBuilder()
     .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
     .appendLiteral("/")
@@ -27,39 +35,40 @@ public final class NominalRollHelper {
     .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
     .appendValue(MONTH_OF_YEAR, 2)
     .appendValue(DAY_OF_MONTH, 2).toFormatter();
+  private static final Set<String> gradeCodes = Arrays.stream(GradeCodes.values()).map(GradeCodes::getCode).collect(Collectors.toSet());
+
+  static {
+    gradeCodeMap.put("1", "01");
+    gradeCodeMap.put("01", "01");
+    gradeCodeMap.put("2", "02");
+    gradeCodeMap.put("02", "02");
+    gradeCodeMap.put("3", "03");
+    gradeCodeMap.put("03", "03");
+    gradeCodeMap.put("4", "04");
+    gradeCodeMap.put("04", "04");
+    gradeCodeMap.put("5", "05");
+    gradeCodeMap.put("05", "05");
+    gradeCodeMap.put("6", "06");
+    gradeCodeMap.put("06", "06");
+    gradeCodeMap.put("7", "07");
+    gradeCodeMap.put("07", "07");
+    gradeCodeMap.put("8", "08");
+    gradeCodeMap.put("08", "08");
+    gradeCodeMap.put("9", "09");
+    gradeCodeMap.put("09", "09");
+    gradeCodeMap.put("10", "10");
+    gradeCodeMap.put("11", "11");
+    gradeCodeMap.put("12", "12");
+    gradeCodeMap.put("K", "KF");
+    gradeCodeMap.put("KF", "KF");
+    gradeCodeMap.put("UE", "EU");
+    gradeCodeMap.put("EU", "EU");
+    gradeCodeMap.put("US", "SU");
+    gradeCodeMap.put("SU", "SU");
+  }
 
   private NominalRollHelper() {
 
-  }
-
-  static {
-    GRADE_CODE_MAP.put("1", "01");
-    GRADE_CODE_MAP.put("01", "01");
-    GRADE_CODE_MAP.put("2", "02");
-    GRADE_CODE_MAP.put("02", "02");
-    GRADE_CODE_MAP.put("3", "03");
-    GRADE_CODE_MAP.put("03", "03");
-    GRADE_CODE_MAP.put("4", "04");
-    GRADE_CODE_MAP.put("04", "04");
-    GRADE_CODE_MAP.put("5", "05");
-    GRADE_CODE_MAP.put("05", "05");
-    GRADE_CODE_MAP.put("6", "06");
-    GRADE_CODE_MAP.put("06", "06");
-    GRADE_CODE_MAP.put("7", "07");
-    GRADE_CODE_MAP.put("07", "07");
-    GRADE_CODE_MAP.put("8", "08");
-    GRADE_CODE_MAP.put("08", "08");
-    GRADE_CODE_MAP.put("9", "09");
-    GRADE_CODE_MAP.put("09", "09");
-    GRADE_CODE_MAP.put("10", "10");
-    GRADE_CODE_MAP.put("11", "11");
-    GRADE_CODE_MAP.put("12", "12");
-    GRADE_CODE_MAP.put("K", "KF");
-    GRADE_CODE_MAP.put("KF", "KF");
-    GRADE_CODE_MAP.put("UE", "EU");
-    GRADE_CODE_MAP.put("EU", "EU");
-    GRADE_CODE_MAP.put("US", "SU");
-    GRADE_CODE_MAP.put("SU", "SU");
   }
 
   public static Optional<LocalDate> getBirthDateFromString(final String birthDate) {
@@ -93,6 +102,40 @@ public final class NominalRollHelper {
 
 
   public static boolean isValidGradeCode(@NonNull final String gradeCode) {
-    return gradeCodes.contains(GRADE_CODE_MAP.get(StringUtils.upperCase(gradeCode)));
+    return gradeCodes.contains(gradeCodeMap.get(StringUtils.upperCase(gradeCode)));
+  }
+
+
+  public static Set<NominalRollStudentValidationError> populateValidationErrors(final Map<String, String> errors, final NominalRollStudentEntity nominalRollStudentEntity) {
+    final Set<NominalRollStudentValidationError> validationErrors = new HashSet<>();
+    errors.forEach((k, v) -> {
+      final NominalRollStudentValidationError error = new NominalRollStudentValidationError();
+      error.setFieldName(k);
+      error.setFieldError(v);
+      error.setNominalRollStudent(nominalRollStudentEntity);
+      error.setCreateDate(LocalDateTime.now());
+      error.setUpdateDate(LocalDateTime.now());
+      error.setCreateUser(ApplicationProperties.API_NAME);
+      error.setUpdateUser(ApplicationProperties.API_NAME);
+      validationErrors.add(error);
+    });
+    return validationErrors;
+  }
+
+  public static Optional<String> findMatchingPEN(final NominalRollStudent nominalRollStudent, final List<NominalRollPostedStudentEntity> nomRollPostedStudents) {
+    return nomRollPostedStudents.stream().filter(findExactMatch(nominalRollStudent)).map(NominalRollPostedStudentEntity::getAssignedPEN).findFirst();
+  }
+
+  private static Predicate<NominalRollPostedStudentEntity> findExactMatch(final NominalRollStudent nominalRollStudent) {
+    return nomRollPostedStudent -> StringUtils.equalsIgnoreCase(nomRollPostedStudent.getAgreementType(), nominalRollStudent.getLeaProvincial())
+      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalBandCode(), nominalRollStudent.getRecipientNumber())
+      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalRecipientName(), nominalRollStudent.getRecipientName())
+      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getSurname(), nominalRollStudent.getSurname())
+      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getGivenNames(), nominalRollStudent.getGivenNames())
+      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getGender(), nominalRollStudent.getGender())
+      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getGrade(), nominalRollStudent.getGrade())
+      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getBirthDate().toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE), nominalRollStudent.getBirthDate())
+      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFte().toString(), nominalRollStudent.getFte())
+      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getBandOfResidence(), nominalRollStudent.getBandOfResidence());
   }
 }

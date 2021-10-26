@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.Map;
 
 
@@ -17,8 +18,9 @@ import java.util.Map;
 @NoArgsConstructor
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class NominalRollStudent {
+public class NominalRollStudent implements Serializable {
   private static final NominalRollStudent EMPTY = new NominalRollStudent();
+  private static final long serialVersionUID = 3313662987694060598L;
   //DB PK for each row
   String nominalRollStudentID; // guid for each student.
   // fields from file
@@ -46,7 +48,8 @@ public class NominalRollStudent {
   // fields computed.
   String assignedPEN;
 
-  Map<String,String> validationErrors; // key is field name and value is error for the field.
+  private Map<String, String> validationErrors; // key is field name and value is error for the field.
+
   public boolean isEmpty() {
     return this.equals(EMPTY);
   }
