@@ -31,5 +31,5 @@ public interface NominalRollStudentRepository extends JpaRepository<NominalRollS
 
   void deleteAllByProcessingYear(String processingYear);
 
-  List<NominalRollStudentEntity> findAllByStatusAndCreateDateBefore(String status, LocalDateTime createDate);
+  List<NominalRollStudentEntity> findTop100ByStatusAndCreateDateBefore(String status, LocalDateTime createDate);
 }
