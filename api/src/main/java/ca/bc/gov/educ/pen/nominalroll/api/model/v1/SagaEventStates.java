@@ -70,7 +70,7 @@ public class SagaEventStates {
    * The Saga event response.
    */
   @Lob
-  @Column(name = "SAGA_EVENT_RESPONSE")
+  @Column(name = "SAGA_EVENT_RESPONSE", nullable = false)
   byte[] sagaEventResponseBytes;
 
   /**

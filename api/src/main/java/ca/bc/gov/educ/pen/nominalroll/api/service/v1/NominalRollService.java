@@ -146,7 +146,7 @@ public class NominalRollService {
   private void sendIndividualStudentAsMessageToTopic(final NominalRollStudentSagaData nominalRollStudentSagaData) {
     final var eventPayload = JsonUtil.getJsonString(nominalRollStudentSagaData);
     if (eventPayload.isPresent()) {
-      final Event event = Event.builder().eventType(EventType.READ_FROM_TOPIC).eventOutcome(EventOutcome.READ_FROM_TOPIC_SUCCESS).eventPayload(eventPayload.get()).build();
+      final Event event = Event.builder().eventType(EventType.READ_FROM_TOPIC).eventOutcome(EventOutcome.READ_FROM_TOPIC_SUCCESS).eventPayload(eventPayload.get()).nominalRollStudentID(nominalRollStudentSagaData.getNominalRollStudent().getNominalRollStudentID()).build();
       final var eventString = JsonUtil.getJsonString(event);
       if (eventString.isPresent()) {
         this.messagePublisher.dispatchMessage(TopicsEnum.NOMINAL_ROLL_API_TOPIC.toString(), eventString.get().getBytes());

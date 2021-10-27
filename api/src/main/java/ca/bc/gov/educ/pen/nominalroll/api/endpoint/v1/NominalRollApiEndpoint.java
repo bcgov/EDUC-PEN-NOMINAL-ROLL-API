@@ -40,7 +40,6 @@ public interface NominalRollApiEndpoint {
   @PostMapping(URL.PROCESSING)
   @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
   @ApiResponses(value = {@ApiResponse(responseCode = "202", description = "ACCEPTED")})
-  @Transactional
   @Tag(name = "Endpoint to start processing of nominal roll students", description = "Endpoint to start processing of nominal roll students")
   @Schema(name = "NominalRollStudent", implementation = NominalRollStudent.class)
   ResponseEntity<Void> processNominalRollStudents(@Validated @RequestBody List<NominalRollStudent> nominalRollStudents, @RequestHeader(name = "correlationID") String correlationID);

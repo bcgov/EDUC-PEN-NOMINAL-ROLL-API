@@ -59,7 +59,7 @@ public class Saga {
    */
   @NotNull(message = "payload cannot be null")
   @Lob
-  @Column(name = "PAYLOAD")
+  @Column(name = "PAYLOAD", nullable = false)
   byte[] payloadBytes;
 
   /**

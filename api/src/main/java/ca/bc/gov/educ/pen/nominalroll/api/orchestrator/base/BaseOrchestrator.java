@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.util.Pair;
 import org.springframework.scheduling.annotation.Async;
@@ -283,7 +284,7 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
       .sagaEventOutcome(eventOutcome.toString())
       .sagaEventState(eventType.toString())
       .sagaStepNumber(this.calculateStep(saga))
-      .sagaEventResponse(eventPayload == null ? " " : eventPayload)
+      .sagaEventResponse(StringUtils.isBlank(eventPayload) ? "NO-PAYLOAD-IN-RESPONSE" : eventPayload)
       .build();
   }
 
