@@ -112,7 +112,7 @@ public class NominalRollOrchestratorTest extends BaseNominalRollAPITest {
       .build();
 
     orchestrator.handleEvent(event);
-    verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(NOMINAL_ROLL_API_TOPIC.toString()), eventCaptor.capture());
+    verify(messagePublisher, atMost(invocations + 1)).dispatchMessage(eq(orchestrator.getTopicToSubscribe()), eventCaptor.capture());
     var newEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(eventCaptor.getValue()));
     assertThat(newEvent.getEventType()).isEqualTo(MARK_SAGA_COMPLETE);
     var sagaFromDB = sagaService.findSagaById(saga.getSagaId());

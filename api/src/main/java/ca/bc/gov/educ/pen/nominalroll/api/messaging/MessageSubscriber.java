@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,6 +24,7 @@ public class MessageSubscriber {
 
 
   private final Connection connection;
+  private final List<String> topics = new ArrayList<>();
 
   @Autowired
   public MessageSubscriber(final Connection con, final List<EventHandler> eventHandlers) {
@@ -31,6 +33,11 @@ public class MessageSubscriber {
   }
 
   public void subscribe(final EventHandler eventHandler) {
+    if (topics.contains(eventHandler.getTopicToSubscribe())) {
+      throw new IllegalArgumentException("Topic already subscribed");
+    } else {
+      topics.add(eventHandler.getTopicToSubscribe());
+    }
     final String queue = eventHandler.getTopicToSubscribe().replace("_", "-");
     final var dispatcher = this.connection.createDispatcher(this.onMessage(eventHandler));
     dispatcher.subscribe(eventHandler.getTopicToSubscribe(), queue);

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.CREATE_DIA_STUDENTS;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.MARK_SAGA_COMPLETE;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaEnum.NOMINAL_ROLL_POST_SAGA;
-import static ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum.NOMINAL_ROLL_API_TOPIC;
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum.NOMINAL_ROLL_POST_SAGA_TOPIC;
 
 /**
  * The type Split pen orchestrator
@@ -35,7 +35,7 @@ public class PostNominalRollOrchestrator extends BaseUserActionsOrchestrator<Nom
    * @param messagePublisher the message publisher
    */
   public PostNominalRollOrchestrator(final SagaService sagaService, final MessagePublisher messagePublisher) {
-    super(sagaService, messagePublisher, NominalRollPostSagaData.class, NOMINAL_ROLL_POST_SAGA.toString(), NOMINAL_ROLL_API_TOPIC.toString());
+    super(sagaService, messagePublisher, NominalRollPostSagaData.class, NOMINAL_ROLL_POST_SAGA.toString(), NOMINAL_ROLL_POST_SAGA_TOPIC.toString());
   }
 
   /**
