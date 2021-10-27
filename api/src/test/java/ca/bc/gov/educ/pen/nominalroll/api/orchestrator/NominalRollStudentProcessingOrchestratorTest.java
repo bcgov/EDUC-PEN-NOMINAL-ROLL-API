@@ -6,10 +6,12 @@ import ca.bc.gov.educ.pen.nominalroll.api.constants.EventType;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.GradeCodes;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GenderCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GradeCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Event;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudentSagaData;
 import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
 import lombok.SneakyThrows;
@@ -25,15 +27,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventOutcome.VALIDATION_SUCCESS_NO_ERROR;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventOutcome.VALIDATION_SUCCESS_WITH_ERROR;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.VALIDATE_NOMINAL_ROLL_STUDENT;
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaStatusEnum.COMPLETED;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaStatusEnum.IN_PROGRESS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 
 public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRollAPITest {
 
@@ -116,5 +119,35 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
     final var newEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(this.eventCaptor.getValue()));
     assertThat(newEvent.getEventType()).isEqualTo(VALIDATE_NOMINAL_ROLL_STUDENT);
     assertThat(newEvent.getEventOutcome()).isEqualTo(VALIDATION_SUCCESS_NO_ERROR);
+  }
+
+  @SneakyThrows
+  @Test
+  public void testHandleEvent_givenEventTypeVALIDATE_NOMINAL_ROLL_STUDENTAndEventOutComeVALIDATION_SUCCESS_NO_ERROR_shouldExecuteMarkSagaComplete() {
+    NominalRollStudent nominalRollStudent = this.createMockNominalRollStudent();
+    NominalRollStudentEntity entity = NominalRollStudentMapper.mapper.toModel(nominalRollStudent);
+    entity.setCreateDate(LocalDateTime.now().minusMinutes(14));
+    entity.setUpdateDate(LocalDateTime.now());
+    entity.setCreateUser(ApplicationProperties.API_NAME);
+    entity.setUpdateUser(ApplicationProperties.API_NAME);
+    entity = this.testHelper.getRepository().save(entity);
+    nominalRollStudent.setNominalRollStudentID(entity.getNominalRollStudentID().toString());
+
+    val saga = this.creatMockSaga(nominalRollStudent);
+    saga.setSagaId(null);
+    saga.setStatus(IN_PROGRESS.toString());
+    saga.setNominalRollStudentID(UUID.fromString(nominalRollStudent.getNominalRollStudentID()));
+    this.testHelper.getSagaRepository().save(saga);
+
+    val event = Event.builder()
+      .sagaId(saga.getSagaId())
+      .eventType(EventType.VALIDATE_NOMINAL_ROLL_STUDENT)
+      .eventOutcome(VALIDATION_SUCCESS_WITH_ERROR)
+      .eventPayload("{\"Gender\":\"Gender code M is not recognized.\",\"Grade\":\"Grade code 01 is not recognized.\",\"School Number\":\"Field value 5465 is not recognized.\",\"School District\":\"School District Number 5 is not recognized.\"}").build();
+    this.nominalRollStudentProcessingOrchestrator.handleEvent(event);
+    val savedSagaInDB = this.testHelper.getSagaRepository().findById(saga.getSagaId());
+    assertThat(savedSagaInDB).isPresent();
+    assertThat(savedSagaInDB.get().getStatus()).isEqualTo(COMPLETED.toString());
+    assertThat(savedSagaInDB.get().getSagaState()).isEqualTo(COMPLETED.toString());
   }
 }

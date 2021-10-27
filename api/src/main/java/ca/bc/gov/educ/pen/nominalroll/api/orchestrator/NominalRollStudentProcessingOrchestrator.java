@@ -114,7 +114,7 @@ public class NominalRollStudentProcessingOrchestrator extends BaseOrchestrator<N
     val nomRollStudOptional = this.nominalRollService.findByNominalRollStudentID(nominalRollStudentSagaData.getNominalRollStudent().getNominalRollStudentID());
     if (nomRollStudOptional.isPresent()) {
       val nomRollStud = nomRollStudOptional.get();
-      nomRollStud.setNominalRollStudentValidationErrors(NominalRollHelper.populateValidationErrors(validationResults, nomRollStud));
+      nomRollStud.getNominalRollStudentValidationErrors().addAll(NominalRollHelper.populateValidationErrors(validationResults, nomRollStud));
       nomRollStud.setStatus(NominalRollStudentStatus.ERROR.toString());
       this.nominalRollService.saveNominalRollStudent(nomRollStud);
     }
@@ -148,7 +148,7 @@ public class NominalRollStudentProcessingOrchestrator extends BaseOrchestrator<N
 
   }
 
-  private void postToPenMatchAPI(final Saga saga, final NominalRollStudentSagaData nominalRollStudentSagaData) throws JsonProcessingException {
+  protected void postToPenMatchAPI(final Saga saga, final NominalRollStudentSagaData nominalRollStudentSagaData) throws JsonProcessingException {
     val nominalRollStudent = nominalRollStudentSagaData.getNominalRollStudent();
     final String mincode = this.restUtils.getFedProvSchoolCodes().get(nominalRollStudent.getSchoolNumber());
     val penMatchRequest = PenMatchSagaMapper.mapper.toPenMatchStudent(nominalRollStudent, mincode);
