@@ -34,7 +34,7 @@ public class MessageSubscriber {
 
   public void subscribe(final EventHandler eventHandler) {
     if (topics.contains(eventHandler.getTopicToSubscribe())) {
-      throw new IllegalArgumentException("Topic already subscribed");
+      throw new IllegalArgumentException("Topic '"+eventHandler.getTopicToSubscribe()+"' already subscribed");
     } else {
       topics.add(eventHandler.getTopicToSubscribe());
     }
