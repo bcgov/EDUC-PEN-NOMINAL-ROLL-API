@@ -79,7 +79,7 @@ public class EventTaskSchedulerAsyncService {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void findAndPublishLoadedStudentRecordsForProcessing() throws InterruptedException {
     final List<NominalRollStudentEntity> studentEntities = new ArrayList<>();
-    final var nominalRollStudentEntities = this.getNominalRollStudentRepository().findAllByStatusAndCreateDateBefore(NominalRollStudentStatus.LOADED.toString(), LocalDateTime.now().minusMinutes(5));
+    final var nominalRollStudentEntities = this.getNominalRollStudentRepository().findTop100ByStatusAndCreateDateBefore(NominalRollStudentStatus.LOADED.toString(), LocalDateTime.now().minusMinutes(5));
     log.debug("found :: {}  records in loaded status", nominalRollStudentEntities.size());
     if (!nominalRollStudentEntities.isEmpty()) {
       for (val entity : nominalRollStudentEntities) {
