@@ -1,9 +1,6 @@
 package ca.bc.gov.educ.pen.nominalroll.api.model.v1;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -21,9 +18,10 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @Entity
-@Table(name = "PEN_SERVICES_SAGA")
+@Table(name = "NOMINAL_ROLL_SAGA")
 @DynamicUpdate
 public class Saga {
   /**
@@ -32,7 +30,7 @@ public class Saga {
   @Id
   @GeneratedValue(generator = "UUID")
   @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator", parameters = {
-      @org.hibernate.annotations.Parameter(name = "uuid_gen_strategy_class", value = "org.hibernate.id.uuid.CustomVersionOneStrategy")})
+    @org.hibernate.annotations.Parameter(name = "uuid_gen_strategy_class", value = "org.hibernate.id.uuid.CustomVersionOneStrategy")})
   @Column(name = "SAGA_ID", unique = true, updatable = false, columnDefinition = "BINARY(16)")
   UUID sagaId;
 
@@ -53,8 +51,8 @@ public class Saga {
   /**
    * The student id.
    */
-  @Column(name = "STUDENT_ID", columnDefinition = "BINARY(16)")
-  UUID studentID;
+  @Column(name = "NOMINAL_ROLL_STUDENT_ID", columnDefinition = "BINARY(16)")
+  UUID nominalRollStudentID;
 
   /**
    * The Payload.

@@ -104,6 +104,7 @@ public class NominalRollStudentEntity {
    */
   @EqualsAndHashCode.Exclude
   @ToString.Exclude
+  @Setter(AccessLevel.NONE) // no setter, only getter as it will affect the attached entity.
   @OneToMany(mappedBy = "nominalRollStudent", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true, targetEntity = NominalRollStudentValidationError.class)
   Set<NominalRollStudentValidationError> nominalRollStudentValidationErrors;
 

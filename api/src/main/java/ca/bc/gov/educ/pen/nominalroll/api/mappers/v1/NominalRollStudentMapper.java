@@ -2,6 +2,7 @@ package ca.bc.gov.educ.pen.nominalroll.api.mappers.v1;
 
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.LocalDateTimeMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.UUIDMapper;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollPostedStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import org.mapstruct.DecoratedWith;
@@ -17,8 +18,18 @@ public interface NominalRollStudentMapper {
   @Mapping(target = "validationErrors", ignore = true)
   NominalRollStudent toStruct(NominalRollStudentEntity nominalRollStudentEntity);
 
-  @Mapping(target = "status", constant = "LOADED")
+  @Mapping(target = "status", defaultValue = "LOADED")
   @Mapping(target = "nominalRollStudentValidationErrors", ignore = true)
   NominalRollStudentEntity toModel(NominalRollStudent nominalRollStudent);
+
+  @Mapping(target = "recordNumber", ignore = true)
+  @Mapping(target = "federalSchoolNumber", source = "schoolNumber")
+  @Mapping(target = "federalSchoolName", source = "schoolName")
+  @Mapping(target = "federalSchoolBoard", source = "schoolDistrictNumber")
+  @Mapping(target = "federalRecipientName", source = "recipientName")
+  @Mapping(target = "federalBandCode", source = "recipientNumber")
+  @Mapping(target = "agreementType", ignore = true)
+  @Mapping(target = "processingYear", ignore = true)
+  NominalRollPostedStudentEntity toPostedEntity(NominalRollStudentEntity nominalRollStudentEntity);
 
 }

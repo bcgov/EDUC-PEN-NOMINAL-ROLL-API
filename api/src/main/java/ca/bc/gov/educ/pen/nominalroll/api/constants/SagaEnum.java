@@ -7,5 +7,6 @@ public enum SagaEnum {
   /**
    * post saga enum.
    */
-  NOMINAL_ROLL_POST_SAGA
+  NOMINAL_ROLL_POST_SAGA,
+  NOMINAL_ROLL_PROCESS_STUDENT_SAGA;
 }

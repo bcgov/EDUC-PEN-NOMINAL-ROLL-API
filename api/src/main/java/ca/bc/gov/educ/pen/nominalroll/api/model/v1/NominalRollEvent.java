@@ -1,9 +1,6 @@
 package ca.bc.gov.educ.pen.nominalroll.api.model.v1;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
@@ -23,7 +20,8 @@ import java.util.UUID;
 @Builder
 @Entity
 @Table(name = "NOMINAL_ROLL_EVENT")
-@Data
+@Getter
+@Setter
 @DynamicUpdate
 public class NominalRollEvent {
   /**
@@ -54,7 +52,7 @@ public class NominalRollEvent {
   @Id
   @GeneratedValue(generator = "UUID")
   @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator", parameters = {
-      @Parameter(name = "uuid_gen_strategy_class", value = "org.hibernate.id.uuid.CustomVersionOneStrategy")})
+    @Parameter(name = "uuid_gen_strategy_class", value = "org.hibernate.id.uuid.CustomVersionOneStrategy")})
   @Column(name = "EVENT_ID", unique = true, updatable = false, columnDefinition = "BINARY(16)")
   private UUID eventId;
   /**
@@ -120,12 +118,6 @@ public class NominalRollEvent {
      */
     byte[] eventPayloadBytes;
 
-    /**
-     * Event payload services event . services event builder.
-     *
-     * @param eventPayload the event payload
-     * @return the services event . services event builder
-     */
     public NominalRollEvent.NominalRollEventBuilder eventPayload(final String eventPayload) {
       this.eventPayloadBytes = eventPayload.getBytes(StandardCharsets.UTF_8);
       return this;

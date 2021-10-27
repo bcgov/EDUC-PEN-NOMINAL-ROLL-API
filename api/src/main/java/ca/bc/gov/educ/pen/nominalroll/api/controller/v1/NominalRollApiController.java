@@ -15,6 +15,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollFileProcessRespon
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
 import ca.bc.gov.educ.pen.nominalroll.api.util.TransformUtil;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.poi.openxml4j.exceptions.OLE2NotOfficeXmlFileException;
@@ -66,10 +67,12 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
     return nominalRollFileProcessResponseOptional.map(ResponseEntity::ok).orElse(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
   }
 
+  @SneakyThrows
   @Override
   public ResponseEntity<Void> processNominalRollStudents(final List<NominalRollStudent> nominalRollStudents, final String correlationID) {
     val nomRollStudentEntities = nominalRollStudents.stream().map(NominalRollStudentMapper.mapper::toModel).map(TransformUtil::uppercaseFields).collect(Collectors.toList());
-    this.service.saveNominalRollStudents(nomRollStudentEntities, correlationID);
+    List<NominalRollStudentEntity> studentEntities = this.service.saveNominalRollStudents(nomRollStudentEntities, correlationID);
+    this.service.prepareAndSendNominalRollStudentsForFurtherProcessing(studentEntities);
     return ResponseEntity.accepted().build();
   }
 
@@ -121,9 +124,7 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
     if (errorsMap.isEmpty()) {
       BeanUtils.copyProperties(entity, dbEntity, "createDate", "createUser", "nominalRollStudentID", "nominalRollStudentValidationErrors");
       // no validation errors so remove existing ones.
-      if (dbEntity.getNominalRollStudentValidationErrors() != null) {
-        dbEntity.getNominalRollStudentValidationErrors().clear();
-      }
+      dbEntity.getNominalRollStudentValidationErrors().clear();
       return ResponseEntity.ok(NominalRollStudentMapper.mapper.toStruct(this.service.updateNominalRollStudent(dbEntity)));
     } else {
       nominalRollStudent.setValidationErrors(errorsMap);

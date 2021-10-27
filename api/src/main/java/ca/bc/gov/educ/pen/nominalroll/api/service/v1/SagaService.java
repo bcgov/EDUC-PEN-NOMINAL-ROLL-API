@@ -62,6 +62,7 @@ public class SagaService {
    * @param saga the saga
    * @return the saga
    */
+  @Transactional(propagation = Propagation.MANDATORY)
   public Saga createSagaRecord(final Saga saga) {
     return this.getSagaRepository().save(saga);
   }
@@ -80,7 +81,7 @@ public class SagaService {
     saga.setUpdateDate(LocalDateTime.now());
     this.getSagaRepository().save(saga);
     val result = this.getSagaEventRepository()
-        .findBySagaAndSagaEventOutcomeAndSagaEventStateAndSagaStepNumber(saga, sagaEventStates.getSagaEventOutcome(), sagaEventStates.getSagaEventState(), sagaEventStates.getSagaStepNumber() - 1); //check if the previous step was same and had same outcome, and it is due to replay.
+      .findBySagaAndSagaEventOutcomeAndSagaEventStateAndSagaStepNumber(saga, sagaEventStates.getSagaEventOutcome(), sagaEventStates.getSagaEventState(), sagaEventStates.getSagaStepNumber() - 1); //check if the previous step was same and had same outcome, and it is due to replay.
     if (result.isEmpty()) {
       this.getSagaEventRepository().save(sagaEventStates);
     }
@@ -120,60 +121,38 @@ public class SagaService {
   /**
    * Find by student id optional.
    *
-   * @param studentID the student id
-   * @param sagaName  the saga name
+   * @param nominalRollStudentID the student id
+   * @param sagaName             the saga name
    * @return the list
    */
-  public Optional<Saga> findByStudentIDAndSagaName(final UUID studentID, final String sagaName) {
-    return this.getSagaRepository().findByStudentIDAndSagaName(studentID, sagaName);
+  public Optional<Saga> findByNominalRollStudentIDAndSagaName(final UUID nominalRollStudentID, final String sagaName) {
+    return this.getSagaRepository().findByNominalRollStudentIDAndSagaName(nominalRollStudentID, sagaName);
   }
 
-  /**
-   * Find all by student id and status in list.
-   *
-   * @param studentID the student id
-   * @param sagaName  the saga name
-   * @param statuses  the statuses
-   * @return the list
-   */
-  public List<Saga> findAllByStudentIDAndStatusIn(final UUID studentID, final String sagaName, final List<String> statuses) {
-    return this.getSagaRepository().findAllByStudentIDAndSagaNameAndStatusIn(studentID, sagaName, statuses);
-  }
-
-  /**
-   * Update attached entity during saga process.
-   *
-   * @param saga the saga
-   */
-  @Retryable(value = {Exception.class}, maxAttempts = 5, backoff = @Backoff(multiplier = 2, delay = 2000))
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void updateAttachedEntityDuringSagaProcess(final Saga saga) {
-    this.getSagaRepository().save(saga);
-  }
 
   /**
    * Create saga record in db saga.
    *
-   * @param sagaName  the saga name
-   * @param userName  the user name
-   * @param payload   the payload
-   * @param studentID the student id
+   * @param sagaName             the saga name
+   * @param userName             the username
+   * @param payload              the payload
+   * @param nominalRollStudentID the student id
    * @return the saga
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public Saga createSagaRecordInDB(final String sagaName, final String userName, final String payload, final UUID studentID) {
+  public Saga createSagaRecordInDB(final String sagaName, final String userName, final String payload, final UUID nominalRollStudentID) {
     final var saga = Saga
-        .builder()
-        .payload(payload)
-        .studentID(studentID)
-        .sagaName(sagaName)
-        .status(STARTED.toString())
-        .sagaState(INITIATED.toString())
-        .createDate(LocalDateTime.now())
-        .createUser(userName)
-        .updateUser(userName)
-        .updateDate(LocalDateTime.now())
-        .build();
+      .builder()
+      .payload(payload)
+      .nominalRollStudentID(nominalRollStudentID)
+      .sagaName(sagaName)
+      .status(STARTED.toString())
+      .sagaState(INITIATED.toString())
+      .createDate(LocalDateTime.now())
+      .createUser(userName)
+      .updateUser(userName)
+      .updateDate(LocalDateTime.now())
+      .build();
     return this.createSagaRecord(saga);
   }
 
@@ -181,7 +160,7 @@ public class SagaService {
    * Create saga records in db saga.
    *
    * @param sagaName the saga name
-   * @param userName the user name
+   * @param userName the username
    * @param payloads the list of pen request batch id and the payload
    * @return the saga
    */
@@ -191,7 +170,7 @@ public class SagaService {
     payloads.forEach(payloadPair -> sagas.add(
       Saga.builder()
         .payload(payloadPair.getSecond())
-        .studentID(payloadPair.getFirst())
+        .nominalRollStudentID(payloadPair.getFirst())
         .sagaName(sagaName)
         .status(STARTED.toString())
         .sagaState(INITIATED.toString())

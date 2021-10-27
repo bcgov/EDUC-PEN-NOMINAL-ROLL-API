@@ -1,40 +1,64 @@
 package ca.bc.gov.educ.pen.nominalroll.api.service.v1;
 
+import ca.bc.gov.educ.pen.nominalroll.api.constants.EventOutcome;
+import ca.bc.gov.educ.pen.nominalroll.api.constants.EventType;
+import ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.v1.NominalRollStudentStatus;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.EntityNotFoundException;
+import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
+import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollPostedStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
+import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
+import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollPostedStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Event;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudentSagaData;
+import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.jboss.threads.EnhancedQueueExecutor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class NominalRollService {
   private static final String STUDENT_ID_ATTRIBUTE = "nominalRollStudentID";
+  private final ApplicationProperties applicationProperties;
+  private final MessagePublisher messagePublisher;
   private final NominalRollStudentRepository repository;
+  private final NominalRollPostedStudentRepository postedStudentRepository;
   private final Executor paginatedQueryExecutor = new EnhancedQueueExecutor.Builder()
     .setThreadFactory(new ThreadFactoryBuilder().setNameFormat("async-pagination-query-executor-%d").build())
     .setCorePoolSize(2).setMaximumPoolSize(10).setKeepAliveTime(Duration.ofSeconds(60)).build();
 
-  public NominalRollService(final NominalRollStudentRepository repository) {
+  public NominalRollService(final ApplicationProperties applicationProperties, final MessagePublisher messagePublisher, final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository) {
+    this.applicationProperties = applicationProperties;
+    this.messagePublisher = messagePublisher;
     this.repository = repository;
+    this.postedStudentRepository = postedStudentRepository;
   }
 
   public boolean isAllRecordsProcessed() {
@@ -65,9 +89,9 @@ public class NominalRollService {
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void saveNominalRollStudents(final List<NominalRollStudentEntity> nomRollStudentEntities, final String correlationID) {
+  public List<NominalRollStudentEntity> saveNominalRollStudents(final List<NominalRollStudentEntity> nomRollStudentEntities, final String correlationID) {
     log.debug("creating nominal roll entities in transient table for transaction ID :: {}", correlationID);
-    this.repository.saveAll(nomRollStudentEntities);
+    return this.repository.saveAll(nomRollStudentEntities);
   }
 
   /**
@@ -94,5 +118,56 @@ public class NominalRollService {
 
   public NominalRollStudentEntity updateNominalRollStudent(final NominalRollStudentEntity entity) {
     return this.repository.save(entity);
+  }
+
+  public void publishUnprocessedStudentRecordsForProcessing(final List<NominalRollStudentSagaData> nominalRollStudentSagaDatas) throws InterruptedException {
+    final List<List<NominalRollStudentSagaData>> partitionedList = Lists.partition(nominalRollStudentSagaDatas, 100);
+    for (final List<NominalRollStudentSagaData> subList : partitionedList) {
+      subList.forEach(this::sendIndividualStudentAsMessageToTopic);
+      TimeUnit.MILLISECONDS.sleep(this.applicationProperties.getPauseTimeBeforeBurstOfMessageInMillis());
+    }
+  }
+
+  @Async("publisherExecutor")
+  public void prepareAndSendNominalRollStudentsForFurtherProcessing(final List<NominalRollStudentEntity> nominalRollStudentEntities) throws InterruptedException {
+    final List<NominalRollStudentSagaData> nominalRollStudentSagaDatas = nominalRollStudentEntities.stream()
+      .map(el -> {
+        val nominalRollStudentSagaData = new NominalRollStudentSagaData();
+        nominalRollStudentSagaData.setNominalRollStudent(NominalRollStudentMapper.mapper.toStruct(el));
+        return nominalRollStudentSagaData;
+      })
+      .collect(Collectors.toList());
+    this.publishUnprocessedStudentRecordsForProcessing(nominalRollStudentSagaDatas);
+  }
+
+  /**
+   * Send individual student as message to topic consumer.
+   */
+  private void sendIndividualStudentAsMessageToTopic(final NominalRollStudentSagaData nominalRollStudentSagaData) {
+    final var eventPayload = JsonUtil.getJsonString(nominalRollStudentSagaData);
+    if (eventPayload.isPresent()) {
+      final Event event = Event.builder().eventType(EventType.READ_FROM_TOPIC).eventOutcome(EventOutcome.READ_FROM_TOPIC_SUCCESS).eventPayload(eventPayload.get()).build();
+      final var eventString = JsonUtil.getJsonString(event);
+      if (eventString.isPresent()) {
+        this.messagePublisher.dispatchMessage(TopicsEnum.NOMINAL_ROLL_API_TOPIC.toString(), eventString.get().getBytes());
+      } else {
+        log.error("Event String is empty, skipping the publish to topic :: {}", nominalRollStudentSagaData);
+      }
+    } else {
+      log.error("Event payload is empty, skipping the publish to topic :: {}", nominalRollStudentSagaData);
+    }
+  }
+
+  public Optional<NominalRollStudentEntity> findByNominalRollStudentID(final String nominalRollStudentID) {
+    return this.repository.findById(UUID.fromString(nominalRollStudentID));
+  }
+
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void saveNominalRollStudent(final NominalRollStudentEntity nomRollStud) {
+    this.repository.save(nomRollStud);
+  }
+
+  public List<NominalRollPostedStudentEntity> findAllBySurnameAndGivenNamesAndBirthDateAndGenderAndGrade(final String surname, final String givenNames, final LocalDate birthDate, final String gender, final String grade) {
+    return this.postedStudentRepository.findAllBySurnameAndGivenNamesAndBirthDateAndGenderAndGradeOrderByCreateDateDesc(surname, givenNames, birthDate, gender, grade);
   }
 }

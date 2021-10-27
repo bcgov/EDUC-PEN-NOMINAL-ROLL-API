@@ -2,7 +2,7 @@ package ca.bc.gov.educ.pen.nominalroll.api.repository.v1;
 
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.Saga;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.SagaEventStates;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.UUID;
  * The interface Saga event repository.
  */
 @Repository
-public interface SagaEventRepository extends CrudRepository<SagaEventStates, UUID> {
+public interface SagaEventRepository extends JpaRepository<SagaEventStates, UUID> {
   /**
    * Find by saga list.
    *

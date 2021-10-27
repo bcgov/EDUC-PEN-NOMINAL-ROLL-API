@@ -42,5 +42,5 @@ public class Event {
   /**
    * The student ID
    */
-  private String studentID;
+  private String nominalRollStudentID;
 }

@@ -50,6 +50,8 @@ public class ApplicationProperties {
 
   @Value("${folder.base.path}")
   private String folderBasePath;
+  @Value("${pause.time.before.burst.message}")
+  private Integer pauseTimeBeforeBurstOfMessageInMillis;
 
   public String getFolderBasePath() {
     return StringUtils.isBlank(this.folderBasePath) ? "/temp" : this.folderBasePath;
