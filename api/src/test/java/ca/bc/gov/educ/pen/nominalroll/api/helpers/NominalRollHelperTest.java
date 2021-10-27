@@ -63,7 +63,7 @@ public class NominalRollHelperTest {
     val matchingPen = NominalRollHelper.findMatchingPEN(nominalRollStudent, postedStudentEntityList);
     assertThat(matchingPen).isEmpty();
     final NominalRollPostedStudentEntity postedStudentEntity = new NominalRollPostedStudentEntity();
-    postedStudentEntity.setBirthDate(LocalDate.parse("2000-01-01").atStartOfDay());
+    postedStudentEntity.setBirthDate(LocalDate.parse("2000-01-01"));
     postedStudentEntity.setAssignedPEN("123456789");
     postedStudentEntity.setStatus("PROCESSED");
     postedStudentEntity.setAgreementType("P");

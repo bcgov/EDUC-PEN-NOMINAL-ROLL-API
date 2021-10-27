@@ -8,6 +8,7 @@ import org.hibernate.annotations.Parameter;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -65,7 +66,7 @@ public class NominalRollPostedStudentEntity {
   String gender;
 
   @Column(name = "BIRTH_DATE")
-  LocalDateTime birthDate;
+  LocalDate birthDate;
 
   @Column(name = "GRADE", length = 2)
   String grade;

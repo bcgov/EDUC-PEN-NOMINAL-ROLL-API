@@ -4,6 +4,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.exception.EntityNotFoundException;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
+import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollPostedStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
@@ -36,9 +37,11 @@ public class NominalRollServiceTest {
   @Mock
   MessagePublisher messagePublisher;
 
+  @Mock
+  ApplicationProperties applicationProperties;
   @Before
   public void before() {
-    this.service = new NominalRollService(this.messagePublisher, this.repository, this.postedStudentRepository);
+    this.service = new NominalRollService(applicationProperties, this.messagePublisher, this.repository, this.postedStudentRepository);
   }
 
 //  @Test

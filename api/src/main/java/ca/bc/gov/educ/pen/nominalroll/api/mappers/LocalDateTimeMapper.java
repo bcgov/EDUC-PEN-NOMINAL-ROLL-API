@@ -31,6 +31,9 @@ public class LocalDateTimeMapper {
     if (dateTime == null) {
       return null;
     }
+    if (dateTime.length() < 11) {
+      dateTime = dateTime + "T00:00:00";
+    }
     return LocalDateTime.parse(dateTime);
   }
 

@@ -6,6 +6,8 @@ import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentValidationError;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import lombok.Getter;
 import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
@@ -23,8 +25,6 @@ import java.util.stream.Collectors;
 import static java.time.temporal.ChronoField.*;
 
 public final class NominalRollHelper {
-  @Getter
-  private static final Map<String, String> gradeCodeMap = new HashMap<>();
   public static final DateTimeFormatter YYYY_MM_DD_SLASH_FORMATTER = new DateTimeFormatterBuilder()
     .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
     .appendLiteral("/")
@@ -35,6 +35,11 @@ public final class NominalRollHelper {
     .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
     .appendValue(MONTH_OF_YEAR, 2)
     .appendValue(DAY_OF_MONTH, 2).toFormatter();
+  @Getter
+  private static final Map<String, String> gradeCodeMap = new HashMap<>();
+  @Getter
+  private static final ListMultimap<String, String> agreementTypeMap = ArrayListMultimap.create();
+
   private static final Set<String> gradeCodes = Arrays.stream(GradeCodes.values()).map(GradeCodes::getCode).collect(Collectors.toSet());
 
   static {
@@ -65,6 +70,14 @@ public final class NominalRollHelper {
     gradeCodeMap.put("EU", "EU");
     gradeCodeMap.put("US", "SU");
     gradeCodeMap.put("SU", "SU");
+    agreementTypeMap.put("L", "L");
+    agreementTypeMap.put("LEA", "L");
+    agreementTypeMap.put("Local Ed. Agreement", "L");
+    agreementTypeMap.put("Local Education Agreement", "L");
+    agreementTypeMap.put("P", "P");
+    agreementTypeMap.put("Provincial", "P");
+    agreementTypeMap.put("Prov", "P");
+
   }
 
   private NominalRollHelper() {
@@ -127,15 +140,25 @@ public final class NominalRollHelper {
   }
 
   private static Predicate<NominalRollPostedStudentEntity> findExactMatch(final NominalRollStudent nominalRollStudent) {
-    return nomRollPostedStudent -> StringUtils.equalsIgnoreCase(nomRollPostedStudent.getAgreementType(), nominalRollStudent.getLeaProvincial())
-      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalBandCode(), nominalRollStudent.getRecipientNumber())
+    return nomRollPostedStudent -> StringUtils.equalsIgnoreCase(nomRollPostedStudent.getAgreementType(), NominalRollHelper.getAgreementTypeMap().get(nominalRollStudent.getLeaProvincial()).get(0))
+      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalBandCode(), getFederalBandCode(nominalRollStudent.getRecipientNumber()))
       && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalRecipientName(), nominalRollStudent.getRecipientName())
+      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalSchoolNumber(), nominalRollStudent.getSchoolNumber()) && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalSchoolName(), nominalRollStudent.getSchoolName())
+      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalSchoolBoard(), nominalRollStudent.getSchoolDistrictNumber())
       && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getSurname(), nominalRollStudent.getSurname())
       && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getGivenNames(), nominalRollStudent.getGivenNames())
       && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getGender(), nominalRollStudent.getGender())
       && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getGrade(), nominalRollStudent.getGrade())
-      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getBirthDate().toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE), nominalRollStudent.getBirthDate())
-      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFte().toString(), nominalRollStudent.getFte())
+      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getBirthDate().format(DateTimeFormatter.ISO_LOCAL_DATE), nominalRollStudent.getBirthDate())
+      && StringUtils.equalsIgnoreCase(String.valueOf(nomRollPostedStudent.getFte().doubleValue()), nominalRollStudent.getFte())
       && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getBandOfResidence(), nominalRollStudent.getBandOfResidence());
+  }
+
+  public static String getFederalBandCode(final String federalBandCode) {
+    if (StringUtils.isBlank(federalBandCode)) {
+      return "";
+    } else {
+      return federalBandCode.replaceFirst("^0+(?!$)", "");
+    }
   }
 }

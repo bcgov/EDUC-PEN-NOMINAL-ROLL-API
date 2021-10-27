@@ -9,6 +9,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollPostedStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
+import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollPostedStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Event;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +46,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class NominalRollService {
   private static final String STUDENT_ID_ATTRIBUTE = "nominalRollStudentID";
+  private final ApplicationProperties applicationProperties;
   private final MessagePublisher messagePublisher;
   private final NominalRollStudentRepository repository;
   private final NominalRollPostedStudentRepository postedStudentRepository;
@@ -51,7 +54,8 @@ public class NominalRollService {
     .setThreadFactory(new ThreadFactoryBuilder().setNameFormat("async-pagination-query-executor-%d").build())
     .setCorePoolSize(2).setMaximumPoolSize(10).setKeepAliveTime(Duration.ofSeconds(60)).build();
 
-  public NominalRollService(final MessagePublisher messagePublisher, final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository) {
+  public NominalRollService(final ApplicationProperties applicationProperties, final MessagePublisher messagePublisher, final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository) {
+    this.applicationProperties = applicationProperties;
     this.messagePublisher = messagePublisher;
     this.repository = repository;
     this.postedStudentRepository = postedStudentRepository;
@@ -120,9 +124,7 @@ public class NominalRollService {
     final List<List<NominalRollStudentSagaData>> partitionedList = Lists.partition(nominalRollStudentSagaDatas, 100);
     for (final List<NominalRollStudentSagaData> subList : partitionedList) {
       subList.forEach(this::sendIndividualStudentAsMessageToTopic);
-      if (partitionedList.size() > 1) {
-        TimeUnit.SECONDS.sleep(5);
-      }
+      TimeUnit.MILLISECONDS.sleep(this.applicationProperties.getPauseTimeBeforeBurstOfMessageInMillis());
     }
   }
 
@@ -165,7 +167,7 @@ public class NominalRollService {
     this.repository.save(nomRollStud);
   }
 
-  public List<NominalRollPostedStudentEntity> findAllBySurnameAndGivenNamesAndBirthDateAndGenderAndGrade(final String surname, final String givenNames, final LocalDateTime birthDate, final String gender, final String grade) {
+  public List<NominalRollPostedStudentEntity> findAllBySurnameAndGivenNamesAndBirthDateAndGenderAndGrade(final String surname, final String givenNames, final LocalDate birthDate, final String gender, final String grade) {
     return this.postedStudentRepository.findAllBySurnameAndGivenNamesAndBirthDateAndGenderAndGradeOrderByCreateDateDesc(surname, givenNames, birthDate, gender, grade);
   }
 }

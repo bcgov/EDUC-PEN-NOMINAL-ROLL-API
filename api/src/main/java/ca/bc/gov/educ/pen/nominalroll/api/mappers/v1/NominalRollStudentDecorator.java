@@ -1,15 +1,13 @@
 package ca.bc.gov.educ.pen.nominalroll.api.mappers.v1;
 
+import ca.bc.gov.educ.pen.nominalroll.api.helpers.NominalRollHelper;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollPostedStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentValidationError;
-import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import lombok.val;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class NominalRollStudentDecorator implements NominalRollStudentMapper {
@@ -25,5 +23,15 @@ public abstract class NominalRollStudentDecorator implements NominalRollStudentM
     nomRollStudent.setValidationErrors(nominalRollStudentEntity.getNominalRollStudentValidationErrors().stream().collect(Collectors.toMap(NominalRollStudentValidationError::getFieldName, NominalRollStudentValidationError::getFieldError)));
     return nomRollStudent;
   }
+
+  @Override
+  public NominalRollPostedStudentEntity toPostedEntity(final NominalRollStudentEntity nominalRollStudentEntity) {
+    val postedEntity = this.delegate.toPostedEntity(nominalRollStudentEntity);
+    postedEntity.setProcessingYear(LocalDateTime.now());
+    postedEntity.setAgreementType(NominalRollHelper.getAgreementTypeMap().get(nominalRollStudentEntity.getLeaProvincial()).get(0)); // always mapped to same value.
+    postedEntity.setFederalBandCode(NominalRollHelper.getFederalBandCode(postedEntity.getFederalBandCode()));
+    return postedEntity;
+  }
+
 
 }
