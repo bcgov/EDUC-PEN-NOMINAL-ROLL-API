@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.pen.nominalroll.api.service.v1;
 
+import ca.bc.gov.educ.pen.nominalroll.api.constants.CacheNames;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ public class CacheService {
       this.restUtils.getActiveGradeCodes();
       this.restUtils.getFedProvSchoolCodes();
       this.restUtils.getSchools();
+      this.restUtils.districtCodes();
     }
   }
 
@@ -38,6 +40,7 @@ public class CacheService {
     this.restUtils.getActiveGradeCodes();
     this.restUtils.getFedProvSchoolCodes();
     this.restUtils.getSchools();
+    this.restUtils.districtCodes();
     log.debug("Cache refreshed successfully");
   }
 
@@ -45,6 +48,25 @@ public class CacheService {
     val cached = this.cacheManager.getCache(cacheName);
     if (cached != null) {
       cached.clear();
+    }
+    switch (cacheName){
+      case CacheNames
+        .FED_PROV_CODES:
+        this.restUtils.getFedProvSchoolCodes();
+        break;
+      case CacheNames.SCHOOL_CODES:
+        this.restUtils.getSchools();
+        this.restUtils.districtCodes();
+        break;
+      case CacheNames.GRADE_CODES:
+        this.restUtils.getActiveGradeCodes();
+        break;
+      case CacheNames.GENDER_CODES:
+        this.restUtils.getActiveGenderCodes();
+        break;
+      case CacheNames.DISTRICT_CODES:
+        this.restUtils.districtCodes();
+        break;
     }
     log.info("{} Cache was evicted on demand", cacheName);
   }

@@ -108,6 +108,7 @@ public class RestUtils {
       .block();
   }
 
+  @Cacheable(CacheNames.DISTRICT_CODES)
   public List<String> districtCodes() {
     return this.getSchools().stream().map(School::getDistNo).filter(Objects::nonNull).collect(Collectors.toList());
   }
