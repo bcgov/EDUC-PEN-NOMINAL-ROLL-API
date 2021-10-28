@@ -81,13 +81,13 @@ public class EventTaskSchedulerAsyncService {
 
   @Async("taskExecutor")
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void findAndPublishLoadedStudentRecordsForProcessing() throws InterruptedException {
-    if (this.getSagaRepository().countAllByStatusIn(this.getStatusFilters()) > 99) { // at max there will be 200 parallel sagas.
-      log.debug("Saga count is greater than 99, so not processing student records");
+  public void findAndPublishLoadedStudentRecordsForProcessing() {
+    if (this.getSagaRepository().countAllByStatusIn(this.getStatusFilters()) > 20) { // at max there will be 40 parallel sagas.
+      log.debug("Saga count is greater than 20, so not processing student records");
       return;
     }
     final List<NominalRollStudentEntity> studentEntities = new ArrayList<>();
-    final var nominalRollStudentEntities = this.getNominalRollStudentRepository().findTop100ByStatus(NominalRollStudentStatus.LOADED.toString());
+    final var nominalRollStudentEntities = this.getNominalRollStudentRepository().findTop20ByStatusOrderByCreateDate(NominalRollStudentStatus.LOADED.toString());
     log.debug("found :: {}  records in loaded status", nominalRollStudentEntities.size());
     if (!nominalRollStudentEntities.isEmpty()) {
       for (val entity : nominalRollStudentEntities) {

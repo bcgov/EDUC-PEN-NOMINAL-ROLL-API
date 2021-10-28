@@ -44,8 +44,8 @@ public class EventTaskScheduler {
   }
 
 
-  @Scheduled(fixedRate = 10000) // every 10 seconds
-  @SchedulerLock(name = "PROCESS_LOADED_STUDENTS", lockAtLeastFor = "6s", lockAtMostFor = "7s")
+  @Scheduled(fixedRateString = "${scheduled.jobs.process.loaded.nom.roll.students.fixedRate}")
+  @SchedulerLock(name = "PROCESS_LOADED_STUDENTS", lockAtLeastFor = "1500ms", lockAtMostFor = "1600ms")
   public void processLoadedNominalRollStudents() throws InterruptedException {
     LockAssert.assertLocked();
     this.getTaskSchedulerAsyncService().findAndPublishLoadedStudentRecordsForProcessing();
