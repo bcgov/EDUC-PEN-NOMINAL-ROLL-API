@@ -58,7 +58,7 @@ public abstract class BaseNominalRollAPITest {
   protected Saga creatMockSaga(final NominalRollStudent student) {
     return Saga.builder()
       .sagaId(UUID.randomUUID())
-      .updateDate(LocalDateTime.now())
+      .updateDate(LocalDateTime.now().minusMinutes(15))
       .createUser(ApplicationProperties.API_NAME)
       .updateUser(ApplicationProperties.API_NAME)
       .createDate(LocalDateTime.now().minusMinutes(15))
