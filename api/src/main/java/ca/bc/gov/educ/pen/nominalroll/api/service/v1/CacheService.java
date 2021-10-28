@@ -20,11 +20,18 @@ public class CacheService {
     this.restUtils = restUtils;
     this.cacheManager = cacheManager;
     if (applicationProperties.getIsHttpRampUp()) {
-      this.restUtils.getActiveGenderCodes();
-      this.restUtils.getActiveGradeCodes();
-      this.restUtils.getFedProvSchoolCodes();
-      this.restUtils.getSchools();
-      this.restUtils.districtCodes();
+      val genders = this.restUtils.getActiveGenderCodes();
+      log.info("cached {} genders", genders.size());
+
+      val grades = this.restUtils.getActiveGradeCodes();
+      log.info("cached {} grades", grades.size());
+
+      val fedProvSchoolCodes = this.restUtils.getFedProvSchoolCodes();
+      log.info("cached {} fedProvSchoolCodes", fedProvSchoolCodes.size());
+      val schools = this.restUtils.getSchools();
+      log.info("cached {} schools", schools.size());
+      val districts = this.restUtils.districtCodes();
+      log.info("cached {} districts", districts.size());
     }
   }
 
@@ -49,7 +56,7 @@ public class CacheService {
     if (cached != null) {
       cached.clear();
     }
-    switch (cacheName){
+    switch (cacheName) {
       case CacheNames
         .FED_PROV_CODES:
         this.restUtils.getFedProvSchoolCodes();

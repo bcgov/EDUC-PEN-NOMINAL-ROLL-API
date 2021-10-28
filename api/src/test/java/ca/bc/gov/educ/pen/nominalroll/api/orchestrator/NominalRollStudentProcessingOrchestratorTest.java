@@ -196,7 +196,7 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
     final var newEvent = JsonUtil.getJsonObjectFromString(Event.class, new String(this.eventCaptor.getValue()));
     assertThat(newEvent.getEventType()).isEqualTo(PROCESS_PEN_MATCH);
     assertThat(newEvent.getEventOutcome()).isNull();
-    assertThat(newEvent.getEventPayload()).isEqualTo("{\"pen\":null,\"dob\":\"1907-05-26\",\"sex\":\"M\",\"enrolledGradeCode\":\"01\",\"surname\":\"Wayne\",\"givenName\":\"John\",\"middleName\":null,\"usualSurname\":null,\"usualGivenName\":null,\"usualMiddleName\":null,\"mincode\":\"10200001\",\"localID\":null,\"postal\":null}");
+    assertThat(newEvent.getEventPayload()).isEqualTo("{\"pen\":null,\"dob\":\"19070526\",\"sex\":\"M\",\"enrolledGradeCode\":\"01\",\"surname\":\"Wayne\",\"givenName\":\"John\",\"middleName\":null,\"usualSurname\":null,\"usualGivenName\":null,\"usualMiddleName\":null,\"mincode\":\"10200001\",\"localID\":null,\"postal\":null}");
   }
 
   @SneakyThrows

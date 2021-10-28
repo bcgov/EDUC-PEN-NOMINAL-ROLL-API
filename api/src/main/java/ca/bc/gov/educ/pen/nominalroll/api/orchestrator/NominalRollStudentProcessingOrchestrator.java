@@ -152,6 +152,7 @@ public class NominalRollStudentProcessingOrchestrator extends BaseOrchestrator<N
     val nominalRollStudent = nominalRollStudentSagaData.getNominalRollStudent();
     final String mincode = this.restUtils.getFedProvSchoolCodes().get(nominalRollStudent.getSchoolNumber());
     val penMatchRequest = PenMatchSagaMapper.mapper.toPenMatchStudent(nominalRollStudent, mincode);
+    penMatchRequest.setDob(StringUtils.replace(penMatchRequest.getDob(), "-", "")); // pen-match api expects yyyymmdd
     val penMatchRequestJson = JsonUtil.mapper.writeValueAsString(penMatchRequest);
     final Event nextEvent = Event.builder().sagaId(saga.getSagaId())
       .eventType(PROCESS_PEN_MATCH)
