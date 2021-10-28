@@ -23,14 +23,14 @@ public class AsyncConfiguration {
   public Executor threadPoolTaskExecutor() {
     return new EnhancedQueueExecutor.Builder()
       .setThreadFactory(new ThreadFactoryBuilder().setNameFormat("message-subscriber-%d").build())
-      .setCorePoolSize(6).setMaximumPoolSize(6).setKeepAliveTime(Duration.ofSeconds(60)).build();
+      .setCorePoolSize(10).setMaximumPoolSize(10).setKeepAliveTime(Duration.ofSeconds(60)).build();
   }
 
   @Bean(name = "publisherExecutor")
   public Executor publisherExecutor() {
     return new EnhancedQueueExecutor.Builder()
       .setThreadFactory(new ThreadFactoryBuilder().setNameFormat("message-publisher-%d").build())
-      .setCorePoolSize(4).setMaximumPoolSize(4).setKeepAliveTime(Duration.ofSeconds(60)).build();
+      .setCorePoolSize(2).setMaximumPoolSize(2).setKeepAliveTime(Duration.ofSeconds(60)).build();
   }
 
   /**
@@ -42,7 +42,7 @@ public class AsyncConfiguration {
   public Executor controllerTaskExecutor() {
     return new EnhancedQueueExecutor.Builder()
       .setThreadFactory(new ThreadFactoryBuilder().setNameFormat("async-executor-%d").build())
-      .setCorePoolSize(4).setMaximumPoolSize(4).setKeepAliveTime(Duration.ofSeconds(60)).build();
+      .setCorePoolSize(10).setMaximumPoolSize(10).setKeepAliveTime(Duration.ofSeconds(60)).build();
   }
 
 }

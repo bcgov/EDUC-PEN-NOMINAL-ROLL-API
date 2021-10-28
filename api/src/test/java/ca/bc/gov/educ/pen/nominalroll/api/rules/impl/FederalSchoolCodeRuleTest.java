@@ -25,13 +25,11 @@ public class FederalSchoolCodeRuleTest {
   private static FederalSchoolCodeRule rule;
   @Mock
   static RestUtils restUtils;
-  @Mock
-  static CacheService cacheService;
 
   @Before
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    rule = new FederalSchoolCodeRule(restUtils, cacheService);
+    rule = new FederalSchoolCodeRule(restUtils);
   }
 
   @Test

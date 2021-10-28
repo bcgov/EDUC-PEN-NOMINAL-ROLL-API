@@ -3,7 +3,6 @@ package ca.bc.gov.educ.pen.nominalroll.api.config;
 import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
 import ca.bc.gov.educ.pen.nominalroll.api.rules.Rule;
 import ca.bc.gov.educ.pen.nominalroll.api.rules.impl.*;
-import ca.bc.gov.educ.pen.nominalroll.api.service.v1.CacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,8 +40,8 @@ public class RulesConfig {
   @Bean
   @Order(5)
   @Autowired
-  public Rule federalSchoolCodeRule(final RestUtils restUtils, final CacheService cacheService) {
-    return new FederalSchoolCodeRule(restUtils, cacheService);
+  public Rule federalSchoolCodeRule(final RestUtils restUtils) {
+    return new FederalSchoolCodeRule(restUtils);
   }
 
   @Bean

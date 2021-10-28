@@ -24,11 +24,9 @@ public class FederalSchoolCodeRule extends BaseRule {
    */
   private final RestUtils restUtils;
 
-  private final CacheService cacheService;
 
-  public FederalSchoolCodeRule(final RestUtils restUtils, final CacheService cacheService) {
+  public FederalSchoolCodeRule(final RestUtils restUtils) {
     this.restUtils = restUtils;
-    this.cacheService = cacheService;
   }
 
 
@@ -39,11 +37,7 @@ public class FederalSchoolCodeRule extends BaseRule {
     if (StringUtils.isBlank(schoolNum)) {
       errorsMap.put(HeaderNames.SCHOOL_NUMBER.getCode(), "Field value is missing.");
     } else {
-      String mincode = this.restUtils.getFedProvSchoolCodes().get(schoolNum);
-      if (StringUtils.isBlank(mincode)) {
-        this.cacheService.evictCache(CacheNames.FED_PROV_CODES);
-        mincode = this.restUtils.getFedProvSchoolCodes().get(schoolNum);
-      }
+      val mincode = this.restUtils.getFedProvSchoolCodes().get(schoolNum);
       if (StringUtils.isBlank(mincode)) {
         errorsMap.put(HeaderNames.SCHOOL_NUMBER.getCode(), String.format("Field value %s is not recognized.", schoolNum));
       }
