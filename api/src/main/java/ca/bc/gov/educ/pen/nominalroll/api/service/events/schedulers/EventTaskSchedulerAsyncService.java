@@ -56,12 +56,7 @@ public class EventTaskSchedulerAsyncService {
   @Async("taskExecutor")
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void findAndProcessUncompletedSagas() {
-    val countOfPendingSagas = this.getSagaRepository().countAllByStatusIn(this.getStatusFilters());
-    if(countOfPendingSagas > 100) {
-      log.debug("There are {} pending sagas. Will try after some time.", countOfPendingSagas);
-      return;
-    }
-    final var sagas = this.getSagaRepository().findTop100ByStatusIn(this.getStatusFilters());
+    final var sagas = this.getSagaRepository().findTop100ByStatusInOrderByCreateDate(this.getStatusFilters());
     if (!sagas.isEmpty()) {
       processUncompletedSagas(sagas);
     }

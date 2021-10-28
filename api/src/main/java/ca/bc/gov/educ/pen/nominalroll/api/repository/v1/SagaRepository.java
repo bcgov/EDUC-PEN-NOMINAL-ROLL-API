@@ -14,17 +14,10 @@ import java.util.UUID;
  */
 @Repository
 public interface SagaRepository extends JpaRepository<Saga, UUID> {
-  /**
-   * Find all by status in list.
-   *
-   * @param statuses the statuses
-   * @return the list
-   */
-  List<Saga> findAllByStatusIn(List<String> statuses);
 
   Optional<Saga> findByNominalRollStudentIDAndSagaName(UUID nominalRollStudentID, String sagaName);
 
   List<Saga> findAllByCreateDateBefore(LocalDateTime createDateToCompare);
-  long countAllByStatusIn(List<String> statuses);
-  List<Saga> findTop100ByStatusIn(List<String> statuses);
+
+  List<Saga> findTop100ByStatusInOrderByCreateDate(List<String> statuses);
 }
