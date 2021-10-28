@@ -20,4 +20,6 @@ public interface SagaRepository extends JpaRepository<Saga, UUID> {
   List<Saga> findAllByCreateDateBefore(LocalDateTime createDateToCompare);
 
   List<Saga> findTop100ByStatusInOrderByCreateDate(List<String> statuses);
+
+  long countAllByStatusIn(List<String> statuses);
 }

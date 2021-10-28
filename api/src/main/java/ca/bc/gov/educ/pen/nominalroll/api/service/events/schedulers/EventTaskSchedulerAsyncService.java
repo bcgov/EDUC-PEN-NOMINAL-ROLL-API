@@ -64,7 +64,7 @@ public class EventTaskSchedulerAsyncService {
 
   private void processUncompletedSagas(List<Saga> sagas) {
     for (val saga : sagas) {
-      if (saga.getUpdateDate().isBefore(LocalDateTime.now().minusMinutes(15))
+      if (saga.getUpdateDate().isBefore(LocalDateTime.now().minusMinutes(2))
         && this.getSagaOrchestrators().containsKey(saga.getSagaName())) {
         try {
           this.setRetryCountAndLog(saga);
@@ -82,6 +82,10 @@ public class EventTaskSchedulerAsyncService {
   @Async("taskExecutor")
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void findAndPublishLoadedStudentRecordsForProcessing() throws InterruptedException {
+    if (this.getSagaRepository().countAllByStatusIn(this.getStatusFilters()) > 9) { // at max there will be 109 parallel sagas.
+      log.debug("Saga count is greater than 9, so not processing student records");
+      return;
+    }
     final List<NominalRollStudentEntity> studentEntities = new ArrayList<>();
     final var nominalRollStudentEntities = this.getNominalRollStudentRepository().findTop100ByStatusAndCreateDateBefore(NominalRollStudentStatus.LOADED.toString(), LocalDateTime.now().minusMinutes(5));
     log.debug("found :: {}  records in loaded status", nominalRollStudentEntities.size());
