@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,5 +30,6 @@ public interface NominalRollStudentRepository extends JpaRepository<NominalRollS
 
   void deleteAllByProcessingYear(String processingYear);
 
-  List<NominalRollStudentEntity> findTop100ByStatusAndCreateDateBefore(String status, LocalDateTime createDate);
+
+  List<NominalRollStudentEntity> findTop100ByStatus(String status);
 }

@@ -58,11 +58,11 @@ public class EventTaskSchedulerAsyncService {
   public void findAndProcessUncompletedSagas() {
     final var sagas = this.getSagaRepository().findTop100ByStatusInOrderByCreateDate(this.getStatusFilters());
     if (!sagas.isEmpty()) {
-      processUncompletedSagas(sagas);
+      this.processUncompletedSagas(sagas);
     }
   }
 
-  private void processUncompletedSagas(List<Saga> sagas) {
+  private void processUncompletedSagas(final List<Saga> sagas) {
     for (val saga : sagas) {
       if (saga.getUpdateDate().isBefore(LocalDateTime.now().minusMinutes(2))
         && this.getSagaOrchestrators().containsKey(saga.getSagaName())) {
@@ -87,7 +87,7 @@ public class EventTaskSchedulerAsyncService {
       return;
     }
     final List<NominalRollStudentEntity> studentEntities = new ArrayList<>();
-    final var nominalRollStudentEntities = this.getNominalRollStudentRepository().findTop100ByStatusAndCreateDateBefore(NominalRollStudentStatus.LOADED.toString(), LocalDateTime.now().minusMinutes(5));
+    final var nominalRollStudentEntities = this.getNominalRollStudentRepository().findTop100ByStatus(NominalRollStudentStatus.LOADED.toString());
     log.debug("found :: {}  records in loaded status", nominalRollStudentEntities.size());
     if (!nominalRollStudentEntities.isEmpty()) {
       for (val entity : nominalRollStudentEntities) {

@@ -15,7 +15,6 @@ import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentReposi
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Event;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudentSagaData;
 import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -39,14 +38,12 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class NominalRollService {
   private static final String STUDENT_ID_ATTRIBUTE = "nominalRollStudentID";
-  private final ApplicationProperties applicationProperties;
   private final MessagePublisher messagePublisher;
   private final NominalRollStudentRepository repository;
   private final NominalRollPostedStudentRepository postedStudentRepository;
@@ -54,8 +51,7 @@ public class NominalRollService {
     .setThreadFactory(new ThreadFactoryBuilder().setNameFormat("async-pagination-query-executor-%d").build())
     .setCorePoolSize(2).setMaximumPoolSize(10).setKeepAliveTime(Duration.ofSeconds(60)).build();
 
-  public NominalRollService(final ApplicationProperties applicationProperties, final MessagePublisher messagePublisher, final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository) {
-    this.applicationProperties = applicationProperties;
+  public NominalRollService(final MessagePublisher messagePublisher, final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository) {
     this.messagePublisher = messagePublisher;
     this.repository = repository;
     this.postedStudentRepository = postedStudentRepository;
@@ -120,16 +116,12 @@ public class NominalRollService {
     return this.repository.save(entity);
   }
 
-  public void publishUnprocessedStudentRecordsForProcessing(final List<NominalRollStudentSagaData> nominalRollStudentSagaDatas) throws InterruptedException {
-    final List<List<NominalRollStudentSagaData>> partitionedList = Lists.partition(nominalRollStudentSagaDatas, 100);
-    for (final List<NominalRollStudentSagaData> subList : partitionedList) {
-      subList.forEach(this::sendIndividualStudentAsMessageToTopic);
-      TimeUnit.MILLISECONDS.sleep(this.applicationProperties.getPauseTimeBeforeBurstOfMessageInMillis());
-    }
+  public void publishUnprocessedStudentRecordsForProcessing(final List<NominalRollStudentSagaData> nominalRollStudentSagaDatas) {
+    nominalRollStudentSagaDatas.forEach(this::sendIndividualStudentAsMessageToTopic);
   }
 
   @Async("publisherExecutor")
-  public void prepareAndSendNominalRollStudentsForFurtherProcessing(final List<NominalRollStudentEntity> nominalRollStudentEntities) throws InterruptedException {
+  public void prepareAndSendNominalRollStudentsForFurtherProcessing(final List<NominalRollStudentEntity> nominalRollStudentEntities) {
     final List<NominalRollStudentSagaData> nominalRollStudentSagaDatas = nominalRollStudentEntities.stream()
       .map(el -> {
         val nominalRollStudentSagaData = new NominalRollStudentSagaData();

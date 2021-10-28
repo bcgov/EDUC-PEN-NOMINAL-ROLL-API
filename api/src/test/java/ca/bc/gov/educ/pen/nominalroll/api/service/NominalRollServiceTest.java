@@ -37,11 +37,9 @@ public class NominalRollServiceTest {
   @Mock
   MessagePublisher messagePublisher;
 
-  @Mock
-  ApplicationProperties applicationProperties;
   @Before
   public void before() {
-    this.service = new NominalRollService(applicationProperties, this.messagePublisher, this.repository, this.postedStudentRepository);
+    this.service = new NominalRollService(this.messagePublisher, this.repository, this.postedStudentRepository);
   }
 
 //  @Test
