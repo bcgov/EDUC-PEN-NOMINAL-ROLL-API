@@ -56,20 +56,29 @@ public class EventTaskSchedulerAsyncService {
   @Async("taskExecutor")
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void findAndProcessUncompletedSagas() {
-    final var sagas = this.getSagaRepository().findAllByStatusIn(this.getStatusFilters());
+    val countOfPendingSagas = this.getSagaRepository().countAllByStatusIn(this.getStatusFilters());
+    if(countOfPendingSagas > 100) {
+      log.debug("There are {} pending sagas. Will try after some time.", countOfPendingSagas);
+      return;
+    }
+    final var sagas = this.getSagaRepository().findTop100ByStatusIn(this.getStatusFilters());
     if (!sagas.isEmpty()) {
-      for (val saga : sagas) {
-        if (saga.getUpdateDate().isBefore(LocalDateTime.now().minusMinutes(15))
-          && this.getSagaOrchestrators().containsKey(saga.getSagaName())) {
-          try {
-            this.setRetryCountAndLog(saga);
-            this.getSagaOrchestrators().get(saga.getSagaName()).replaySaga(saga);
-          } catch (final InterruptedException ex) {
-            Thread.currentThread().interrupt();
-            log.error("InterruptedException while findAndProcessPendingSagaEvents :: for saga :: {} :: {}", saga, ex);
-          } catch (final IOException | TimeoutException e) {
-            log.error("Exception while findAndProcessPendingSagaEvents :: for saga :: {} :: {}", saga, e);
-          }
+      processUncompletedSagas(sagas);
+    }
+  }
+
+  private void processUncompletedSagas(List<Saga> sagas) {
+    for (val saga : sagas) {
+      if (saga.getUpdateDate().isBefore(LocalDateTime.now().minusMinutes(15))
+        && this.getSagaOrchestrators().containsKey(saga.getSagaName())) {
+        try {
+          this.setRetryCountAndLog(saga);
+          this.getSagaOrchestrators().get(saga.getSagaName()).replaySaga(saga);
+        } catch (final InterruptedException ex) {
+          Thread.currentThread().interrupt();
+          log.error("InterruptedException while findAndProcessPendingSagaEvents :: for saga :: {} :: {}", saga, ex);
+        } catch (final IOException | TimeoutException e) {
+          log.error("Exception while findAndProcessPendingSagaEvents :: for saga :: {} :: {}", saga, e);
         }
       }
     }

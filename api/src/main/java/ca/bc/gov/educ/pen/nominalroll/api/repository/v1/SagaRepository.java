@@ -25,4 +25,6 @@ public interface SagaRepository extends JpaRepository<Saga, UUID> {
   Optional<Saga> findByNominalRollStudentIDAndSagaName(UUID nominalRollStudentID, String sagaName);
 
   List<Saga> findAllByCreateDateBefore(LocalDateTime createDateToCompare);
+  long countAllByStatusIn(List<String> statuses);
+  List<Saga> findTop100ByStatusIn(List<String> statuses);
 }
