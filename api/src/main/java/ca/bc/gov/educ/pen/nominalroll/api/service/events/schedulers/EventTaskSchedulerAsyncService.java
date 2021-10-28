@@ -59,7 +59,7 @@ public class EventTaskSchedulerAsyncService {
     final var sagas = this.getSagaRepository().findAllByStatusIn(this.getStatusFilters());
     if (!sagas.isEmpty()) {
       for (val saga : sagas) {
-        if (saga.getCreateDate().isBefore(LocalDateTime.now().minusMinutes(10))
+        if (saga.getUpdateDate().isBefore(LocalDateTime.now().minusMinutes(15))
           && this.getSagaOrchestrators().containsKey(saga.getSagaName())) {
           try {
             this.setRetryCountAndLog(saga);

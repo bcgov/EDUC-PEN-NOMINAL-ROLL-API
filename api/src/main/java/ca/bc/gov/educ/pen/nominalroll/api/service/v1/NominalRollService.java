@@ -121,7 +121,7 @@ public class NominalRollService {
   }
 
   public void publishUnprocessedStudentRecordsForProcessing(final List<NominalRollStudentSagaData> nominalRollStudentSagaDatas) throws InterruptedException {
-    final List<List<NominalRollStudentSagaData>> partitionedList = Lists.partition(nominalRollStudentSagaDatas, 100);
+    final List<List<NominalRollStudentSagaData>> partitionedList = Lists.partition(nominalRollStudentSagaDatas, 10);
     for (final List<NominalRollStudentSagaData> subList : partitionedList) {
       subList.forEach(this::sendIndividualStudentAsMessageToTopic);
       TimeUnit.MILLISECONDS.sleep(this.applicationProperties.getPauseTimeBeforeBurstOfMessageInMillis());
