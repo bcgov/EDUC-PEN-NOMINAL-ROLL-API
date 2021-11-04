@@ -96,7 +96,7 @@ public interface NominalRollApiEndpoint {
   @Transactional
   @Tag(name = "Endpoint to validate the given nominal roll student", description = "Endpoint to validate the given nominal roll student")
   @Schema(name = "NominalRollStudent", implementation = NominalRollStudent.class)
-  ResponseEntity<NominalRollStudent> validateNomRollStudent(NominalRollStudent nominalRollStudent);
+  ResponseEntity<NominalRollStudent> validateNomRollStudent(@Validated @RequestBody NominalRollStudent nominalRollStudent);
 
   @PutMapping(URL.NOM_ROLL_STUDENT_ID)
   @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
