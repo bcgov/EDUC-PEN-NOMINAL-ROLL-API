@@ -87,7 +87,7 @@ public class EventTaskSchedulerAsyncService {
       return;
     }
     final List<NominalRollStudentEntity> studentEntities = new ArrayList<>();
-    final var nominalRollStudentEntities = this.getNominalRollStudentRepository().findTop20ByStatusOrderByCreateDate(NominalRollStudentStatus.LOADED.toString());
+    final var nominalRollStudentEntities = this.getNominalRollStudentRepository().findTop100ByStatusOrderByCreateDate(NominalRollStudentStatus.LOADED.toString());
     log.debug("found :: {}  records in loaded status", nominalRollStudentEntities.size());
     if (!nominalRollStudentEntities.isEmpty()) {
       for (val entity : nominalRollStudentEntities) {
