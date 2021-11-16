@@ -40,32 +40,34 @@ public class NominalRollStudentRepositoryImpl implements NominalRollStudentRepos
 
     if(searchCriteria != null) {
       searchCriteria.forEach((key, value) -> {
+        String searchString = "";
         switch (key) {
           case ("schoolNumber"):
-            sqlString.append(" AND SCHOOL_NUMBER IN (:schoolNumber)");
+            searchString = " AND SCHOOL_NUMBER IN (:schoolNumber)";
             break;
           case ("surname"):
-            sqlString.append(" AND SURNAME LIKE :surname");
+            searchString = " AND SURNAME LIKE :surname";
             break;
           case ("givenNames"):
-            sqlString.append(" AND GIVEN_NAMES LIKE :givenNames");
+            searchString = " AND GIVEN_NAMES LIKE :givenNames";
             break;
           case ("gender"):
-            sqlString.append(" AND GENDER = :gender");
+            searchString = " AND GENDER = :gender";
             break;
           case ("birthDate"):
-            sqlString.append(" AND BIRTH_DATE = :birthDate");
+            searchString = " AND BIRTH_DATE = :birthDate";
             break;
           case ("assignedPEN"):
-            sqlString.append(" AND ASSIGNED_PEN = :assignedPEN");
+            searchString = " AND ASSIGNED_PEN = :assignedPEN";
             break;
           case ("grade"):
-            sqlString.append(" AND GRADE = :grade");
+            searchString = " AND GRADE = :grade";
             break;
           default:
             log.error("Unknown search criteria key provided for Nominal Roll Student IDs search. It is being ignored :: " + key);
             break;
         }
+        sqlString.append(searchString);
       });
     }
 
@@ -80,7 +82,6 @@ public class NominalRollStudentRepositoryImpl implements NominalRollStudentRepos
       searchCriteria.forEach(q::setParameter);
     }
 
-    var result = q.getResultList();
-    return result;
+    return q.getResultList();
   }
 }
