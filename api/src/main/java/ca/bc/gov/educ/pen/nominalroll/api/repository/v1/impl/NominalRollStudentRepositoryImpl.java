@@ -20,6 +20,17 @@ public class NominalRollStudentRepositoryImpl implements NominalRollStudentRepos
   @Getter(AccessLevel.PRIVATE)
   private final EntityManager entityManager;
 
+  @Getter(AccessLevel.PRIVATE)
+  private final Map<String, String> searchStatements = Map.of(
+    "schoolNumber", " AND SCHOOL_NUMBER IN (:schoolNumber)",
+    "surname", " AND SURNAME LIKE :surname",
+    "givenNames", " AND GIVEN_NAMES LIKE :givenNames",
+    "gender", " AND GENDER = :gender",
+    "birthDate", " AND BIRTH_DATE = :birthDate",
+    "assignedPEN", " AND ASSIGNED_PEN = :assignedPEN",
+    "grade", " AND GRADE = :grade"
+    );
+
   /**
    * Instantiates a new pen request batch student repository custom.
    *
@@ -40,34 +51,12 @@ public class NominalRollStudentRepositoryImpl implements NominalRollStudentRepos
 
     if(searchCriteria != null) {
       searchCriteria.forEach((key, value) -> {
-        String searchString = "";
-        switch (key) {
-          case ("schoolNumber"):
-            searchString = " AND SCHOOL_NUMBER IN (:schoolNumber)";
-            break;
-          case ("surname"):
-            searchString = " AND SURNAME LIKE :surname";
-            break;
-          case ("givenNames"):
-            searchString = " AND GIVEN_NAMES LIKE :givenNames";
-            break;
-          case ("gender"):
-            searchString = " AND GENDER = :gender";
-            break;
-          case ("birthDate"):
-            searchString = " AND BIRTH_DATE = :birthDate";
-            break;
-          case ("assignedPEN"):
-            searchString = " AND ASSIGNED_PEN = :assignedPEN";
-            break;
-          case ("grade"):
-            searchString = " AND GRADE = :grade";
-            break;
-          default:
-            log.error("Unknown search criteria key provided for Nominal Roll Student IDs search. It is being ignored :: " + key);
-            break;
+        String searchString = this.getSearchStatements().get(key);
+        if(searchString != null) {
+          sqlString.append(searchString);
+        } else {
+          log.error("Unknown search criteria key provided for Nominal Roll Student IDs search. It is being ignored :: " + key);
         }
-        sqlString.append(searchString);
       });
     }
 
