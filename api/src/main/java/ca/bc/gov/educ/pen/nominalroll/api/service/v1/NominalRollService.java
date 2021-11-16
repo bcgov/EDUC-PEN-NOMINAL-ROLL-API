@@ -9,10 +9,11 @@ import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollPostedStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
-import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollPostedStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
+import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepositoryCustom;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Event;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollIDs;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudentSagaData;
 import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -33,6 +34,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -47,14 +49,17 @@ public class NominalRollService {
   private final MessagePublisher messagePublisher;
   private final NominalRollStudentRepository repository;
   private final NominalRollPostedStudentRepository postedStudentRepository;
+  private final NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom;
   private final Executor paginatedQueryExecutor = new EnhancedQueueExecutor.Builder()
     .setThreadFactory(new ThreadFactoryBuilder().setNameFormat("async-pagination-query-executor-%d").build())
     .setCorePoolSize(2).setMaximumPoolSize(10).setKeepAliveTime(Duration.ofSeconds(60)).build();
 
-  public NominalRollService(final MessagePublisher messagePublisher, final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository) {
+  public NominalRollService(final MessagePublisher messagePublisher, final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository,
+                            final NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom) {
     this.messagePublisher = messagePublisher;
     this.repository = repository;
     this.postedStudentRepository = postedStudentRepository;
+    this.nominalRollStudentRepositoryCustom = nominalRollStudentRepositoryCustom;
   }
 
   public boolean isAllRecordsProcessed() {
@@ -161,5 +166,9 @@ public class NominalRollService {
 
   public List<NominalRollPostedStudentEntity> findAllBySurnameAndGivenNamesAndBirthDateAndGenderAndGrade(final String surname, final String givenNames, final LocalDate birthDate, final String gender, final String grade) {
     return this.postedStudentRepository.findAllBySurnameAndGivenNamesAndBirthDateAndGenderAndGradeOrderByCreateDateDesc(surname, givenNames, birthDate, gender, grade);
+  }
+
+  public List<NominalRollIDs> findAllNominalRollStudentIDs(final String processingYear, final List<String> statusCodes, final Map<String, String> searchCriteria) {
+    return this.nominalRollStudentRepositoryCustom.getAllNominalRollStudentIDs(processingYear, statusCodes, searchCriteria);
   }
 }

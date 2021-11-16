@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.pen.nominalroll.api.model.v1;
 
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollIDs;
 import ca.bc.gov.educ.pen.nominalroll.api.util.UpperCase;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
@@ -21,6 +22,10 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "NOMINAL_ROLL_STUDENT")
+@SqlResultSetMapping(name="nominalRollIDsMapping", classes = {
+  @ConstructorResult(targetClass = NominalRollIDs.class,
+    columns = {@ColumnResult(name="NOMINAL_ROLL_STUDENT_ID", type = UUID.class)})
+})
 @DynamicUpdate
 @ToString
 public class NominalRollStudentEntity {

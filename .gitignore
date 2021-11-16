@@ -25,3 +25,6 @@ api/target
 api/src/main/resources/application-local.properties
 api/src/main/resources/application-dev.properties
 api/src/main/resources/application-test.properties
+
+.idea/
+*.iml

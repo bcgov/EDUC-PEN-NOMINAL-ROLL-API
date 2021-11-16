@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.pen.nominalroll.api.controller.v1;
 
 import ca.bc.gov.educ.pen.nominalroll.api.constants.FileTypes;
+import ca.bc.gov.educ.pen.nominalroll.api.constants.v1.NominalRollStudentStatus;
 import ca.bc.gov.educ.pen.nominalroll.api.endpoint.v1.NominalRollApiEndpoint;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.FileError;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.FileUnProcessableException;
@@ -12,12 +13,16 @@ import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollStudentSearchService;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.FileUpload;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollFileProcessResponse;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollIDs;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
 import ca.bc.gov.educ.pen.nominalroll.api.util.TransformUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.OLE2NotOfficeXmlFileException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -129,5 +134,27 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
       nominalRollStudent.setValidationErrors(errorsMap);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(nominalRollStudent);
     }
+  }
+
+  @Override
+  public ResponseEntity<List<NominalRollIDs>> findAllNominalRollStudentIDs(final String processingYear, final List<String> statusCodes, final String searchCriteriaListJson) {
+    val errorCode = statusCodes.stream().filter(statusCode -> NominalRollStudentStatus.valueOfCode(statusCode) == null).findFirst();
+    if (errorCode.isPresent()) {
+      log.error("Invalid nominal roll student status code provided :: " + errorCode);
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+
+    Map<String, String> searchCriteria = null;
+    try {
+      if (StringUtils.isNotBlank(searchCriteriaListJson)) {
+        searchCriteria = JsonUtil.mapper.readValue(searchCriteriaListJson, new TypeReference<>() {
+        });
+      }
+    } catch (JsonProcessingException e) {
+      log.error("Invalid nominal roll student searchCriteria provided :: " + searchCriteriaListJson);
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+    return ResponseEntity.ok(this.service.findAllNominalRollStudentIDs(processingYear, statusCodes, searchCriteria));
+    //.stream().map(UUID::toString).collect(Collectors.toList())
   }
 }
