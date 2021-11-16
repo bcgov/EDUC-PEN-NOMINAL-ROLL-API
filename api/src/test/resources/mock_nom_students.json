@@ -14,7 +14,8 @@
     "grade": "04",
     "fte": "1.0",
     "bandOfResidence": "8554",
-    "status": "SYS_MATCHED"
+    "status": "MATCHEDSYS",
+    "processingYear": "2021"
   },
   {
     "nominalRollStudentID": "038564D8-9129-4127-9E8F-1E94B602FA64",
@@ -31,8 +32,9 @@
     "grade": "KF",
     "fte": "1.0",
     "bandOfResidence": "8556",
-    "status": "USER_MATCHED",
-    "assignedPEN": "316029342"
+    "status": "MATCHEDUSR",
+    "assignedPEN": "316029342",
+    "processingYear": "2021"
   },
   {
     "nominalRollStudentID": "86780066-ED30-4429-8A66-42D23A53FE1E",
@@ -49,7 +51,8 @@
     "grade": "KF",
     "fte": "1.0",
     "bandOfResidence": "8556",
-    "status": "LOADED"
+    "status": "LOADED",
+    "processingYear": "2021"
   },
   {
     "nominalRollStudentID": "826E9C1F-9428-4AFC-9F93-CF88D8596696",
@@ -66,8 +69,9 @@
     "grade": "KF",
     "fte": "1.0",
     "bandOfResidence": "8556",
-    "status": "USER_MATCHED",
-    "assignedPEN": "982641108"
+    "status": "MATCHEDUSR",
+    "assignedPEN": "982641108",
+    "processingYear": "2021"
   },
   {
     "nominalRollStudentID": "71330D16-20F4-47D8-8E46-F02CA001D61F",
@@ -84,8 +88,9 @@
     "grade": "09",
     "fte": "1.0",
     "bandOfResidence": "7445",
-    "status": "USER_MATCHED",
-    "assignedPEN": "377021056"
+    "status": "MATCHEDUSR",
+    "assignedPEN": "377021056",
+    "processingYear": "2021"
   },
   {
     "nominalRollStudentID": "EC3C6EE6-2435-43DA-8853-4F371FB9F378",
@@ -102,7 +107,8 @@
     "grade": "05",
     "fte": "1.0",
     "bandOfResidence": "7445",
-    "status": "USER_MATCHED",
-    "assignedPEN": "377021056"
+    "status": "MATCHEDUSR",
+    "assignedPEN": "377021056",
+    "processingYear": "2021"
   }
 ]

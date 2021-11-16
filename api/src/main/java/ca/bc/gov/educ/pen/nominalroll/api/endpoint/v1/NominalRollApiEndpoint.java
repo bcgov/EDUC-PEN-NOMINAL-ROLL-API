@@ -3,9 +3,11 @@ package ca.bc.gov.educ.pen.nominalroll.api.endpoint.v1;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.v1.URL;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.FileUpload;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollFileProcessResponse;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollIDs;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -104,4 +106,17 @@ public interface NominalRollApiEndpoint {
   @Transactional
   @Tag(name = "Endpoint to update the nominal roll student", description = "Endpoint to update the nominal roll student")
   ResponseEntity<NominalRollStudent> updateNominalRollStudent(@PathVariable UUID nomRollStudentID, @Validated @RequestBody NominalRollStudent nominalRollStudent);
+
+  @GetMapping(URL.NOM_ROLL_STUDENT_IDS)
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR.")})
+  @Transactional(readOnly = true)
+  @Tag(name = "Endpoint to support nominal roll navigation view in frontend.", description = "This API endpoint exposes flexible way to query ids without returning the entire entity.")
+  ResponseEntity<List<NominalRollIDs>> findAllNominalRollStudentIDs(@RequestParam(name = "processingYear") String processingYear,
+                                                                    @RequestParam(name = "statusCodes") List<String> statusCodes,
+                                                                    @ArraySchema(schema = @Schema(name = "searchCriteria",
+                                                             description = "searchCriteria if provided should be a JSON string Map<String,String>",
+                                                             implementation = java.util.Map.class))
+                                                           @RequestParam(name = "searchCriteria", required = false) String searchCriteria);
+
 }

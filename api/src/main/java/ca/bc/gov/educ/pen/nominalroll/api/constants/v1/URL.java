@@ -7,6 +7,7 @@ public final class URL {
   public static final String DUPLICATES = "/duplicates";
   public static final String PAGINATED = "/paginated";
   public static final String VALIDATE = "/validate";
+  public static final String NOM_ROLL_STUDENT_IDS = "/nominal-roll-student-ids";
 
   private URL() {
 

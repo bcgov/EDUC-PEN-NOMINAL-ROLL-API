@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.pen.nominalroll.api.controller;
 
 import ca.bc.gov.educ.pen.nominalroll.api.BaseNominalRollAPITest;
+import ca.bc.gov.educ.pen.nominalroll.api.constants.v1.NominalRollStudentStatus;
 import ca.bc.gov.educ.pen.nominalroll.api.controller.v1.NominalRollApiController;
 import ca.bc.gov.educ.pen.nominalroll.api.filter.FilterOperation;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
@@ -34,8 +35,7 @@ import java.io.FileInputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ca.bc.gov.educ.pen.nominalroll.api.constants.v1.URL.BASE_URL;
-import static ca.bc.gov.educ.pen.nominalroll.api.constants.v1.URL.PAGINATED;
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.v1.URL.*;
 import static ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Condition.AND;
 import static ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Condition.OR;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -690,6 +690,28 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
       .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
       .content(JsonUtil.getJsonStringFromObject(body))
       .contentType(APPLICATION_JSON)).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void testReadStudentIDs_surnameEndWith_ShouldReturnStatusOkAndRecord() throws Exception {
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final var mockAuthority = oidcLogin().authorities(grantedAuthority);
+    final File file = new File(
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+    );
+    final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
+    });
+    final Map<String, String> searchCriteria = Map.of("surname", "B%");
+    final ObjectMapper objectMapper = new ObjectMapper();
+    final String criteriaJSON = objectMapper.writeValueAsString(searchCriteria);
+    System.out.println(criteriaJSON);
+    this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+    this.mockMvc
+      .perform(get(BASE_URL + NOM_ROLL_STUDENT_IDS).with(mockAuthority).param("searchCriteria", criteriaJSON)
+        .param("processingYear", "2021")
+        .param("statusCodes", NominalRollStudentStatus.MATCHEDUSR.getCode() + "," + NominalRollStudentStatus.MATCHEDSYS.getCode())
+        .contentType(APPLICATION_JSON))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
   }
 
   private NominalRollStudentEntity createNominalRollStudent() {
