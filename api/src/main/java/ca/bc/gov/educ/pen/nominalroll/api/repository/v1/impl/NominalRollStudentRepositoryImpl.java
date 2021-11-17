@@ -23,8 +23,8 @@ public class NominalRollStudentRepositoryImpl implements NominalRollStudentRepos
   @Getter(AccessLevel.PRIVATE)
   private final Map<String, String> searchStatements = Map.of(
     "schoolNumber", " AND SCHOOL_NUMBER IN (:schoolNumber)",
-    "surname", " AND SURNAME LIKE :surname",
-    "givenNames", " AND GIVEN_NAMES LIKE :givenNames",
+    "surname", " AND LOWER(SURNAME) LIKE LOWER(:surname)",
+    "givenNames", " AND LOWER(GIVEN_NAMES) LIKE LOWER(:givenNames)",
     "gender", " AND GENDER = :gender",
     "birthDate", " AND BIRTH_DATE = :birthDate",
     "assignedPEN", " AND ASSIGNED_PEN = :assignedPEN",

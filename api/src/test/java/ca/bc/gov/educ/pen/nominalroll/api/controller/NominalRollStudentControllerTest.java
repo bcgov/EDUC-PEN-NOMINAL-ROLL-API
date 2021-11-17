@@ -701,7 +701,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
     );
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
-    final Map<String, String> searchCriteria = Map.of("surname", "B%");
+    final Map<String, String> searchCriteria = Map.of("surname", "b%");
     final ObjectMapper objectMapper = new ObjectMapper();
     final String criteriaJSON = objectMapper.writeValueAsString(searchCriteria);
     System.out.println(criteriaJSON);
