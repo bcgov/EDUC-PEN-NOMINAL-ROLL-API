@@ -56,17 +56,6 @@ public class EventHandlerService {
     this.studentProcessingOrchestrator = studentProcessingOrchestrator;
   }
 
-  /**
-   * Handle get next PEN number event.
-   *
-   * @param event the event
-   * @return the byte [ ]
-   * @throws JsonProcessingException the json processing exception
-   */
-  @Transactional(propagation = REQUIRES_NEW)
-  public byte[] handleCreateDIAStudents(@NonNull final Event event) throws JsonProcessingException {
-    return new byte[0];
-  }
 
 
   @Transactional(propagation = REQUIRES_NEW)

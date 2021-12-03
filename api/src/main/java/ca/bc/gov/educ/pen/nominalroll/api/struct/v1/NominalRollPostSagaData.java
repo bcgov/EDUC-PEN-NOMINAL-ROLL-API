@@ -6,9 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import javax.validation.constraints.NotNull;
-import java.util.List;
-
 /**
  * The type Student merge complete saga data.
  */
@@ -18,11 +15,9 @@ import java.util.List;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NominalRollPostSagaData {
+  Boolean isSavedToPosterityTable;
 
-  /**
-   * MergeToPen: TruePEN.
-   */
-  @NotNull(message = "Nominal roll students can not be null.")
-  List<NominalRollStudent> students;
-
+  public Boolean getIsSavedToPosterityTable() {
+    return isSavedToPosterityTable != null && isSavedToPosterityTable;
+  }
 }

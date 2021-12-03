@@ -8,7 +8,7 @@ public enum EventOutcome {
   /**
    * Read from topic success event outcome.
    */
-  DIA_STUDENTS_CREATED,
+  SLD_DIA_STUDENTS_CREATED,
 
   /**
    * Saga completed event outcome.
@@ -18,5 +18,6 @@ public enum EventOutcome {
   VALIDATION_SUCCESS_NO_ERROR,
   VALIDATION_SUCCESS_WITH_ERROR,
   PEN_MATCH_PROCESSED,
-  PEN_MATCH_RESULTS_PROCESSED
+  PEN_MATCH_RESULTS_PROCESSED,
+  NOMINAL_ROLL_POSTED_STUDENTS_SAVED
   }

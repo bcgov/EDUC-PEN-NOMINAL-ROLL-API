@@ -171,4 +171,13 @@ public class NominalRollService {
   public List<NominalRollIDs> findAllNominalRollStudentIDs(final String processingYear, final List<String> statusCodes, final Map<String, String> searchCriteria) {
     return this.nominalRollStudentRepositoryCustom.getAllNominalRollStudentIDs(processingYear, statusCodes, searchCriteria);
   }
+
+  public List<NominalRollStudentEntity> findAllByProcessingYear(final String processingYear) {
+    return this.repository.findAllByProcessingYear(processingYear);
+  }
+
+  @Transactional
+  public List<NominalRollPostedStudentEntity> savePostedStudents(final List<NominalRollPostedStudentEntity> postedStudentEntities) {
+    return this.postedStudentRepository.saveAll(postedStudentEntities);
+  }
 }

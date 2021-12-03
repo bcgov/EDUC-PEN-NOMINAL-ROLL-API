@@ -13,7 +13,7 @@ public enum EventType {
   /**
    * Get student event type.
    */
-  CREATE_DIA_STUDENTS,
+  CREATE_SLD_DIA_STUDENTS,
 
   /**
    * Create student event type.
@@ -27,5 +27,6 @@ public enum EventType {
   READ_FROM_TOPIC,
   VALIDATE_NOMINAL_ROLL_STUDENT,
   PROCESS_PEN_MATCH,
-  PROCESS_PEN_MATCH_RESULTS
+  PROCESS_PEN_MATCH_RESULTS,
+  SAVE_NOMINAL_ROLL_POSTED_STUDENTS
 }

@@ -11,7 +11,8 @@ public enum NominalRollStudentStatus {
   ERROR("ERROR"),
   MATCHEDSYS("MATCHEDSYS"),
   FIXABLE("FIXABLE"),
-  MATCHEDUSR("MATCHEDUSR");
+  MATCHEDUSR("MATCHEDUSR"),
+  IGNORED("IGNORED");
 
   /**
    * The constant codeMap.
@@ -19,7 +20,7 @@ public enum NominalRollStudentStatus {
   private static final Map<String, NominalRollStudentStatus> codeMap = new HashMap<>();
 
   static {
-    for (NominalRollStudentStatus status: values()) {
+    for (NominalRollStudentStatus status : values()) {
       codeMap.put(status.getCode(), status);
     }
   }
@@ -39,16 +40,6 @@ public enum NominalRollStudentStatus {
   }
 
   /**
-   * To string string.
-   *
-   * @return the string
-   */
-  @Override
-  public String toString(){
-    return this.getCode();
-  }
-
-  /**
    * Value of code nominal roll student status codes.
    *
    * @param code the code
@@ -56,5 +47,15 @@ public enum NominalRollStudentStatus {
    */
   public static NominalRollStudentStatus valueOfCode(String code) {
     return codeMap.get(code);
+  }
+
+  /**
+   * To string string.
+   *
+   * @return the string
+   */
+  @Override
+  public String toString() {
+    return this.getCode();
   }
 }

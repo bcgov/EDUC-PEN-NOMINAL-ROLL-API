@@ -22,6 +22,7 @@ public interface NominalRollStudentMapper {
   @Mapping(target = "nominalRollStudentValidationErrors", ignore = true)
   NominalRollStudentEntity toModel(NominalRollStudent nominalRollStudent);
 
+  @Mapping(target = "federalRecipientBandName", source = "recipientName")
   @Mapping(target = "recordNumber", ignore = true)
   @Mapping(target = "federalSchoolNumber", source = "schoolNumber")
   @Mapping(target = "federalSchoolName", source = "schoolName")

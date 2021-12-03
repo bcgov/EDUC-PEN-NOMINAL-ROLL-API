@@ -51,7 +51,7 @@ public class NominalRollPostedStudentEntity {
 
   @Column(name = "FEDERAL_RECIPIENT_BAND_NAME", length = 255)
   @UpperCase
-  String federalRecipientName;
+  String federalRecipientBandName;
 
   @Column(name = "SURNAME", length = 255)
   @UpperCase

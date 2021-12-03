@@ -25,11 +25,10 @@ import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
-import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.CREATE_DIA_STUDENTS;
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.CREATE_SLD_DIA_STUDENTS;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.MARK_SAGA_COMPLETE;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaEnum.NOMINAL_ROLL_POST_SAGA;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaStatusEnum.COMPLETED;
-import static ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum.NOMINAL_ROLL_API_TOPIC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -105,8 +104,8 @@ public class NominalRollOrchestratorTest extends BaseNominalRollAPITest {
   public void testUpdateOriginalStudent_givenEventAndSagaData_shouldPostEventToStudentApi() throws IOException, InterruptedException, TimeoutException {
     var invocations = mockingDetails(messagePublisher).getInvocations().size();
     var event = Event.builder()
-      .eventType(CREATE_DIA_STUDENTS)
-      .eventOutcome(EventOutcome.DIA_STUDENTS_CREATED)
+      .eventType(CREATE_SLD_DIA_STUDENTS)
+      .eventOutcome(EventOutcome.SLD_DIA_STUDENTS_CREATED)
       .sagaId(saga.getSagaId())
       .nominalRollStudentID(studentID)
       .build();
@@ -120,8 +119,8 @@ public class NominalRollOrchestratorTest extends BaseNominalRollAPITest {
     assertThat(sagaFromDB.get().getSagaState()).isEqualTo(COMPLETED.toString());
     var sagaStates = sagaService.findAllSagaStates(saga);
     assertThat(sagaStates.size()).isEqualTo(1);
-    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(EventType.CREATE_DIA_STUDENTS.toString());
-    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.DIA_STUDENTS_CREATED.toString());
+    assertThat(sagaStates.get(0).getSagaEventState()).isEqualTo(EventType.CREATE_SLD_DIA_STUDENTS.toString());
+    assertThat(sagaStates.get(0).getSagaEventOutcome()).isEqualTo(EventOutcome.SLD_DIA_STUDENTS_CREATED.toString());
   }
 
   /**
