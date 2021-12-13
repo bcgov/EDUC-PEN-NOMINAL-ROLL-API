@@ -22,11 +22,11 @@ public interface NominalRollStudentMapper {
   @Mapping(target = "nominalRollStudentValidationErrors", ignore = true)
   NominalRollStudentEntity toModel(NominalRollStudent nominalRollStudent);
 
+  @Mapping(target = "federalRecipientBandName", source = "recipientName")
   @Mapping(target = "recordNumber", ignore = true)
   @Mapping(target = "federalSchoolNumber", source = "schoolNumber")
   @Mapping(target = "federalSchoolName", source = "schoolName")
   @Mapping(target = "federalSchoolBoard", source = "schoolDistrictNumber")
-  @Mapping(target = "federalRecipientName", source = "recipientName")
   @Mapping(target = "federalBandCode", source = "recipientNumber")
   @Mapping(target = "agreementType", ignore = true)
   @Mapping(target = "processingYear", ignore = true)

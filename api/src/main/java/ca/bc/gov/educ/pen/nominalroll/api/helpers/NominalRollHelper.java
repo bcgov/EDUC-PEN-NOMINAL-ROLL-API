@@ -11,9 +11,11 @@ import com.google.common.collect.ListMultimap;
 import lombok.Getter;
 import lombok.NonNull;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
@@ -23,6 +25,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoField.*;
+import static java.time.temporal.TemporalAdjusters.firstDayOfYear;
+import static java.time.temporal.TemporalAdjusters.lastDayOfYear;
 
 public final class NominalRollHelper {
   public static final DateTimeFormatter YYYY_MM_DD_SLASH_FORMATTER = new DateTimeFormatterBuilder()
@@ -39,6 +43,8 @@ public final class NominalRollHelper {
   private static final Map<String, String> gradeCodeMap = new HashMap<>();
   @Getter
   private static final ListMultimap<String, String> agreementTypeMap = ArrayListMultimap.create();
+  @Getter
+  private static final Map<String, String> sldSchTypeMap = new HashMap<>();
 
   private static final Set<String> gradeCodes = Arrays.stream(GradeCodes.values()).map(GradeCodes::getCode).collect(Collectors.toSet());
 
@@ -77,7 +83,8 @@ public final class NominalRollHelper {
     agreementTypeMap.put("P", "P");
     agreementTypeMap.put("Provincial", "P");
     agreementTypeMap.put("Prov", "P");
-
+    sldSchTypeMap.put("L", "Local Ed. Agreement");
+    sldSchTypeMap.put("P", "Provincial");
   }
 
   private NominalRollHelper() {
@@ -141,8 +148,8 @@ public final class NominalRollHelper {
 
   private static Predicate<NominalRollPostedStudentEntity> findExactMatch(final NominalRollStudent nominalRollStudent) {
     return nomRollPostedStudent -> StringUtils.equalsIgnoreCase(nomRollPostedStudent.getAgreementType(), NominalRollHelper.getAgreementTypeMap().get(nominalRollStudent.getLeaProvincial()).get(0))
-      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalBandCode(), getFederalBandCode(nominalRollStudent.getRecipientNumber()))
-      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalRecipientName(), nominalRollStudent.getRecipientName())
+      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalBandCode(), removeLeadingZeros(nominalRollStudent.getRecipientNumber()))
+      && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalRecipientBandName(), nominalRollStudent.getRecipientName())
       && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalSchoolNumber(), nominalRollStudent.getSchoolNumber()) && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalSchoolName(), nominalRollStudent.getSchoolName())
       && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalSchoolBoard(), nominalRollStudent.getSchoolDistrictNumber())
       && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getSurname(), nominalRollStudent.getSurname())
@@ -154,11 +161,18 @@ public final class NominalRollHelper {
       && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getBandOfResidence(), nominalRollStudent.getBandOfResidence());
   }
 
-  public static String getFederalBandCode(final String federalBandCode) {
+  public static String removeLeadingZeros(final String federalBandCode) {
     if (StringUtils.isBlank(federalBandCode)) {
       return "";
     } else {
       return federalBandCode.replaceFirst("^0+(?!$)", "");
     }
+  }
+
+  public static Pair<LocalDateTime, LocalDateTime> getFirstAndLastDateTimesOfYear(final String processingYear) {
+    final LocalDate processingDate = LocalDate.of(Integer.parseInt(processingYear), 1, 1);
+    final LocalDateTime firstDay = processingDate.with(firstDayOfYear()).atStartOfDay();
+    final LocalDateTime lastDay = processingDate.with(lastDayOfYear()).atTime(LocalTime.MAX);
+    return Pair.of(firstDay, lastDay);
   }
 }

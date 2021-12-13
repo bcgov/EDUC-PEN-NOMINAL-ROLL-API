@@ -70,7 +70,7 @@ public class NominalRollHelperTest {
     nominalRollStudent.setLeaProvincial("P");
     nominalRollStudent.setRecipientNumber("1");
     postedStudentEntity.setFederalBandCode("1");
-    postedStudentEntity.setFederalRecipientName("test");
+    postedStudentEntity.setFederalRecipientBandName("test");
     nominalRollStudent.setRecipientName("test");
 
     postedStudentEntity.setSurname("test");
