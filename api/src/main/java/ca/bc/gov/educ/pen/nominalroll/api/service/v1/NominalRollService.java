@@ -207,13 +207,14 @@ public class NominalRollService {
         }
       }
       if (!ignoredStudents.isEmpty()) {
-        this.saveNominalRollStudents(ignoredStudents, correlationID);
+        log.debug("updating ignored nominal roll entities in transient table for transaction ID :: {}", correlationID);
+        this.repository.saveAll(ignoredStudents);
       }
       if (!studentsToBePosted.isEmpty()) {
         this.savePostedStudents(studentsToBePosted);
       }
     } else {
-      log.info("NominalRollPostedStudentEntities of processingYear {} exist :: {} ", processingYear, correlationID);
+      log.info("NominalRollPostedStudentEntities of processingYear {} already exist :: {} ", processingYear, correlationID);
     }
   }
 
