@@ -5,6 +5,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.constants.EventType;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.v1.NominalRollStudentStatus;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.EntityNotFoundException;
+import ca.bc.gov.educ.pen.nominalroll.api.helpers.NominalRollHelper;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollPostedStudentEntity;
@@ -19,6 +20,8 @@ import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.threads.EnhancedQueueExecutor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,10 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
@@ -179,5 +179,46 @@ public class NominalRollService {
   @Transactional
   public List<NominalRollPostedStudentEntity> savePostedStudents(final List<NominalRollPostedStudentEntity> postedStudentEntities) {
     return this.postedStudentRepository.saveAll(postedStudentEntities);
+  }
+
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void savePostedStudentsAndIgnoredStudents(final String processingYear, final String updateUser, final String correlationID) {
+    final Pair<LocalDateTime, LocalDateTime> firstAndLastDays = NominalRollHelper.getFirstAndLastDateTimesOfYear(processingYear);
+
+    if(!this.postedStudentRepository.existsByProcessingYearBetween(firstAndLastDays.getLeft(), firstAndLastDays.getRight())) {
+      val students = this.findAllByProcessingYear(processingYear);
+      final List<NominalRollStudentEntity> ignoredStudents = new ArrayList<>();
+      final List<NominalRollPostedStudentEntity> studentsToBePosted = new ArrayList<>();
+      int index = 0;
+      for (val student : students) {
+        if (StringUtils.isBlank(student.getAssignedPEN())) {
+          student.setStatus(NominalRollStudentStatus.IGNORED.toString());
+          student.setUpdateUser(updateUser);
+          student.setUpdateDate(LocalDateTime.now());
+          ignoredStudents.add(student);
+        } else {
+          val postedStudentEntity = NominalRollStudentMapper.mapper.toPostedEntity(student);
+          postedStudentEntity.setCreateUser(updateUser);
+          postedStudentEntity.setCreateDate(LocalDateTime.now());
+          postedStudentEntity.setUpdateUser(updateUser);
+          postedStudentEntity.setUpdateDate(LocalDateTime.now());
+          postedStudentEntity.setRecordNumber(++index);
+          studentsToBePosted.add(postedStudentEntity);
+        }
+      }
+      if (!ignoredStudents.isEmpty()) {
+        this.saveNominalRollStudents(ignoredStudents, correlationID);
+      }
+      if (!studentsToBePosted.isEmpty()) {
+        this.savePostedStudents(studentsToBePosted);
+      }
+    } else {
+      log.info("NominalRollPostedStudentEntities of processingYear {} exist :: {} ", processingYear, correlationID);
+    }
+  }
+
+  public List<NominalRollPostedStudentEntity> findPostedStudentsByProcessingYear(final String processingYear) {
+    final Pair<LocalDateTime, LocalDateTime> firstAndLastDays = NominalRollHelper.getFirstAndLastDateTimesOfYear(processingYear);
+    return this.postedStudentRepository.findAllByProcessingYearBetween(firstAndLastDays.getLeft(), firstAndLastDays.getRight());
   }
 }

@@ -27,7 +27,6 @@ public interface NominalRollStudentMapper {
   @Mapping(target = "federalSchoolNumber", source = "schoolNumber")
   @Mapping(target = "federalSchoolName", source = "schoolName")
   @Mapping(target = "federalSchoolBoard", source = "schoolDistrictNumber")
-  @Mapping(target = "federalRecipientName", source = "recipientName")
   @Mapping(target = "federalBandCode", source = "recipientNumber")
   @Mapping(target = "agreementType", ignore = true)
   @Mapping(target = "processingYear", ignore = true)

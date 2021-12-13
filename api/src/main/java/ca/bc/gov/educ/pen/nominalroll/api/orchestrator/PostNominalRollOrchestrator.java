@@ -1,29 +1,33 @@
 package ca.bc.gov.educ.pen.nominalroll.api.orchestrator;
 
-import ca.bc.gov.educ.pen.nominalroll.api.constants.EventOutcome;
-import ca.bc.gov.educ.pen.nominalroll.api.constants.v1.NominalRollStudentStatus;
-import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
+import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollPostedStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollPostedStudentEntity;
-import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.Saga;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.SagaEventStates;
+import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.SagaService;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.external.sld.v1.SldDiaStudent;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Event;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollPostSagaData;
+import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventOutcome.NOMINAL_ROLL_POSTED_STUDENTS_SAVED;
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventOutcome.SLD_DIA_STUDENTS_CREATED;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.*;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaEnum.NOMINAL_ROLL_POST_SAGA;
-import static ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum.NOMINAL_ROLL_POST_SAGA_TOPIC;
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaStatusEnum.IN_PROGRESS;
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum.*;
 
 /**
  * The type Split pen orchestrator
@@ -35,8 +39,10 @@ public class PostNominalRollOrchestrator extends BaseUserActionsOrchestrator<Nom
   /**
    * The constant studentMapper.
    */
-  protected static final NominalRollStudentMapper studentMapper = NominalRollStudentMapper.mapper;
+  protected static final NominalRollPostedStudentMapper postedStudentMapper = NominalRollPostedStudentMapper.mapper;
   private final NominalRollService nominalRollService;
+  private final RestUtils restUtils;
+
 
   /**
    * Instantiates a new Base orchestrator.
@@ -45,9 +51,10 @@ public class PostNominalRollOrchestrator extends BaseUserActionsOrchestrator<Nom
    * @param messagePublisher   the message publisher
    * @param nominalRollService the nominal roll service
    */
-  public PostNominalRollOrchestrator(final SagaService sagaService, final MessagePublisher messagePublisher, final NominalRollService nominalRollService) {
+  public PostNominalRollOrchestrator(final SagaService sagaService, final MessagePublisher messagePublisher, final NominalRollService nominalRollService, final RestUtils restUtils) {
     super(sagaService, messagePublisher, NominalRollPostSagaData.class, NOMINAL_ROLL_POST_SAGA.toString(), NOMINAL_ROLL_POST_SAGA_TOPIC.toString());
     this.nominalRollService = nominalRollService;
+    this.restUtils = restUtils;
   }
 
   /**
@@ -57,38 +64,35 @@ public class PostNominalRollOrchestrator extends BaseUserActionsOrchestrator<Nom
   public void populateStepsToExecuteMap() {
     this.stepBuilder()
       .begin(SAVE_NOMINAL_ROLL_POSTED_STUDENTS, this::saveNominalRollPostedStudents)
-      .step(SAVE_NOMINAL_ROLL_POSTED_STUDENTS, EventOutcome.NOMINAL_ROLL_POSTED_STUDENTS_SAVED, CREATE_SLD_DIA_STUDENTS, this::createDIAStudents)
-      .step(CREATE_SLD_DIA_STUDENTS, EventOutcome.SLD_DIA_STUDENTS_CREATED, MARK_SAGA_COMPLETE, this::markSagaComplete);
-  }
-
-  private void saveNominalRollPostedStudents(final Event event, final Saga saga, final NominalRollPostSagaData nominalRollPostSagaData) {
-    if (nominalRollPostSagaData.getIsSavedToPosterityTable()) { //already saved to posterity table, next step is to create SLD/DIA students, this can happen in replay process.
-
-    } else {
-      val students = this.nominalRollService.findAllByProcessingYear(String.valueOf(LocalDate.now().getYear()));
-      final List<NominalRollStudentEntity> ignoredStudents = new ArrayList<>();
-      final List<NominalRollPostedStudentEntity> studentsToBePosted = new ArrayList<>();
-      for (val student : students) {
-        if (StringUtils.isBlank(student.getAssignedPEN())) {
-          student.setStatus(NominalRollStudentStatus.IGNORED.toString());
-          ignoredStudents.add(student);
-        } else {
-          studentsToBePosted.add(NominalRollStudentMapper.mapper.toPostedEntity(student));
-        }
-      }
-      if (!ignoredStudents.isEmpty()) {
-        this.nominalRollService.saveNominalRollStudents(ignoredStudents, saga.getSagaId().toString());
-      }
-      if (!studentsToBePosted.isEmpty()) {
-        this.nominalRollService.savePostedStudents(studentsToBePosted);
-      }
-    }
-
-
+      .step(SAVE_NOMINAL_ROLL_POSTED_STUDENTS, NOMINAL_ROLL_POSTED_STUDENTS_SAVED, CREATE_SLD_DIA_STUDENTS, this::createDIAStudents)
+      .step(CREATE_SLD_DIA_STUDENTS, SLD_DIA_STUDENTS_CREATED, MARK_SAGA_COMPLETE, this::markSagaComplete);
   }
 
   /**
-   * Update the original student record
+   * Save nominal roll posted students
+   *
+   * @param event                   the event
+   * @param saga                    the saga
+   * @param nominalRollPostSagaData the split pen saga data
+   * @throws JsonProcessingException the json processing exception
+   */
+  private void saveNominalRollPostedStudents(final Event event, final Saga saga, final NominalRollPostSagaData nominalRollPostSagaData) throws InterruptedException, TimeoutException, IOException {
+    final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+    saga.setStatus(IN_PROGRESS.toString());
+    saga.setSagaState(SAVE_NOMINAL_ROLL_POSTED_STUDENTS.toString());
+    this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
+
+    this.nominalRollService.savePostedStudentsAndIgnoredStudents(nominalRollPostSagaData.getProcessingYear(), nominalRollPostSagaData.getUpdateUser(), saga.getSagaId().toString());
+
+    val nextEvent = Event.builder().sagaId(saga.getSagaId())
+      .eventType(SAVE_NOMINAL_ROLL_POSTED_STUDENTS)
+      .eventOutcome(NOMINAL_ROLL_POSTED_STUDENTS_SAVED)
+      .build();
+    this.handleEvent(nextEvent);
+  }
+
+  /**
+   * Create DIA students
    *
    * @param event                   the event
    * @param saga                    the saga
@@ -96,9 +100,20 @@ public class PostNominalRollOrchestrator extends BaseUserActionsOrchestrator<Nom
    * @throws JsonProcessingException the json processing exception
    */
   public void createDIAStudents(final Event event, final Saga saga, final NominalRollPostSagaData nominalRollPostSagaData) throws JsonProcessingException {
-//    final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
-//    saga.setStatus(IN_PROGRESS.toString());
-    //DO MORE!
+    final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
+    saga.setSagaState(CREATE_SLD_DIA_STUDENTS.toString());
+    this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
+
+    final List<NominalRollPostedStudentEntity> nominalRollStudents = this.nominalRollService.findPostedStudentsByProcessingYear(nominalRollPostSagaData.getProcessingYear());
+    final List<SldDiaStudent> sldDiaStudents = nominalRollStudents.stream().map(student -> postedStudentMapper.toDiaStudent(student, this.restUtils)).collect(Collectors.toList());
+
+    final Event nextEvent = Event.builder().sagaId(saga.getSagaId())
+      .eventType(CREATE_SLD_DIA_STUDENTS)
+      .replyTo(this.getTopicToSubscribe())
+      .eventPayload(JsonUtil.getJsonStringFromObject(sldDiaStudents))
+      .build();
+    this.postMessageToTopic(SLD_API_TOPIC.toString(), nextEvent);
+    log.info("message sent to SLD_API_TOPIC for CREATE_SLD_DIA_STUDENTS Event. :: {}", saga.getSagaId());
   }
 
 }

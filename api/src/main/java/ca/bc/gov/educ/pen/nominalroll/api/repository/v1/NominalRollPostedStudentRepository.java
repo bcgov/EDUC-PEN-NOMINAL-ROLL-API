@@ -5,10 +5,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface NominalRollPostedStudentRepository extends JpaRepository<NominalRollPostedStudentEntity, UUID> {
   List<NominalRollPostedStudentEntity> findAllBySurnameAndGivenNamesAndBirthDateAndGenderAndGradeOrderByCreateDateDesc(String surname, String givenNames, LocalDate birthDate, String gender, String grade);
+
+  List<NominalRollPostedStudentEntity> findAllByProcessingYearBetween(LocalDateTime startTime, LocalDateTime endTime);
+
+  boolean existsByProcessingYearBetween(LocalDateTime startTime, LocalDateTime endTime);
 }

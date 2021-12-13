@@ -2,7 +2,6 @@ package ca.bc.gov.educ.pen.nominalroll.api.service.events;
 
 import ca.bc.gov.educ.pen.nominalroll.api.constants.EventType;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum;
-import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
 import ca.bc.gov.educ.pen.nominalroll.api.orchestrator.base.EventHandler;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Event;
 import lombok.Getter;
@@ -30,21 +29,21 @@ public class EventHandlerDelegatorService implements EventHandler {
   private final EventHandlerService eventHandlerService;
 
   /**
-   * The Message publisher.
+   * The Event publisher service.
    */
   @Getter(PRIVATE)
-  private final MessagePublisher messagePublisher;
+  private final EventPublisherService eventPublisherService;
 
   /**
    * Instantiates a new Event handler delegator service.
    *
    * @param eventHandlerService the event handler service
-   * @param messagePublisher    the message publisher
+   * @param eventPublisherService the message publisher service
    */
   @Autowired
-  public EventHandlerDelegatorService(final EventHandlerService eventHandlerService, final MessagePublisher messagePublisher) {
+  public EventHandlerDelegatorService(final EventHandlerService eventHandlerService, final EventPublisherService eventPublisherService) {
     this.eventHandlerService = eventHandlerService;
-    this.messagePublisher = messagePublisher;
+    this.eventPublisherService = eventPublisherService;
   }
 
   /**
