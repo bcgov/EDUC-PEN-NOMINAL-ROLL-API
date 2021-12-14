@@ -714,6 +714,39 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(2)));
   }
 
+  @Test
+  public void testIsBeingProcessed_givenProcessingYear_ShouldReturnStatusOkAndStatusCounts() throws Exception {
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final var mockAuthority = oidcLogin().authorities(grantedAuthority);
+    final File file = new File(
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+    );
+    final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
+    });
+    this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+    this.mockMvc
+      .perform(get(BASE_URL).with(mockAuthority).param("processingYear", "2021")
+        .contentType(APPLICATION_JSON))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(3)))
+      .andExpect(jsonPath("$[?(@.status == 'LOADED')].count", contains(1)));
+  }
+
+  @Test
+  public void testIsBeingProcessed_givenNotProcessingYear_ShouldReturnStatusOkAndEmptyStatusCounts() throws Exception {
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final var mockAuthority = oidcLogin().authorities(grantedAuthority);
+    final File file = new File(
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+    );
+    final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
+    });
+    this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+    this.mockMvc
+      .perform(get(BASE_URL).with(mockAuthority).param("processingYear", "2020")
+        .contentType(APPLICATION_JSON))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
+  }
+
   private NominalRollStudentEntity createNominalRollStudent() {
     final NominalRollStudentEntity student = new NominalRollStudentEntity();
     student.setGivenNames("John");

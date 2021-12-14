@@ -11,10 +11,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.processor.FileProcessor;
 import ca.bc.gov.educ.pen.nominalroll.api.rules.RulesProcessor;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollStudentSearchService;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.FileUpload;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollFileProcessResponse;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollIDs;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.*;
 import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
 import ca.bc.gov.educ.pen.nominalroll.api.util.TransformUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -81,12 +78,8 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   }
 
   @Override
-  public ResponseEntity<Void> isBeingProcessed(final String processingYear) {
-    if (this.service.countAllNominalRollStudents(processingYear) > 0) {
-      return ResponseEntity.accepted().build();
-    } else {
-      return ResponseEntity.notFound().build();
-    }
+  public ResponseEntity<List<NominalRollStudentCount>> isBeingProcessed(final String processingYear) {
+    return ResponseEntity.ok(this.service.countAllNominalRollStudents(processingYear));
   }
 
   @Override

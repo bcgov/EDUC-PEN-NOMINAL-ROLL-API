@@ -15,6 +15,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentReposi
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepositoryCustom;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Event;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollIDs;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudentCount;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudentSagaData;
 import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -81,8 +82,8 @@ public class NominalRollService {
     return this.repository.findById(nominalRollStudentID).orElseThrow(() -> new EntityNotFoundException(NominalRollStudentEntity.class, STUDENT_ID_ATTRIBUTE, nominalRollStudentID.toString()));
   }
 
-  public long countAllNominalRollStudents(final String processingYear) {
-    return this.repository.countAllByProcessingYear(processingYear);
+  public List<NominalRollStudentCount> countAllNominalRollStudents(final String processingYear) {
+    return this.repository.getCountByProcessingYear(processingYear);
   }
 
   public void deleteAllNominalRollStudents(final String processingYear) {

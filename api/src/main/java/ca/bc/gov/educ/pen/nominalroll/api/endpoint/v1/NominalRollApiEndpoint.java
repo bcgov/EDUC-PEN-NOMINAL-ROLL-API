@@ -1,10 +1,7 @@
 package ca.bc.gov.educ.pen.nominalroll.api.endpoint.v1;
 
 import ca.bc.gov.educ.pen.nominalroll.api.constants.v1.URL;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.FileUpload;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollFileProcessResponse;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollIDs;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.*;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -47,10 +44,10 @@ public interface NominalRollApiEndpoint {
 
   @GetMapping
   @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
-  @ApiResponses(value = {@ApiResponse(responseCode = "202", description = "ACCEPTED"), @ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "NOT FOUND")})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   @Transactional(readOnly = true)
   @Tag(name = "Endpoint to check if provided processing year nominal roll is already in progress", description = "Endpoint to check if provided processing year nominal roll is already in progress")
-  ResponseEntity<Void> isBeingProcessed(@RequestParam(name = "processingYear") String processingYear);
+  ResponseEntity<List<NominalRollStudentCount>> isBeingProcessed(@RequestParam(name = "processingYear") String processingYear);
 
   @GetMapping(URL.NOM_ROLL_STUDENT_ID)
   @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
