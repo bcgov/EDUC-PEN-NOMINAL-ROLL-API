@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.pen.nominalroll.api.repository.v1;
 
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudentCount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -15,6 +16,9 @@ public interface NominalRollStudentRepository extends JpaRepository<NominalRollS
   long countByStatus(String status);
 
   long countAllByProcessingYear(String processingYear);
+
+  @Query("select new ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudentCount(status, count(nominalRollStudentID)) from NominalRollStudentEntity student where student.processingYear = ?1 group by student.status")
+  List<NominalRollStudentCount> getCountByProcessingYear(String processingYear);
 
   @Query(value = "SELECT " +
     "COUNT(nominal_roll_student_id) " +
