@@ -165,8 +165,8 @@ public class NominalRollService {
     this.repository.save(nomRollStud);
   }
 
-  public List<NominalRollPostedStudentEntity> findAllBySurnameAndGivenNamesAndBirthDateAndGenderAndGrade(final String surname, final String givenNames, final LocalDate birthDate, final String gender, final String grade) {
-    return this.postedStudentRepository.findAllBySurnameAndGivenNamesAndBirthDateAndGenderAndGradeOrderByCreateDateDesc(surname, givenNames, birthDate, gender, grade);
+  public List<NominalRollPostedStudentEntity> findAllBySurnameAndGivenNamesAndBirthDateAndGender(final String surname, final String givenNames, final LocalDate birthDate, final String gender) {
+    return this.postedStudentRepository.findAllBySurnameAndGivenNamesAndBirthDateAndGenderOrderByCreateDateDesc(surname, givenNames, birthDate, gender);
   }
 
   public List<NominalRollIDs> findAllNominalRollStudentIDs(final String processingYear, final List<String> statusCodes, final Map<String, String> searchCriteria) {

@@ -125,17 +125,17 @@ public class NominalRollStudentProcessingOrchestrator extends BaseOrchestrator<N
     saga.setSagaState(PROCESS_PEN_MATCH.toString());
     this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
     val nominalRollStudent = nominalRollStudentSagaData.getNominalRollStudent();
-    val nomRollPostedStudents = this.nominalRollService.findAllBySurnameAndGivenNamesAndBirthDateAndGenderAndGrade(nominalRollStudent.getSurname(), nominalRollStudent.getGivenNames(), LocalDate.parse(nominalRollStudent.getBirthDate()), nominalRollStudent.getGender(), nominalRollStudent.getGrade());
-    if (nomRollPostedStudents.isEmpty()) { // proceed to actual pen match logic by calling api.
+    val nomRollPostedStudents = this.nominalRollService.findAllBySurnameAndGivenNamesAndBirthDateAndGender(nominalRollStudent.getSurname(), nominalRollStudent.getGivenNames(), LocalDate.parse(nominalRollStudent.getBirthDate()), nominalRollStudent.getGender());
+    if (nomRollPostedStudents.size() != 1) { // proceed to actual pen match logic by calling api.
       this.postToPenMatchAPI(saga, nominalRollStudentSagaData);
     } else {
-      final Optional<String> matchingPEN = NominalRollHelper.findMatchingPEN(nominalRollStudent, nomRollPostedStudents);
-      if (matchingPEN.isPresent()) {
-        log.info("Found exact match from posterity table and pen is :: {}", matchingPEN.get());
+      final String matchingPEN = nomRollPostedStudents.get(0).getAssignedPEN();
+      if (StringUtils.isNotEmpty(matchingPEN)) {
+        log.info("Found exact match from posterity table and pen is :: {}", matchingPEN);
         val nomRollStudOptional = this.nominalRollService.findByNominalRollStudentID(nominalRollStudent.getNominalRollStudentID());
         if (nomRollStudOptional.isPresent()) {
           val nomRollStud = nomRollStudOptional.get();
-          nomRollStud.setAssignedPEN(matchingPEN.get());
+          nomRollStud.setAssignedPEN(matchingPEN);
           nomRollStud.setStatus(NominalRollStudentStatus.MATCHEDSYS.toString());
           this.nominalRollService.saveNominalRollStudent(nomRollStud);
           //fastest route to success, complete the saga.

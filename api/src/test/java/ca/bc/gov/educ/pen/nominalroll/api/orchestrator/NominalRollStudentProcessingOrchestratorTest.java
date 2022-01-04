@@ -232,6 +232,7 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
     assertThat(savedSagaInDB.get().getSagaState()).isEqualTo(COMPLETED.toString());
     val savedNominalRollStudent = this.testHelper.getRepository().findById(entity.getNominalRollStudentID());
     assertThat(savedNominalRollStudent).isPresent();
+    assertThat(savedNominalRollStudent.get().getAssignedPEN()).isEqualTo(postedEntity.getAssignedPEN());
     assertThat(savedNominalRollStudent.get().getStatus()).isEqualTo(MATCHEDSYS.toString());
   }
 
