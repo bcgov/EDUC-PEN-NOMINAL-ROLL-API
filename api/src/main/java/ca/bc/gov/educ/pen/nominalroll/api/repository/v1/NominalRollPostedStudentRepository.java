@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Repository
 public interface NominalRollPostedStudentRepository extends JpaRepository<NominalRollPostedStudentEntity, UUID> {
-  List<NominalRollPostedStudentEntity> findAllBySurnameAndGivenNamesAndBirthDateAndGenderAndGradeOrderByCreateDateDesc(String surname, String givenNames, LocalDate birthDate, String gender, String grade);
+  List<NominalRollPostedStudentEntity> findAllBySurnameAndGivenNamesAndBirthDateAndGenderOrderByCreateDateDesc(String surname, String givenNames, LocalDate birthDate, String gender);
 
   List<NominalRollPostedStudentEntity> findAllByProcessingYearBetween(LocalDateTime startTime, LocalDateTime endTime);
 
