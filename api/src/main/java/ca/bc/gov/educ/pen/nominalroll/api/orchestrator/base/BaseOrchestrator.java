@@ -523,8 +523,8 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    */
   @Override
   @Transactional
-  public Saga createSaga(@NotNull final String payload, final UUID nominalRollStudentID, final String userName) {
-    return this.sagaService.createSagaRecordInDB(this.sagaName, userName, payload, nominalRollStudentID);
+  public Saga createSaga(@NotNull final String payload, final UUID nominalRollStudentID, final String userName, final String processingYear) {
+    return this.sagaService.createSagaRecordInDB(this.sagaName, userName, payload, nominalRollStudentID, processingYear);
   }
 
   /**
@@ -536,8 +536,8 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    */
   @Override
   @Transactional
-  public List<Saga> createMultipleSagas(@NotNull final List<Pair<UUID, String>> payloads, final String userName) {
-    return this.getSagaService().createMultipleBatchSagaRecordsInDB(this.getSagaName(), userName, payloads);
+  public List<Saga> createMultipleSagas(@NotNull final List<Pair<UUID, String>> payloads, final String userName, final String processingYear) {
+    return this.getSagaService().createMultipleBatchSagaRecordsInDB(this.getSagaName(), userName, payloads, processingYear);
   }
 
   /**

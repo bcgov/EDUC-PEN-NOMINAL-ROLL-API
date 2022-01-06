@@ -1,0 +1,26 @@
+[
+  {
+    "sagaEventState": "INITIATED",
+    "sagaEventOutcome": "INITIATE_SUCCESS",
+    "sagaStepNumber": 1,
+    "sagaEventResponse": "",
+    "createUser": "NOMINAL_ROLL_POST_DATA_SAGA",
+    "updateUser": "NOMINAL_ROLL_POST_DATA_SAGA"
+  },
+  {
+    "sagaEventState": "SAVE_NOMINAL_ROLL_POSTED_STUDENTS",
+    "sagaEventOutcome": "NOMINAL_ROLL_POSTED_STUDENTS_SAVED",
+    "sagaStepNumber": 2,
+    "sagaEventResponse": "",
+    "createUser": "NOMINAL_ROLL_POST_DATA_SAGA",
+    "updateUser": "NOMINAL_ROLL_POST_DATA_SAGA"
+  },
+  {
+    "sagaEventState": "CREATE_SLD_DIA_STUDENTS",
+    "sagaEventOutcome": "SLD_DIA_STUDENTS_CREATED",
+    "sagaStepNumber": 3,
+    "sagaEventResponse": "",
+    "createUser": "NOMINAL_ROLL_POST_DATA_SAGA",
+    "updateUser": "NOMINAL_ROLL_POST_DATA_SAGA"
+  }
+]

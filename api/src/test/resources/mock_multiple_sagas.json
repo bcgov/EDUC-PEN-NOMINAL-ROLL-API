@@ -1,0 +1,35 @@
+[
+  {
+    "sagaId": "0a610f58-75e8-19da-8175-e8d6cfd10009",
+    "sagaName": "NOMINAL_ROLL_POST_DATA_SAGA",
+    "sagaState": "COMPLETED",
+    "status": "COMPLETED",
+    "createUser": "USER",
+    "updateUser": "USER",
+    "processingYear": "2020",
+    "nominalRollStudentID": null,
+    "payload": "{\"createUser\":null,\"updateUser\":\"USER\",\"createDate\":null,\"updateDate\":null,\"processingYear\":\"2020\"}"
+  },
+  {
+    "sagaId": "0a610f58-75e8-19da-8175-e8d6cfd10008",
+    "sagaName": "NOMINAL_ROLL_POST_DATA_SAGA",
+    "sagaState": "IN_PROGRESS",
+    "status": "SAVE_NOMINAL_ROLL_POSTED_STUDENTS",
+    "createUser": "USER",
+    "updateUser": "USER",
+    "processingYear": "2021",
+    "nominalRollStudentID": null,
+    "payload": "{\"createUser\":null,\"updateUser\":\"USER\",\"createDate\":null,\"updateDate\":null,\"processingYear\":\"2021\"}"
+  },
+  {
+    "sagaId": "0a610f58-75e8-19da-8175-e8d6cfd10007",
+    "sagaName": "NOMINAL_ROLL_PROCESS_STUDENT_SAGA",
+    "sagaState": "IN_PROGRESS",
+    "status": "VALIDATE_NOMINAL_ROLL_STUDENT",
+    "createUser": "USER",
+    "updateUser": "USER",
+    "processingYear": "2021",
+    "nominalRollStudentID": "ac336ffc-70d4-15cf-8170-e952f901000a",
+    "payload": "{\"penMatchResult\":null,\"nominalRollStudent\":{\"nominalRollStudentID\":\"0a612f49-79f6-11db-8179-f879c7900060\",\"surname\":\"Fox\"}}"
+  }
+]

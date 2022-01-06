@@ -22,7 +22,11 @@ public class Saga {
   /**
    * The Student id.
    */
-  UUID studentID;
+  UUID nominalRollStudentID;
+  /**
+   * The Processing year.
+   */
+  String processingYear;
   /**
    * The Saga name.
    */

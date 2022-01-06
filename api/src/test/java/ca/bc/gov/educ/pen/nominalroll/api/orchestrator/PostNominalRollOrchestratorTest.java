@@ -38,12 +38,12 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.CREATE_SLD_DIA_STUDENTS;
-import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaEnum.NOMINAL_ROLL_POST_SAGA;
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaEnum.NOMINAL_ROLL_POST_DATA_SAGA;
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.value;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-public class NominalRollOrchestratorTest extends BaseNominalRollAPITest {
+public class PostNominalRollOrchestratorTest extends BaseNominalRollAPITest {
   /**
    * The Repository.
    */
@@ -106,8 +106,8 @@ public class NominalRollOrchestratorTest extends BaseNominalRollAPITest {
     var payload = placeholderNominalRollPostSagaData();
     sagaData = getNominalRollSagaDataFromJsonString(payload);
     sagaPayload = JsonUtil.getJsonStringFromObject(sagaData);
-    saga = sagaService.createSagaRecordInDB(NOMINAL_ROLL_POST_SAGA.toString(), "Test",
-      sagaPayload, UUID.fromString(studentID));
+    saga = sagaService.createSagaRecordInDB(NOMINAL_ROLL_POST_DATA_SAGA.toString(), "Test",
+      sagaPayload, UUID.fromString(studentID), "2021");
     final var file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
     );
