@@ -42,8 +42,8 @@ pipeline {
             echo sh(returnStdout: true, script: 'env')
           }
 
-          sh "wget -O - https://raw.githubusercontent.com/${OWNER}/${REPO_NAME}/main/tools/jenkins/deployHelpers.groovy > deployHelpers.groovy"
-          extJSHelper = evaluate readFile('deployHelpers.groovy')
+          sh "wget -O - https://raw.githubusercontent.com/bcgov/EDUC-INFRA-COMMON/master/openshift/common-deployment/deployHelpers.js > deployHelpers.js"
+          extJSHelper = evaluate readFile('deployHelpers.js')
         }
       }
     }
