@@ -30,7 +30,7 @@ public interface NominalRollStudentRepository extends JpaRepository<NominalRollS
     "assigned_pen " +
     "HAVING " +
     "COUNT(nominal_roll_student_id) > 1", nativeQuery = true)
-  long countForDuplicateAssignedPENs(String processingYear);
+  Long countForDuplicateAssignedPENs(String processingYear);
 
   void deleteAllByProcessingYear(String processingYear);
 

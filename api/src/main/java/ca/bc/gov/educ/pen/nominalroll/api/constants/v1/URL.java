@@ -8,6 +8,7 @@ public final class URL {
   public static final String PAGINATED = "/paginated";
   public static final String VALIDATE = "/validate";
   public static final String NOM_ROLL_STUDENT_IDS = "/nominal-roll-student-ids";
+  public static final String SAGA = "/saga";
 
   private URL() {
 

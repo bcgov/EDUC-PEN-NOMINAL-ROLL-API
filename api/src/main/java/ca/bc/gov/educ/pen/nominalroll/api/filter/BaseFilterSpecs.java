@@ -14,13 +14,13 @@ import java.util.function.Function;
  */
 public abstract class BaseFilterSpecs<R> {
 
-  private final ca.bc.gov.educ.pen.nominalroll.api.filter.FilterSpecifications<R, ChronoLocalDate> dateFilterSpecifications;
-  private final ca.bc.gov.educ.pen.nominalroll.api.filter.FilterSpecifications<R, ChronoLocalDateTime<?>> dateTimeFilterSpecifications;
-  private final ca.bc.gov.educ.pen.nominalroll.api.filter.FilterSpecifications<R, Integer> integerFilterSpecifications;
-  private final ca.bc.gov.educ.pen.nominalroll.api.filter.FilterSpecifications<R, String> stringFilterSpecifications;
-  private final ca.bc.gov.educ.pen.nominalroll.api.filter.FilterSpecifications<R, Long> longFilterSpecifications;
-  private final ca.bc.gov.educ.pen.nominalroll.api.filter.FilterSpecifications<R, UUID> uuidFilterSpecifications;
-  private final ca.bc.gov.educ.pen.nominalroll.api.filter.Converters converters;
+  private final FilterSpecifications<R, ChronoLocalDate> dateFilterSpecifications;
+  private final FilterSpecifications<R, ChronoLocalDateTime<?>> dateTimeFilterSpecifications;
+  private final FilterSpecifications<R, Integer> integerFilterSpecifications;
+  private final FilterSpecifications<R, String> stringFilterSpecifications;
+  private final FilterSpecifications<R, Long> longFilterSpecifications;
+  private final FilterSpecifications<R, UUID> uuidFilterSpecifications;
+  private final Converters converters;
 
   /**
    * Instantiates a new Base filter specs.
@@ -33,7 +33,7 @@ public abstract class BaseFilterSpecs<R> {
    * @param uuidFilterSpecifications     the uuid filter specifications
    * @param converters                   the converters
    */
-  protected BaseFilterSpecs(ca.bc.gov.educ.pen.nominalroll.api.filter.FilterSpecifications<R, ChronoLocalDate> dateFilterSpecifications, ca.bc.gov.educ.pen.nominalroll.api.filter.FilterSpecifications<R, ChronoLocalDateTime<?>> dateTimeFilterSpecifications, ca.bc.gov.educ.pen.nominalroll.api.filter.FilterSpecifications<R, Integer> integerFilterSpecifications, ca.bc.gov.educ.pen.nominalroll.api.filter.FilterSpecifications<R, String> stringFilterSpecifications, ca.bc.gov.educ.pen.nominalroll.api.filter.FilterSpecifications<R, Long> longFilterSpecifications, ca.bc.gov.educ.pen.nominalroll.api.filter.FilterSpecifications<R, UUID> uuidFilterSpecifications, ca.bc.gov.educ.pen.nominalroll.api.filter.Converters converters) {
+  protected BaseFilterSpecs(FilterSpecifications<R, ChronoLocalDate> dateFilterSpecifications, FilterSpecifications<R, ChronoLocalDateTime<?>> dateTimeFilterSpecifications, FilterSpecifications<R, Integer> integerFilterSpecifications, FilterSpecifications<R, String> stringFilterSpecifications, FilterSpecifications<R, Long> longFilterSpecifications, FilterSpecifications<R, UUID> uuidFilterSpecifications, Converters converters) {
     this.dateFilterSpecifications = dateFilterSpecifications;
     this.dateTimeFilterSpecifications = dateTimeFilterSpecifications;
     this.integerFilterSpecifications = integerFilterSpecifications;

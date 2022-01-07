@@ -1,0 +1,10 @@
+{
+  "sagaName": "NOMINAL_ROLL_POST_DATA_SAGA",
+  "sagaState": "COMPLETED",
+  "status": "COMPLETED",
+  "createUser": "USER",
+  "updateUser": "USER",
+  "processingYear": "2021",
+  "nominalRollStudentID": null,
+  "payload": ""
+}
