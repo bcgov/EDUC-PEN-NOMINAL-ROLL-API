@@ -19,10 +19,10 @@ public interface SagaMapper {
   SagaMapper mapper = Mappers.getMapper(SagaMapper.class);
 
   /**
-   * To struct ca . bc . gov . educ . api . pen . services . struct . v 1 . saga.
+   * To struct ca . bc . gov . educ  . pen . nominalroll . api . struct . v 1 . saga.
    *
    * @param saga the saga
-   * @return the ca . bc . gov . educ . api . pen . services . struct . v 1 . saga
+   * @return the ca . bc . gov . educ . pen . nominalroll . api . struct . v 1 . saga
    */
   ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Saga toStruct(Saga saga);
 

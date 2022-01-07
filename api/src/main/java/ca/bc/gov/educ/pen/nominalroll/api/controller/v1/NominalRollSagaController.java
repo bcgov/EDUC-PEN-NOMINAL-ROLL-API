@@ -60,7 +60,7 @@ public class NominalRollSagaController implements NominalRollSagaEndpoint {
   private final Map<String, Orchestrator> orchestratorMap = new HashMap<>();
 
   /**
-   * Instantiates a new Pen services saga controller.
+   * Instantiates a new nominal roll saga controller.
    *
    * @param sagaService   the saga service
    * @param searchService the saga search service
