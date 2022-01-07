@@ -33,18 +33,20 @@ public interface Orchestrator {
    * @param payload   the payload
    * @param studentID the student id
    * @param userName  the user who created the saga
+   * @param processingYear the processing year
    * @return the saga
    */
-  Saga createSaga(String payload, UUID studentID, String userName);
+  Saga createSaga(String payload, UUID studentID, String userName, String processingYear);
 
   /**
    * create multiple sagas.
    *
    * @param payloads   the list of  pair of student id and payload
-   * @param userName  the user who created the saga
+   * @param userName  the user who created the
+   * @param processingYear the processing year
    * @return the saga
    */
-  List<Saga> createMultipleSagas(List<Pair<UUID, String>> payloads, String userName);
+  List<Saga> createMultipleSagas(List<Pair<UUID, String>> payloads, String userName, String processingYear);
 
   /**
    * Replay saga.

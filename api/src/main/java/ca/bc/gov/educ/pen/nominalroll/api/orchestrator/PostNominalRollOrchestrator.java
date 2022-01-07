@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventOutcome.NOMINAL_ROLL_POSTED_STUDENTS_SAVED;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventOutcome.SLD_DIA_STUDENTS_CREATED;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.*;
-import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaEnum.NOMINAL_ROLL_POST_SAGA;
+import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaEnum.NOMINAL_ROLL_POST_DATA_SAGA;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaStatusEnum.IN_PROGRESS;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum.*;
 
@@ -52,7 +52,7 @@ public class PostNominalRollOrchestrator extends BaseUserActionsOrchestrator<Nom
    * @param nominalRollService the nominal roll service
    */
   public PostNominalRollOrchestrator(final SagaService sagaService, final MessagePublisher messagePublisher, final NominalRollService nominalRollService, final RestUtils restUtils) {
-    super(sagaService, messagePublisher, NominalRollPostSagaData.class, NOMINAL_ROLL_POST_SAGA.toString(), NOMINAL_ROLL_POST_SAGA_TOPIC.toString());
+    super(sagaService, messagePublisher, NominalRollPostSagaData.class, NOMINAL_ROLL_POST_DATA_SAGA.toString(), NOMINAL_ROLL_POST_SAGA_TOPIC.toString());
     this.nominalRollService = nominalRollService;
     this.restUtils = restUtils;
   }

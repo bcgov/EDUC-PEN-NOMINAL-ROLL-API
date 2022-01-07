@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * The type Nominal roll post saga data.
  */
@@ -15,5 +17,6 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class NominalRollPostSagaData extends BaseRequest {
+  @NotNull( message = "processingYear cannot be null")
   String processingYear;
 }

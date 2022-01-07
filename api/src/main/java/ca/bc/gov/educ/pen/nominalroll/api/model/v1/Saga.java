@@ -55,6 +55,12 @@ public class Saga {
   UUID nominalRollStudentID;
 
   /**
+   * The Processing year.
+   */
+  @Column(name = "PROCESSING_YEAR", length = 4)
+  String processingYear;
+
+  /**
    * The Payload.
    */
   @NotNull(message = "payload cannot be null")

@@ -9,6 +9,11 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.util.Pair;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -21,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.INITIATED;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.SagaStatusEnum.STARTED;
@@ -131,6 +138,17 @@ public class SagaService {
 
 
   /**
+   * Find all by processing year and status in list.
+   *
+   * @param processingYear the pen request batch i ds
+   * @param statuses       the statuses
+   * @return the list
+   */
+  public List<Saga> findAllByProcessingYearAndStatusIn(final String processingYear, final List<String> statuses) {
+    return this.getSagaRepository().findAllByProcessingYearAndStatusIn(processingYear, statuses);
+  }
+
+  /**
    * Create saga record in db saga.
    *
    * @param sagaName             the saga name
@@ -140,11 +158,12 @@ public class SagaService {
    * @return the saga
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public Saga createSagaRecordInDB(final String sagaName, final String userName, final String payload, final UUID nominalRollStudentID) {
+  public Saga createSagaRecordInDB(final String sagaName, final String userName, final String payload, final UUID nominalRollStudentID, final String processingYear) {
     final var saga = Saga
       .builder()
       .payload(payload)
       .nominalRollStudentID(nominalRollStudentID)
+      .processingYear(processingYear)
       .sagaName(sagaName)
       .status(STARTED.toString())
       .sagaState(INITIATED.toString())
@@ -165,12 +184,13 @@ public class SagaService {
    * @return the saga
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public List<Saga> createMultipleBatchSagaRecordsInDB(final String sagaName, final String userName, final List<Pair<UUID, String>> payloads) {
+  public List<Saga> createMultipleBatchSagaRecordsInDB(final String sagaName, final String userName, final List<Pair<UUID, String>> payloads, final String processingYear) {
     final List<Saga> sagas = new ArrayList<>();
     payloads.forEach(payloadPair -> sagas.add(
       Saga.builder()
         .payload(payloadPair.getSecond())
         .nominalRollStudentID(payloadPair.getFirst())
+        .processingYear(processingYear)
         .sagaName(sagaName)
         .status(STARTED.toString())
         .sagaState(INITIATED.toString())
@@ -181,5 +201,26 @@ public class SagaService {
         .build()));
 
     return this.getSagaRepository().saveAll(sagas);
+  }
+
+  /**
+   * Find all completable future.
+   *
+   * @param specs      the saga specs
+   * @param pageNumber the page number
+   * @param pageSize   the page size
+   * @param sorts      the sorts
+   * @return the completable future
+   */
+  @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+  public CompletableFuture<Page<Saga>> findAll(final Specification<Saga> specs, final Integer pageNumber, final Integer pageSize, final List<Sort.Order> sorts) {
+    return CompletableFuture.supplyAsync(() -> {
+      final Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by(sorts));
+      try {
+        return this.sagaRepository.findAll(specs, paging);
+      } catch (final Exception ex) {
+        throw new CompletionException(ex);
+      }
+    });
   }
 }

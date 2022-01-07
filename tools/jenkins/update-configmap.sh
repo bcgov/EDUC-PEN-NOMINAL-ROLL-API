@@ -58,11 +58,60 @@ PNR_APIServiceClientSecret=$(curl -sX GET "https://$SOAM_KC/auth/admin/realms/$S
   jq -r '.value')
 
 echo
-echo Writing scope NOMINAL_ROLL
+echo Writing scope NOMINAL_ROLL_READ_STUDENT
 curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scopes" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer $TKN" \
-  -d "{\"description\": \"Nominal roll scope\",\"id\": \"NOMINAL_ROLL\",\"name\": \"NOMINAL_ROLL\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+  -d "{\"description\": \"Read nominal roll student\",\"id\": \"NOMINAL_ROLL_READ_STUDENT\",\"name\": \"NOMINAL_ROLL_READ_STUDENT\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+
+echo
+echo Writing scope NOMINAL_ROLL_WRITE_STUDENT
+curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scopes" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TKN" \
+  -d "{\"description\": \"Write nominal roll student\",\"id\": \"NOMINAL_ROLL_WRITE_STUDENT\",\"name\": \"NOMINAL_ROLL_WRITE_STUDENT\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+
+echo
+echo Writing scope NOMINAL_ROLL_DELETE_STUDENT
+curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scopes" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TKN" \
+  -d "{\"description\": \"Delete nominal roll student\",\"id\": \"NOMINAL_ROLL_DELETE_STUDENT\",\"name\": \"NOMINAL_ROLL_DELETE_STUDENT\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+
+echo
+echo Writing scope NOMINAL_ROLL_UPLOAD_FILE
+curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scopes" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TKN" \
+  -d "{\"description\": \"Upload nominal roll file\",\"id\": \"NOMINAL_ROLL_UPLOAD_FILE\",\"name\": \"NOMINAL_ROLL_UPLOAD_FILE\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+
+echo
+echo Writing scope NOMINAL_ROLL_VALIDATE
+curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scopes" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TKN" \
+  -d "{\"description\": \"Validate nominal roll student\",\"id\": \"NOMINAL_ROLL_VALIDATE\",\"name\": \"NOMINAL_ROLL_VALIDATE\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+
+echo
+echo Writing scope NOMINAL_ROLL_POST_DATA_SAGA
+curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scopes" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TKN" \
+  -d "{\"description\": \"Start post data saga\",\"id\": \"NOMINAL_ROLL_POST_DATA_SAGA\",\"name\": \"NOMINAL_ROLL_POST_DATA_SAGA\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+
+echo
+echo Writing scope NOMINAL_ROLL_READ_SAGA
+curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scopes" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TKN" \
+  -d "{\"description\": \"Fetch nominal roll saga information\",\"id\": \"NOMINAL_ROLL_READ_SAGA\",\"name\": \"NOMINAL_ROLL_READ_SAGA\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+
+echo
+echo Writing scope NOMINAL_ROLL_WRITE_SAGA
+curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scopes" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TKN" \
+  -d "{\"description\": \"Write nominal roll saga information\",\"id\": \"NOMINAL_ROLL_WRITE_SAGA\",\"name\": \"NOMINAL_ROLL_WRITE_SAGA\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
 
 
 ###########################################################
