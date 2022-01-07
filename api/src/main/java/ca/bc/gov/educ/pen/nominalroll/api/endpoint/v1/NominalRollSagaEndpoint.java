@@ -34,7 +34,7 @@ public interface NominalRollSagaEndpoint {
    * @return the response entity
    */
   @PostMapping("/post-data")
-  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL_POST_DATA_SAGA')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK."), @ApiResponse(responseCode = "409", description = "Conflict.")})
   @Transactional
   @Tag(name = "Endpoint to start post data saga.", description = "post data saga")

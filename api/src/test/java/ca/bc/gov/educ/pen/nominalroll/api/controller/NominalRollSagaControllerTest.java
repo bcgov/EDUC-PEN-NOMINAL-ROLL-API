@@ -81,7 +81,7 @@ public class NominalRollSagaControllerTest extends BaseNominalRollAPITest {
   @Test
   public void testPostData_GivenInvalidPayload_ShouldReturnStatusBadRequest() throws Exception {
     this.mockMvc.perform(post(BASE_URL + SAGA + "/post-data")
-            .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_POST_DATA_SAGA")))
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
             .content(placeholderInvalidSagaData()))
@@ -91,7 +91,7 @@ public class NominalRollSagaControllerTest extends BaseNominalRollAPITest {
   @Test
   public void testPostData_GivenValidPayload_ShouldReturnStatusOk() throws Exception {
     this.mockMvc.perform(post(BASE_URL + SAGA + "/post-data")
-      .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_POST_DATA_SAGA")))
       .contentType(MediaType.APPLICATION_JSON)
       .accept(MediaType.APPLICATION_JSON).content(this.placeholderPostDataSagaData())).andDo(print())
       .andExpect(status().isOk()).andExpect(jsonPath("$").exists());
@@ -102,7 +102,7 @@ public class NominalRollSagaControllerTest extends BaseNominalRollAPITest {
     final var payload = this.placeholderPostDataSagaData();
     this.sagaService.createSagaRecordInDB(NOMINAL_ROLL_POST_DATA_SAGA.toString(), "Test", payload, UUID.fromString(this.nominalRollStudentID), "2021");
     this.mockMvc.perform(post(BASE_URL + SAGA + "/post-data")
-      .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_POST_DATA_SAGA")))
       .contentType(MediaType.APPLICATION_JSON)
       .accept(MediaType.APPLICATION_JSON).content(payload)).andDo(print()).andExpect(status().isConflict());
   }
@@ -208,7 +208,7 @@ public class NominalRollSagaControllerTest extends BaseNominalRollAPITest {
 
   @Test
   @SuppressWarnings("java:S100")
-  public void testGetSagaEventsBySagaID_whenSagaIDIsValid_shouldReturnStatusOk() throws Exception {
+  public void testGetSagaEventsBySagaID_givenSagaIDIsValid_shouldReturnStatusOk() throws Exception {
     final File sagEventsFile = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock-saga-events.json")).getFile()
     );

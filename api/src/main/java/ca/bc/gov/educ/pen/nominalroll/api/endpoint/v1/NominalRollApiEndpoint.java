@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -27,7 +28,7 @@ import java.util.concurrent.CompletableFuture;
 public interface NominalRollApiEndpoint {
 
   @PostMapping
-  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL_UPLOAD_FILE')")
   @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "CREATED"), @ApiResponse(responseCode = "400", description = "BAD REQUEST")})
   @Transactional
   @Tag(name = "Endpoint to Upload an excel file and convert to json structure.", description = "Endpoint to Upload an excel file and convert to json structure")
@@ -36,39 +37,40 @@ public interface NominalRollApiEndpoint {
 
 
   @PostMapping(URL.PROCESSING)
-  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL_WRITE_STUDENT')")
   @ApiResponses(value = {@ApiResponse(responseCode = "202", description = "ACCEPTED")})
   @Tag(name = "Endpoint to start processing of nominal roll students", description = "Endpoint to start processing of nominal roll students")
   @Schema(name = "NominalRollStudent", implementation = NominalRollStudent.class)
   ResponseEntity<Void> processNominalRollStudents(@Validated @RequestBody List<NominalRollStudent> nominalRollStudents, @RequestHeader(name = "correlationID") String correlationID);
 
   @GetMapping
-  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL_READ_STUDENT')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   @Transactional(readOnly = true)
   @Tag(name = "Endpoint to check if provided processing year nominal roll is already in progress", description = "Endpoint to check if provided processing year nominal roll is already in progress")
   ResponseEntity<List<NominalRollStudentCount>> isBeingProcessed(@RequestParam(name = "processingYear") String processingYear);
 
   @GetMapping(URL.NOM_ROLL_STUDENT_ID)
-  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL_READ_STUDENT')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "NOT FOUND")})
   @Transactional(readOnly = true)
   @Tag(name = "Endpoint to get the  details of individual record in nominal roll", description = "Endpoint to get the  details of individual record in nominal roll")
   ResponseEntity<NominalRollStudent> getProcessingResultOfStudent(@PathVariable UUID nomRollStudentID);
 
   @DeleteMapping
-  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL_DELETE_STUDENT')")
   @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "NO CONTENT")})
   @Transactional
   @Tag(name = "Endpoint to Delete the entire data set from transient table for the processing year provided", description = "Endpoint to Delete the entire data set from transient table for the processing year provided")
   ResponseEntity<Void> deleteAll(@RequestParam(name = "processingYear") String processingYear);
 
   @GetMapping(URL.DUPLICATES)
-  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL_READ_STUDENT')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   @Transactional(readOnly = true)
   @Tag(name = "Endpoint to check for duplicate nominal roll students", description = "Endpoint to check for duplicate nominal roll students")
-  ResponseEntity<Boolean> checkForDuplicateNominalRollStudents(@RequestHeader(name = "correlationID") String correlationID);
+  ResponseEntity<Boolean> checkForDuplicateNominalRollStudents(@RequestParam(name = "processingYear", defaultValue = "") String processingYear,
+                                                               @RequestHeader(name = "correlationID") String correlationID);
 
   /**
    * Find all completable future.
@@ -80,7 +82,7 @@ public interface NominalRollApiEndpoint {
    * @return the completable future
    */
   @GetMapping(URL.PAGINATED)
-  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL_READ_STUDENT')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR.")})
   @Transactional(readOnly = true)
   @Tag(name = "Endpoint to support data table view in frontend, with sort, filter and pagination.", description = "This API endpoint exposes flexible way to query the entity by leveraging JPA specifications.")
@@ -90,7 +92,7 @@ public interface NominalRollApiEndpoint {
                                                       @RequestParam(name = "searchCriteriaList", required = false) String searchCriteriaListJson);
 
   @PostMapping(URL.VALIDATE)
-  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL_VALIDATE')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   @Transactional
   @Tag(name = "Endpoint to validate the given nominal roll student", description = "Endpoint to validate the given nominal roll student")
@@ -98,14 +100,14 @@ public interface NominalRollApiEndpoint {
   ResponseEntity<NominalRollStudent> validateNomRollStudent(@Validated @RequestBody NominalRollStudent nominalRollStudent);
 
   @PutMapping(URL.NOM_ROLL_STUDENT_ID)
-  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL_WRITE_STUDENT')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "404", description = "NOT FOUND")})
   @Transactional
   @Tag(name = "Endpoint to update the nominal roll student", description = "Endpoint to update the nominal roll student")
   ResponseEntity<NominalRollStudent> updateNominalRollStudent(@PathVariable UUID nomRollStudentID, @Validated @RequestBody NominalRollStudent nominalRollStudent);
 
   @GetMapping(URL.NOM_ROLL_STUDENT_IDS)
-  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL')")
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL_READ_STUDENT')")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "500", description = "INTERNAL SERVER ERROR.")})
   @Transactional(readOnly = true)
   @Tag(name = "Endpoint to support nominal roll navigation view in frontend.", description = "This API endpoint exposes flexible way to query ids without returning the entire entity.")

@@ -27,7 +27,7 @@ public abstract class SearchService<T> {
    *
    * @param filterSpecs the filter specs
    */
-  public SearchService(BaseFilterSpecs<T> filterSpecs, Class<T> clazz) {
+  protected SearchService(BaseFilterSpecs<T> filterSpecs, Class<T> clazz) {
     this.filterSpecs = filterSpecs;
     this.clazz = clazz;
   }

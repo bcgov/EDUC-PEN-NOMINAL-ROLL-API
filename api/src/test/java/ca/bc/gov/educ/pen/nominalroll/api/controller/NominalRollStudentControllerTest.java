@@ -45,8 +45,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @RunWith(JUnitParamsRunner.class)
@@ -84,7 +83,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_givenValueNull_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final var file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -107,7 +106,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_givenValueNotNull_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final var file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -129,7 +128,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_Always_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -146,7 +145,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_whenNoDataInDB_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final MvcResult result = this.mockMvc
       .perform(get(BASE_URL + PAGINATED).with(mockAuthority)
@@ -157,7 +156,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginatedWithSorting_Always_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -178,7 +177,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_GivenFirstNameFilter_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -203,7 +202,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_GivenLastNameFilter_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -228,7 +227,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_GivenSubmitDateBetween_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -255,7 +254,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_GivenFirstAndLast_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -286,7 +285,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_GivenFirstAndLastNull_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -317,7 +316,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_GivenFirstAndLastOrbirthDate_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -354,7 +353,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_GivenFirstORLastANDbirthDate_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -391,7 +390,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_surnameFilterIgnoreCase_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -416,7 +415,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_surnameStartWith_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -441,7 +440,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_surnameNotStartWith_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -466,7 +465,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_surnameStartWith2_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -491,7 +490,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_surnameStartWithIgnoreCase2_ShouldReturnStatusOk() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -517,7 +516,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_surnameEndWith_ShouldReturnStatusOkAndRecord() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -542,7 +541,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_surnameEndWith_ShouldReturnStatusOkButNoRecord() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -567,7 +566,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_givenOperationTypeNull_ShouldReturnStatusBadRequest() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final var file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -590,7 +589,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testReadStudentPaginated_givenInvalidSearchCriteria_ShouldReturnStatusBadRequest() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     this.mockMvc
       .perform(get(BASE_URL + PAGINATED).with(mockAuthority).param("searchCriteriaList", "{test}")
@@ -604,7 +603,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
     assertThat(fileContents).isNotEmpty();
     val body = FileUpload.builder().fileContents(fileContents).fileExtension("xlsx").createUser("test").updateUser("test").build();
     this.mockMvc.perform(post(BASE_URL)
-      .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_UPLOAD_FILE")))
       .header("correlationID", UUID.randomUUID().toString())
       .content(JsonUtil.getJsonStringFromObject(body))
       .contentType(APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.nominalRollStudents", hasSize(6872))).andExpect(jsonPath("$.nominalRollStudents[0].validationErrors", is(nullValue())));
@@ -617,7 +616,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
     assertThat(fileContents).isNotEmpty();
     val body = FileUpload.builder().fileContents(fileContents).fileExtension("xls").createUser("test").updateUser("test").build();
     this.mockMvc.perform(post(BASE_URL)
-      .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_UPLOAD_FILE")))
       .header("correlationID", UUID.randomUUID().toString())
       .content(JsonUtil.getJsonStringFromObject(body))
       .contentType(APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.nominalRollStudents", hasSize(6872))).andExpect(jsonPath("$.nominalRollStudents[0].validationErrors", is(nullValue())));
@@ -636,7 +635,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
     assertThat(fileContents).isNotEmpty();
     val body = FileUpload.builder().fileContents(fileContents).fileExtension("xlsx").createUser("test").updateUser("test").build();
     this.mockMvc.perform(post(BASE_URL)
-        .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_UPLOAD_FILE")))
         .header("correlationID", UUID.randomUUID().toString())
         .content(JsonUtil.getJsonStringFromObject(body))
         .contentType(APPLICATION_JSON))
@@ -654,7 +653,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
     assertThat(fileContents).isNotEmpty();
     val body = FileUpload.builder().fileContents(fileContents).fileExtension("xlsx").createUser("test").updateUser("test").build();
     this.mockMvc.perform(post(BASE_URL)
-        .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_UPLOAD_FILE")))
         .header("correlationID", UUID.randomUUID().toString())
         .content(JsonUtil.getJsonStringFromObject(body))
         .contentType(APPLICATION_JSON))
@@ -664,7 +663,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
     assertThat(fileContents2).isNotEmpty();
     val body2 = FileUpload.builder().fileContents(fileContents2).fileExtension("xls").createUser("test").updateUser("test").build();
     this.mockMvc.perform(post(BASE_URL)
-        .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+        .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_UPLOAD_FILE")))
         .header("correlationID", UUID.randomUUID().toString())
         .content(JsonUtil.getJsonStringFromObject(body2))
         .contentType(APPLICATION_JSON))
@@ -677,7 +676,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
   public void testProcessNominalRollFile_givenInvalidPayload_ShouldReturnStatusBadRequest() throws Exception {
     val body = FileUpload.builder().fileExtension("xlsx").createUser("test").updateUser("test").build();
     this.mockMvc.perform(post(BASE_URL)
-      .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_UPLOAD_FILE")))
       .header("correlationID", UUID.randomUUID().toString())
       .content(JsonUtil.getJsonStringFromObject(body))
       .contentType(APPLICATION_JSON)).andExpect(status().isBadRequest());
@@ -687,14 +686,14 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
   public void testProcessNominalRollFile_givenMissingCorrelationID_ShouldReturnStatusBadRequest() throws Exception {
     val body = FileUpload.builder().fileExtension("xlsx").createUser("test").updateUser("test").build();
     this.mockMvc.perform(post(BASE_URL)
-      .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL")))
+      .with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_UPLOAD_FILE")))
       .content(JsonUtil.getJsonStringFromObject(body))
       .contentType(APPLICATION_JSON)).andExpect(status().isBadRequest());
   }
 
   @Test
   public void testReadStudentIDs_surnameEndWith_ShouldReturnStatusOkAndRecord() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -716,7 +715,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testIsBeingProcessed_givenProcessingYear_ShouldReturnStatusOkAndStatusCounts() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -733,7 +732,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testIsBeingProcessed_givenNotProcessingYear_ShouldReturnStatusOkAndEmptyStatusCounts() throws Exception {
-    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL";
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
     final var mockAuthority = oidcLogin().authorities(grantedAuthority);
     final File file = new File(
       Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
@@ -745,6 +744,36 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
       .perform(get(BASE_URL).with(mockAuthority).param("processingYear", "2020")
         .contentType(APPLICATION_JSON))
       .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$", hasSize(0)));
+  }
+
+  @Test
+  public void testCheckForDuplicateNominalRollStudents_givenProcessingYear_ShouldReturnStatusOkAndTrue() throws Exception {
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
+    final var mockAuthority = oidcLogin().authorities(grantedAuthority);
+    final File file = new File(
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+    );
+    final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
+    });
+    this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+    this.mockMvc
+      .perform(get(BASE_URL + DUPLICATES).with(mockAuthority).header("correlationID", UUID.randomUUID().toString()).param("processingYear", "2021"))
+      .andDo(print()).andExpect(status().isOk()).andExpect(content().string("true"));
+  }
+
+  @Test
+  public void testCheckForDuplicateNominalRollStudents_givenNoProcessingYear_ShouldReturnStatusOkAndFalse() throws Exception {
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
+    final var mockAuthority = oidcLogin().authorities(grantedAuthority);
+    final File file = new File(
+      Objects.requireNonNull(this.getClass().getClassLoader().getResource("mock_nom_students.json")).getFile()
+    );
+    final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
+    });
+    this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+    this.mockMvc
+      .perform(get(BASE_URL + DUPLICATES).with(mockAuthority).header("correlationID", UUID.randomUUID().toString()))
+      .andDo(print()).andExpect(status().isOk()).andExpect(content().string("false"));
   }
 
   private NominalRollStudentEntity createNominalRollStudent() {

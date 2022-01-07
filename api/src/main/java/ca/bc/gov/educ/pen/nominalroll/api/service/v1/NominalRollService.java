@@ -69,9 +69,9 @@ public class NominalRollService {
   }
 
 
-  public boolean hasDuplicateRecords() {
-    final long count = this.repository.countForDuplicateAssignedPENs(Integer.toString(LocalDateTime.now().getYear()));
-    return count > 1;
+  public boolean hasDuplicateRecords(final String processingYear) {
+    final Long count = this.repository.countForDuplicateAssignedPENs(processingYear);
+    return count != null && count > 1;
   }
 
   public List<NominalRollStudentEntity> getAllNominalRollStudents() {

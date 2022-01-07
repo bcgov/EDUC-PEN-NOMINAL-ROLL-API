@@ -29,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -95,8 +96,11 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   }
 
   @Override
-  public ResponseEntity<Boolean> checkForDuplicateNominalRollStudents(final String correlationID) {
-    return ResponseEntity.ok(this.service.hasDuplicateRecords());
+  public ResponseEntity<Boolean> checkForDuplicateNominalRollStudents(String processingYear, final String correlationID) {
+    if(StringUtils.isBlank(processingYear)) {
+      processingYear = Integer.toString(LocalDateTime.now().getYear());
+    }
+    return ResponseEntity.ok(this.service.hasDuplicateRecords(processingYear));
   }
 
   @Override
