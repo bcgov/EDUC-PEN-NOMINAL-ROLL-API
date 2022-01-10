@@ -154,4 +154,9 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
     return ResponseEntity.ok(this.service.findAllNominalRollStudentIDs(processingYear, statusCodes, searchCriteria));
     //.stream().map(UUID::toString).collect(Collectors.toList())
   }
+
+  @Override
+  public ResponseEntity<Boolean> checkForNominalRollPostedStudents(String processingYear) {
+    return ResponseEntity.ok(this.service.hasPostedStudents(processingYear));
+  }
 }

@@ -223,4 +223,9 @@ public class NominalRollService {
     final Pair<LocalDateTime, LocalDateTime> firstAndLastDays = NominalRollHelper.getFirstAndLastDateTimesOfYear(processingYear);
     return this.postedStudentRepository.findAllByProcessingYearBetween(firstAndLastDays.getLeft(), firstAndLastDays.getRight());
   }
+
+  public boolean hasPostedStudents(final String processingYear) {
+    final Pair<LocalDateTime, LocalDateTime> firstAndLastDays = NominalRollHelper.getFirstAndLastDateTimesOfYear(processingYear);
+    return this.postedStudentRepository.existsByProcessingYearBetween(firstAndLastDays.getLeft(), firstAndLastDays.getRight());
+  }
 }

@@ -118,4 +118,10 @@ public interface NominalRollApiEndpoint {
                                                              implementation = java.util.Map.class))
                                                            @RequestParam(name = "searchCriteria", required = false) String searchCriteria);
 
+  @GetMapping(URL.POSTED_STUDENTS + URL.EXIST)
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL_READ_STUDENT')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
+  @Transactional(readOnly = true)
+  @Tag(name = "Endpoint to check if nominal roll posted students exist", description = "Endpoint to check if nominal roll posted students exist")
+  ResponseEntity<Boolean> checkForNominalRollPostedStudents(@RequestParam(name = "processingYear") String processingYear);
 }
