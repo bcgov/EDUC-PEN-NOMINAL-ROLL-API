@@ -10,6 +10,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GradeCode;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
@@ -60,6 +61,9 @@ public class RestUtils {
       .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
       .retrieve().bodyToFlux(FedProvSchoolCodes.class).buffer().blockLast()).stream().collect(Collectors.toMap(FedProvSchoolCodes::getFederalCode, FedProvSchoolCodes::getProvincialCode));
   }
+
+  @CacheEvict(value = CacheNames.FED_PROV_CODES, allEntries = true)
+  public void evictFedProvSchoolCodesCache() {}
 
   @Retryable(value = {Exception.class}, backoff = @Backoff(multiplier = 2, delay = 2000))
   @Cacheable(CacheNames.GENDER_CODES)

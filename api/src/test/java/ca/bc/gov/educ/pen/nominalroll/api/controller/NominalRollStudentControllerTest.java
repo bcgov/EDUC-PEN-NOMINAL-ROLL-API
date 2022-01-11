@@ -803,6 +803,26 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
       .andDo(print()).andExpect(status().isOk()).andExpect(content().string("false"));
   }
 
+  @Test
+  public void testValidateNomRollStudent_givenNomRollStudent_ShouldReturnStatusOk() throws Exception {
+    final var nomRollStudent = this.createMockNominalRollStudent();
+    this.mockMvc
+      .perform(post(BASE_URL + VALIDATE).with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_VALIDATE")))
+        .content(JsonUtil.getJsonStringFromObject(nomRollStudent))
+        .contentType(APPLICATION_JSON))
+      .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.validationErrors", notNullValue()));
+  }
+
+  @Test
+  public void testUpdateNominalRollStudent_givenNomRollStudent_ShouldReturnStatusOk() throws Exception {
+    final var nomRollStudent = this.repository.save(this.createNominalRollStudent());
+    this.mockMvc
+      .perform(put(BASE_URL + "/" + nomRollStudent.getNominalRollStudentID().toString()).with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_WRITE_STUDENT")))
+        .content(JsonUtil.getJsonStringFromObject(mapper.toStruct(nomRollStudent)))
+        .contentType(APPLICATION_JSON))
+      .andDo(print()).andExpect(status().isBadRequest()).andExpect(jsonPath("$.validationErrors", notNullValue()));
+  }
+
   private NominalRollStudentEntity createNominalRollStudent() {
     final NominalRollStudentEntity student = new NominalRollStudentEntity();
     student.setGivenNames("John");
