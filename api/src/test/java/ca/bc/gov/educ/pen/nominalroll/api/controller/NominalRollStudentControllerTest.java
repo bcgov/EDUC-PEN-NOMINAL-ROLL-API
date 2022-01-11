@@ -5,8 +5,10 @@ import ca.bc.gov.educ.pen.nominalroll.api.constants.v1.NominalRollStudentStatus;
 import ca.bc.gov.educ.pen.nominalroll.api.controller.v1.NominalRollApiController;
 import ca.bc.gov.educ.pen.nominalroll.api.filter.FilterOperation;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollPostedStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
+import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollPostedStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.*;
@@ -32,6 +34,9 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -60,6 +65,8 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
   NominalRollApiController controller;
   @Autowired
   NominalRollStudentRepository repository;
+  @Autowired
+  NominalRollPostedStudentRepository postedStudentRepository;
   @Autowired
   NominalRollService studentService;
   @Autowired
@@ -776,6 +783,26 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
       .andDo(print()).andExpect(status().isOk()).andExpect(content().string("false"));
   }
 
+  @Test
+  public void testCheckForNominalRollPostedStudents_givenProcessingYear_ShouldReturnStatusOkAndTrue() throws Exception {
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
+    final var mockAuthority = oidcLogin().authorities(grantedAuthority);
+    this.postedStudentRepository.save(this.createNominalRollPostedStudent());
+    this.mockMvc
+      .perform(get(BASE_URL + POSTED_STUDENTS + EXIST).with(mockAuthority).param("processingYear", "2021"))
+      .andDo(print()).andExpect(status().isOk()).andExpect(content().string("true"));
+  }
+
+  @Test
+  public void testCheckForNominalRollPostedStudents_givenInvalidProcessingYear_ShouldReturnStatusOkAndFalse() throws Exception {
+    final GrantedAuthority grantedAuthority = () -> "SCOPE_NOMINAL_ROLL_READ_STUDENT";
+    final var mockAuthority = oidcLogin().authorities(grantedAuthority);
+    this.postedStudentRepository.save(this.createNominalRollPostedStudent());
+    this.mockMvc
+      .perform(get(BASE_URL + POSTED_STUDENTS + EXIST).with(mockAuthority).param("processingYear", "2022"))
+      .andDo(print()).andExpect(status().isOk()).andExpect(content().string("false"));
+  }
+
   private NominalRollStudentEntity createNominalRollStudent() {
     final NominalRollStudentEntity student = new NominalRollStudentEntity();
     student.setGivenNames("John");
@@ -793,6 +820,20 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
     student.setRecipientName("Test FN Band");
     student.setRecipientNumber("8554");
     student.setStatus("LOADED");
+    return student;
+  }
+
+  private NominalRollPostedStudentEntity createNominalRollPostedStudent() {
+    final NominalRollPostedStudentEntity student = new NominalRollPostedStudentEntity();
+    student.setGivenNames("John");
+    student.setSurname("Wayne");
+    student.setBirthDate(LocalDate.of(1995, 8, 2));
+    student.setGender("M");
+    student.setBandOfResidence("4664");
+    student.setFte(BigDecimal.valueOf(1.5));
+    student.setGrade("01");
+    student.setProcessingYear(LocalDateTime.now().withYear(2021));
+    student.setStatus("MATCHEDSYS");
     return student;
   }
 
