@@ -8,6 +8,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.exception.FileUnProcessableException;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.processor.FileProcessor;
+import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
 import ca.bc.gov.educ.pen.nominalroll.api.rules.RulesProcessor;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollStudentSearchService;
@@ -46,12 +47,14 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   private final NominalRollService service;
   private final NominalRollStudentSearchService searchService;
   private final RulesProcessor rulesProcessor;
+  private final RestUtils restUtils;
 
-  public NominalRollApiController(final List<FileProcessor> fileProcessors, final NominalRollService service, final NominalRollStudentSearchService searchService, final RulesProcessor rulesProcessor) {
+  public NominalRollApiController(final List<FileProcessor> fileProcessors, final NominalRollService service, final NominalRollStudentSearchService searchService, final RulesProcessor rulesProcessor, final RestUtils restUtils) {
     this.fileProcessorsMap = fileProcessors.stream().collect(Collectors.toMap(FileProcessor::getFileType, Function.identity()));
     this.service = service;
     this.searchService = searchService;
     this.rulesProcessor = rulesProcessor;
+    this.restUtils = restUtils;
   }
 
   @Override
@@ -112,6 +115,7 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
 
   @Override
   public ResponseEntity<NominalRollStudent> validateNomRollStudent(final NominalRollStudent nominalRollStudent) {
+    this.restUtils.evictFedProvSchoolCodesCache(); //evict cache because new school codes would be added manually
     val errorsMap = this.rulesProcessor.processRules(NominalRollStudentMapper.mapper.toModel(nominalRollStudent));
     nominalRollStudent.setValidationErrors(errorsMap);
     return ResponseEntity.ok(nominalRollStudent);
@@ -121,6 +125,7 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   public ResponseEntity<NominalRollStudent> updateNominalRollStudent(final UUID nomRollStudentID, final NominalRollStudent nominalRollStudent) {
     val dbEntity = this.service.getNominalRollStudentByID(nomRollStudentID);
     val entity = NominalRollStudentMapper.mapper.toModel(nominalRollStudent);
+    this.restUtils.evictFedProvSchoolCodesCache(); //evict cache because new school codes would be added manually
     val errorsMap = this.rulesProcessor.processRules(entity);
     if (errorsMap.isEmpty()) {
       BeanUtils.copyProperties(entity, dbEntity, "createDate", "createUser", "nominalRollStudentID", "nominalRollStudentValidationErrors");
