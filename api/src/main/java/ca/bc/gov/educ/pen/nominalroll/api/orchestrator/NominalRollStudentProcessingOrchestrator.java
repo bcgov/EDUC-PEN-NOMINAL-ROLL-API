@@ -125,7 +125,7 @@ public class NominalRollStudentProcessingOrchestrator extends BaseOrchestrator<N
     saga.setSagaState(PROCESS_PEN_MATCH.toString());
     this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
     val nominalRollStudent = nominalRollStudentSagaData.getNominalRollStudent();
-    val nomRollPostedStudents = this.nominalRollService.findAllBySurnameAndGivenNamesAndBirthDateAndGender(nominalRollStudent.getSurname(), nominalRollStudent.getGivenNames(), LocalDate.parse(nominalRollStudent.getBirthDate()), nominalRollStudent.getGender());
+    val nomRollPostedStudents = this.nominalRollService.findAllBySurnameAndGivenNamesAndBirthDateAndGender(StringUtils.upperCase(nominalRollStudent.getSurname()), StringUtils.upperCase(nominalRollStudent.getGivenNames()), LocalDate.parse(nominalRollStudent.getBirthDate()), StringUtils.upperCase(nominalRollStudent.getGender()));
     if (nomRollPostedStudents.size() != 1) { // proceed to actual pen match logic by calling api.
       this.postToPenMatchAPI(saga, nominalRollStudentSagaData);
     } else {

@@ -60,7 +60,7 @@ public class NominalRollStudentRepositoryImpl implements NominalRollStudentRepos
       });
     }
 
-    sqlString.append(" ORDER BY SCHOOL_NUMBER ASC," +
+    sqlString.append(" ORDER BY STATUS ASC, SCHOOL_NUMBER ASC," +
       " SURNAME ASC," +
       " GIVEN_NAMES ASC");
 

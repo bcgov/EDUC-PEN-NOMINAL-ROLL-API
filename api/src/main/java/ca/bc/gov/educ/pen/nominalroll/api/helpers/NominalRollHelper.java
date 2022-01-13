@@ -78,11 +78,11 @@ public final class NominalRollHelper {
     gradeCodeMap.put("SU", "SU");
     agreementTypeMap.put("L", "L");
     agreementTypeMap.put("LEA", "L");
-    agreementTypeMap.put("Local Ed. Agreement", "L");
-    agreementTypeMap.put("Local Education Agreement", "L");
+    agreementTypeMap.put("LOCAL ED. AGREEMENT", "L");
+    agreementTypeMap.put("LOCAL EDUCATION AGREEMENT", "L");
     agreementTypeMap.put("P", "P");
-    agreementTypeMap.put("Provincial", "P");
-    agreementTypeMap.put("Prov", "P");
+    agreementTypeMap.put("PROVINCIAL", "P");
+    agreementTypeMap.put("PROV", "P");
     sldSchTypeMap.put("L", "Local Ed. Agreement");
     sldSchTypeMap.put("P", "Provincial");
   }
