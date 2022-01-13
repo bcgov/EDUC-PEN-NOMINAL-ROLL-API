@@ -147,7 +147,7 @@ public final class NominalRollHelper {
   }
 
   private static Predicate<NominalRollPostedStudentEntity> findExactMatch(final NominalRollStudent nominalRollStudent) {
-    return nomRollPostedStudent -> StringUtils.equalsIgnoreCase(nomRollPostedStudent.getAgreementType(), NominalRollHelper.getAgreementTypeMap().get(nominalRollStudent.getLeaProvincial()).get(0))
+    return nomRollPostedStudent -> StringUtils.equalsIgnoreCase(nomRollPostedStudent.getAgreementType(), NominalRollHelper.getAgreementTypeMap().get(StringUtils.upperCase(nominalRollStudent.getLeaProvincial())).get(0))
       && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalBandCode(), removeLeadingZeros(nominalRollStudent.getRecipientNumber()))
       && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalRecipientBandName(), nominalRollStudent.getRecipientName())
       && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalSchoolNumber(), nominalRollStudent.getSchoolNumber()) && StringUtils.equalsIgnoreCase(nomRollPostedStudent.getFederalSchoolName(), nominalRollStudent.getSchoolName())
