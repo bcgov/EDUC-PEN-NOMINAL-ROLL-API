@@ -18,6 +18,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Event;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollPostSagaData;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
+import ca.bc.gov.educ.pen.nominalroll.api.util.TransformUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -114,7 +115,10 @@ public class PostNominalRollOrchestratorTest extends BaseNominalRollAPITest {
     final List<NominalRollStudent> entities = new ObjectMapper().readValue(file, new TypeReference<>() {
     });
 
-    this.studentRepository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
+    this.studentRepository.saveAll(entities.stream().map(student -> {
+      var entity = mapper.toModel(student);
+      return TransformUtil.uppercaseFields(entity);
+    }).collect(Collectors.toList()));
   }
 
   /**

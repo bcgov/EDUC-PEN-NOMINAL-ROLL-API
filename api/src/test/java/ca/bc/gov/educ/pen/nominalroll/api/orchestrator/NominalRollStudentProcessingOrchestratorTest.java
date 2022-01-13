@@ -16,6 +16,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Event;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudentSagaData;
 import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
+import ca.bc.gov.educ.pen.nominalroll.api.util.TransformUtil;
 import lombok.SneakyThrows;
 import lombok.val;
 import org.junit.Before;
@@ -203,7 +204,7 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
   @Test
   public void testHandleEvent_givenEventTypeVALIDATE_NOMINAL_ROLL_STUDENTAndEventOutComeVALIDATION_SUCCESS_NO_ERRORAndExactMatchInPostedStudent_shouldMarkSagaComplete() {
     final NominalRollStudent nominalRollStudent = this.createMockNominalRollStudent();
-    NominalRollStudentEntity entity = NominalRollStudentMapper.mapper.toModel(nominalRollStudent);
+    NominalRollStudentEntity entity = TransformUtil.uppercaseFields(NominalRollStudentMapper.mapper.toModel(nominalRollStudent));
     entity.setCreateDate(LocalDateTime.now().minusMinutes(14));
     entity.setUpdateDate(LocalDateTime.now());
     entity.setCreateUser(ApplicationProperties.API_NAME);
