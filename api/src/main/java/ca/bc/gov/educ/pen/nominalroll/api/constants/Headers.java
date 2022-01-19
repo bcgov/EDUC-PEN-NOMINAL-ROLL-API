@@ -17,7 +17,7 @@ public enum Headers {
   GENDER("Gender", ColumnType.STRING),
   BIRTH_DATE("Birth Date", ColumnType.DATE),
   GRADE("Grade", ColumnType.STRING),
-  FTE("FTE", ColumnType.DATE),
+  FTE("FTE", ColumnType.DOUBLE),
   BAND_OF_RESIDENCE("Band of Residence", ColumnType.STRING);
 
   @Getter
