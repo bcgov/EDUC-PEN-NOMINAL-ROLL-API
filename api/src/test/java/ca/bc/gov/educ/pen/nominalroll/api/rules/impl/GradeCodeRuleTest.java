@@ -1,7 +1,7 @@
 package ca.bc.gov.educ.pen.nominalroll.api.rules.impl;
 
 import ca.bc.gov.educ.pen.nominalroll.api.constants.GradeCodes;
-import ca.bc.gov.educ.pen.nominalroll.api.constants.HeaderNames;
+import ca.bc.gov.educ.pen.nominalroll.api.constants.Headers;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GradeCode;
@@ -82,9 +82,9 @@ public class GradeCodeRuleTest {
     val result = rule.validate(NominalRollStudentMapper.mapper.toModel(nomRoll));
     assertThat(result.size()).isEqualTo(size);
     if (fieldError != null) {
-      assertThat(result.get(HeaderNames.GRADE.getCode())).isEqualTo(String.format(fieldError, gradeCode));
+      assertThat(result.get(Headers.GRADE.getCode())).isEqualTo(String.format(fieldError, gradeCode));
     } else {
-      assertThat(result.get(HeaderNames.GRADE.getCode())).isNull();
+      assertThat(result.get(Headers.GRADE.getCode())).isNull();
     }
   }
 }

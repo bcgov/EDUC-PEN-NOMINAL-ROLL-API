@@ -1,9 +1,8 @@
 package ca.bc.gov.educ.pen.nominalroll.api.rules.impl;
 
-import ca.bc.gov.educ.pen.nominalroll.api.constants.HeaderNames;
+import ca.bc.gov.educ.pen.nominalroll.api.constants.Headers;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
-import ca.bc.gov.educ.pen.nominalroll.api.service.v1.CacheService;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
@@ -54,9 +53,9 @@ public class FederalSchoolCodeRuleTest {
     val result = rule.validate(NominalRollStudentMapper.mapper.toModel(nomRoll));
     assertThat(result.size()).isEqualTo(size);
     if (fieldError != null) {
-      assertThat(result.get(HeaderNames.SCHOOL_NUMBER.getCode())).isEqualTo(String.format(fieldError, fedSchoolCode));
+      assertThat(result.get(Headers.SCHOOL_NUMBER.getCode())).isEqualTo(String.format(fieldError, fedSchoolCode));
     } else {
-      assertThat(result.get(HeaderNames.SCHOOL_NUMBER.getCode())).isNull();
+      assertThat(result.get(Headers.SCHOOL_NUMBER.getCode())).isNull();
     }
   }
 }
