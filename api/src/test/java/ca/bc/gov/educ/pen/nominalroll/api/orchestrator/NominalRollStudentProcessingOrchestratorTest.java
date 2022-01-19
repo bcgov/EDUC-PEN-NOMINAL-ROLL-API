@@ -159,6 +159,7 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
     val savedNominalRollStudent = this.testHelper.getRepository().findById(entity.getNominalRollStudentID());
     assertThat(savedNominalRollStudent).isPresent();
     assertThat(savedNominalRollStudent.get().getStatus()).isEqualTo("ERROR");
+    assertThat(savedNominalRollStudent.get().getNominalRollStudentValidationErrors().size()).isEqualTo(4);
   }
 
   @SneakyThrows
