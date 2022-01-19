@@ -2,7 +2,7 @@ package ca.bc.gov.educ.pen.nominalroll.api.rules;
 
 import ca.bc.gov.educ.pen.nominalroll.api.BaseNominalRollAPITest;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.GradeCodes;
-import ca.bc.gov.educ.pen.nominalroll.api.constants.HeaderNames;
+import ca.bc.gov.educ.pen.nominalroll.api.constants.Headers;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GenderCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GradeCode;
@@ -50,7 +50,7 @@ public class RulesProcessorTest extends BaseNominalRollAPITest {
     val result = processor.processRules(NominalRollStudentMapper.mapper.toModel(student));
     assertThat(result).isNotEmpty();
     assertThat(result.size()).isEqualTo(1);
-    assertThat(result.get(HeaderNames.SCHOOL_DISTRICT_NUMBER.getCode())).isNotBlank();
+    assertThat(result.get(Headers.SCHOOL_DISTRICT_NUMBER.getCode())).isNotBlank();
   }
 
   @Test
@@ -66,12 +66,12 @@ public class RulesProcessorTest extends BaseNominalRollAPITest {
     val result = processor.processRules(NominalRollStudentMapper.mapper.toModel(student));
     assertThat(result).isNotEmpty();
     assertThat(result.size()).isEqualTo(6);
-    assertThat(result.get(HeaderNames.SCHOOL_DISTRICT_NUMBER.getCode())).isNotBlank();
-    assertThat(result.get(HeaderNames.SURNAME.getCode())).isNotBlank();
-    assertThat(result.get(HeaderNames.GENDER.getCode())).isNotBlank();
-    assertThat(result.get(HeaderNames.GRADE.getCode())).isNotBlank();
-    assertThat(result.get(HeaderNames.SCHOOL_NUMBER.getCode())).isNotBlank();
-    assertThat(result.get(HeaderNames.LEA_PROV.getCode())).isNotBlank();
+    assertThat(result.get(Headers.SCHOOL_DISTRICT_NUMBER.getCode())).isNotBlank();
+    assertThat(result.get(Headers.SURNAME.getCode())).isNotBlank();
+    assertThat(result.get(Headers.GENDER.getCode())).isNotBlank();
+    assertThat(result.get(Headers.GRADE.getCode())).isNotBlank();
+    assertThat(result.get(Headers.SCHOOL_NUMBER.getCode())).isNotBlank();
+    assertThat(result.get(Headers.LEA_PROV.getCode())).isNotBlank();
   }
 
   private NominalRollStudent getNominalRollStudent() {

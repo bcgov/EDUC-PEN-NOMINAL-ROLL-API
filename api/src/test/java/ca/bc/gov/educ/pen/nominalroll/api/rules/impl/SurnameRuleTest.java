@@ -1,6 +1,6 @@
 package ca.bc.gov.educ.pen.nominalroll.api.rules.impl;
 
-import ca.bc.gov.educ.pen.nominalroll.api.constants.HeaderNames;
+import ca.bc.gov.educ.pen.nominalroll.api.constants.Headers;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import junitparams.JUnitParamsRunner;
@@ -41,9 +41,9 @@ public class SurnameRuleTest {
     val result = rule.validate(NominalRollStudentMapper.mapper.toModel(nomRoll));
     assertThat(result.size()).isEqualTo(size);
     if (fieldError != null) {
-      assertThat(result.get(HeaderNames.SURNAME.getCode())).isEqualTo(String.format(fieldError, surname));
+      assertThat(result.get(Headers.SURNAME.getCode())).isEqualTo(String.format(fieldError, surname));
     } else {
-      assertThat(result.get(HeaderNames.SURNAME.getCode())).isNull();
+      assertThat(result.get(Headers.SURNAME.getCode())).isNull();
     }
   }
 }

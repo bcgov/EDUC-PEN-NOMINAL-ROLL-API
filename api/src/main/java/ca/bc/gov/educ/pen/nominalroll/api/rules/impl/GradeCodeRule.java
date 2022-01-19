@@ -1,6 +1,6 @@
 package ca.bc.gov.educ.pen.nominalroll.api.rules.impl;
 
-import ca.bc.gov.educ.pen.nominalroll.api.constants.HeaderNames;
+import ca.bc.gov.educ.pen.nominalroll.api.constants.Headers;
 import ca.bc.gov.educ.pen.nominalroll.api.helpers.NominalRollHelper;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
@@ -40,9 +40,9 @@ public class GradeCodeRule extends BaseRule {
     final List<String> gradeCodes = this.restUtils.getActiveGradeCodes().stream().map(GradeCode::getGradeCode).collect(Collectors.toList());
     final Map<String, String> errorsMap = new LinkedHashMap<>();
     if (StringUtils.isBlank(nominalRollStudentEntity.getGrade())) {
-      errorsMap.put(HeaderNames.GRADE.getCode(), "Field value is missing.");
+      errorsMap.put(Headers.GRADE.getCode(), "Field value is missing.");
     } else if (!gradeCodes.contains(NominalRollHelper.getGradeCodeMap().get(nominalRollStudentEntity.getGrade().toUpperCase()))) {
-      errorsMap.put(HeaderNames.GRADE.getCode(), String.format("Grade code %s is not recognized.", nominalRollStudentEntity.getGrade()));
+      errorsMap.put(Headers.GRADE.getCode(), String.format("Grade code %s is not recognized.", nominalRollStudentEntity.getGrade()));
     }
     return errorsMap;
   }

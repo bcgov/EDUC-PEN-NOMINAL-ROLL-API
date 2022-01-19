@@ -1,6 +1,6 @@
 package ca.bc.gov.educ.pen.nominalroll.api.rules.impl;
 
-import ca.bc.gov.educ.pen.nominalroll.api.constants.HeaderNames;
+import ca.bc.gov.educ.pen.nominalroll.api.constants.Headers;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import junitparams.JUnitParamsRunner;
@@ -50,9 +50,9 @@ public class BirthDateRuleTest {
     val result = rule.validate(NominalRollStudentMapper.mapper.toModel(nomRoll));
     assertThat(result.size()).isEqualTo(size);
     if (fieldError != null) {
-      assertThat(result.get(HeaderNames.BIRTH_DATE.getCode())).isEqualTo(String.format(fieldError, birthDate));
+      assertThat(result.get(Headers.BIRTH_DATE.getCode())).isEqualTo(String.format(fieldError, birthDate));
     } else {
-      assertThat(result.get(HeaderNames.BIRTH_DATE.getCode())).isNull();
+      assertThat(result.get(Headers.BIRTH_DATE.getCode())).isNull();
     }
 
   }
