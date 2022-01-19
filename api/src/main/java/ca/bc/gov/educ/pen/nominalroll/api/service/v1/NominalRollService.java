@@ -165,6 +165,17 @@ public class NominalRollService {
     this.repository.save(nomRollStud);
   }
 
+  //To save NominalRollStudent with ValidationErrors, query and save operation should be in the same transaction boundary.
+  public void saveNominalRollStudentValidationErrors(final String nominalRollStudentID, final Map<String, String> errors) {
+    val nomRollStudOptional = this.findByNominalRollStudentID(nominalRollStudentID);
+    if (nomRollStudOptional.isPresent()) {
+      val nomRollStud = nomRollStudOptional.get();
+      nomRollStud.getNominalRollStudentValidationErrors().addAll(NominalRollHelper.populateValidationErrors(errors, nomRollStud));
+      nomRollStud.setStatus(NominalRollStudentStatus.ERROR.toString());
+      this.repository.save(nomRollStud);
+    }
+  }
+
   public List<NominalRollPostedStudentEntity> findAllBySurnameAndGivenNamesAndBirthDateAndGender(final String surname, final String givenNames, final LocalDate birthDate, final String gender) {
     return this.postedStudentRepository.findAllBySurnameAndGivenNamesAndBirthDateAndGenderOrderByCreateDateDesc(surname, givenNames, birthDate, gender);
   }
