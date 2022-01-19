@@ -32,7 +32,9 @@ import static ca.bc.gov.educ.pen.nominalroll.api.constants.Headers.*;
 @Slf4j
 public abstract class BaseExcelProcessor implements FileProcessor {
   private static final List<String> MANDATORY_HEADERS = Arrays.stream(Headers.values()).map(Headers::getCode).collect(Collectors.toList());
-
+  private static final String STRING_TYPE = "String type :: {}";
+  private static final String DATE_TYPE = "Date type :: {}";
+  private static final String NUMBER_TYPE = "Number type :: {}";
   protected final ApplicationProperties applicationProperties;
 
   protected BaseExcelProcessor(final ApplicationProperties applicationProperties) {
@@ -282,17 +284,24 @@ public abstract class BaseExcelProcessor implements FileProcessor {
     if (cell == null) {
       return null;
     }
-    switch (columnType) {
+    switch (cell.getCellType()) {
       case STRING:
-        log.debug("STRING type found: " + cell.getRichStringCellValue().getString());
+        log.debug(STRING_TYPE, cell.getRichStringCellValue().getString());
         return cell.getRichStringCellValue().getString();
-      case DOUBLE:
-        log.debug("DOUBLE type found: " + cell.getNumericCellValue());
-        return String.valueOf(cell.getNumericCellValue());
-      case DATE:
-        val dateValue = cell.getDateCellValue();
-        log.debug("DATE type found: " + dateValue);
-        return new SimpleDateFormat("yyyy-MM-dd").format(dateValue);
+      case NUMERIC:
+        if (DateUtil.isCellDateFormatted(cell)) {
+          val dateValue = cell.getDateCellValue();
+          log.debug(DATE_TYPE, dateValue);
+          return new SimpleDateFormat("yyyy-MM-dd").format(dateValue);
+        }
+        log.debug(NUMBER_TYPE, cell.getNumericCellValue());
+
+        if(columnType.equals(ColumnType.DOUBLE)) {
+          return String.valueOf(cell.getNumericCellValue());
+        }else{
+          Double value = cell.getNumericCellValue();
+          return String.valueOf(value.intValue());
+        }
       default:
         log.debug("Default");
         return "";
