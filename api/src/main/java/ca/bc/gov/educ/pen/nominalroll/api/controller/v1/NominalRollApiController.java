@@ -126,7 +126,10 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
     val dbEntity = this.service.getNominalRollStudentByID(nomRollStudentID);
     val entity = NominalRollStudentMapper.mapper.toModel(nominalRollStudent);
     this.restUtils.evictFedProvSchoolCodesCache(); //evict cache because new school codes would be added manually
-    val errorsMap = this.rulesProcessor.processRules(entity);
+    Map<String,String> errorsMap = new HashMap<>();
+    if(StringUtils.isNotEmpty(nominalRollStudent.getStatus()) && !nominalRollStudent.getStatus().equals(NominalRollStudentStatus.IGNORED.toString())) {
+      errorsMap = this.rulesProcessor.processRules(entity);
+    }
     if (errorsMap.isEmpty()) {
       BeanUtils.copyProperties(entity, dbEntity, "createDate", "createUser", "nominalRollStudentID", "nominalRollStudentValidationErrors");
       // no validation errors so remove existing ones.
