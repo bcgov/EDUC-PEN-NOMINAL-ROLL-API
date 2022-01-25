@@ -126,18 +126,21 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
     val dbEntity = this.service.getNominalRollStudentByID(nomRollStudentID);
     val entity = NominalRollStudentMapper.mapper.toModel(nominalRollStudent);
     this.restUtils.evictFedProvSchoolCodesCache(); //evict cache because new school codes would be added manually
-    Map<String,String> errorsMap = new HashMap<>();
     if(StringUtils.isNotEmpty(nominalRollStudent.getStatus()) && !nominalRollStudent.getStatus().equals(NominalRollStudentStatus.IGNORED.toString())) {
-      errorsMap = this.rulesProcessor.processRules(entity);
-    }
-    if (errorsMap.isEmpty()) {
-      BeanUtils.copyProperties(entity, dbEntity, "createDate", "createUser", "nominalRollStudentID", "nominalRollStudentValidationErrors");
-      // no validation errors so remove existing ones.
-      dbEntity.getNominalRollStudentValidationErrors().clear();
+      var errorsMap = this.rulesProcessor.processRules(entity);
+
+      if (errorsMap.isEmpty()) {
+        BeanUtils.copyProperties(entity, dbEntity, "createDate", "createUser", "nominalRollStudentID", "nominalRollStudentValidationErrors");
+        // no validation errors so remove existing ones.
+        dbEntity.getNominalRollStudentValidationErrors().clear();
+        return ResponseEntity.ok(NominalRollStudentMapper.mapper.toStruct(this.service.updateNominalRollStudent(dbEntity)));
+      } else {
+        nominalRollStudent.setValidationErrors(errorsMap);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(nominalRollStudent);
+      }
+    }else{
+      dbEntity.setStatus(NominalRollStudentStatus.IGNORED.toString());
       return ResponseEntity.ok(NominalRollStudentMapper.mapper.toStruct(this.service.updateNominalRollStudent(dbEntity)));
-    } else {
-      nominalRollStudent.setValidationErrors(errorsMap);
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(nominalRollStudent);
     }
   }
 
