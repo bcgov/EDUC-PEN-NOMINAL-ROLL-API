@@ -125,8 +125,8 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   public ResponseEntity<NominalRollStudent> updateNominalRollStudent(final UUID nomRollStudentID, final NominalRollStudent nominalRollStudent) {
     val dbEntity = this.service.getNominalRollStudentByID(nomRollStudentID);
     val entity = NominalRollStudentMapper.mapper.toModel(nominalRollStudent);
-    this.restUtils.evictFedProvSchoolCodesCache(); //evict cache because new school codes would be added manually
     if(StringUtils.isNotEmpty(nominalRollStudent.getStatus()) && !nominalRollStudent.getStatus().equals(NominalRollStudentStatus.IGNORED.toString())) {
+      this.restUtils.evictFedProvSchoolCodesCache(); //evict cache because new school codes would be added manually
       var errorsMap = this.rulesProcessor.processRules(entity);
 
       if (errorsMap.isEmpty()) {
