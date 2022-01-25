@@ -823,6 +823,18 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
       .andDo(print()).andExpect(status().isBadRequest()).andExpect(jsonPath("$.validationErrors", notNullValue()));
   }
 
+  @Test
+  public void testUpdateNominalRollStudent_givenNomRollStudentIgnored_ShouldReturnStatusOk() throws Exception {
+    NominalRollStudentEntity student = this.createNominalRollStudent();
+    student.setStatus(NominalRollStudentStatus.IGNORED.toString());
+    final var nomRollStudent = this.repository.save(student);
+    this.mockMvc
+      .perform(put(BASE_URL + "/" + nomRollStudent.getNominalRollStudentID().toString()).with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_WRITE_STUDENT")))
+        .content(JsonUtil.getJsonStringFromObject(mapper.toStruct(nomRollStudent)))
+        .contentType(APPLICATION_JSON))
+      .andDo(print()).andExpect(status().isOk());
+  }
+
   private NominalRollStudentEntity createNominalRollStudent() {
     final NominalRollStudentEntity student = new NominalRollStudentEntity();
     student.setGivenNames("John");
