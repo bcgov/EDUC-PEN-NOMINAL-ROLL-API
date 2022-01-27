@@ -5,6 +5,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.constants.EventType;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.v1.NominalRollStudentStatus;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.EntityNotFoundException;
+import ca.bc.gov.educ.pen.nominalroll.api.exception.NominalRollAPIRuntimeException;
 import ca.bc.gov.educ.pen.nominalroll.api.helpers.NominalRollHelper;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
@@ -91,9 +92,9 @@ public class NominalRollService {
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public List<NominalRollStudentEntity> saveNominalRollStudents(final List<NominalRollStudentEntity> nomRollStudentEntities, final String correlationID) {
+  public void saveNominalRollStudents(final List<NominalRollStudentEntity> nomRollStudentEntities, final String correlationID) {
     log.debug("creating nominal roll entities in transient table for transaction ID :: {}", correlationID);
-    return this.repository.saveAll(nomRollStudentEntities);
+    this.repository.saveAll(nomRollStudentEntities);
   }
 
   /**
@@ -166,14 +167,18 @@ public class NominalRollService {
   }
 
   //To save NominalRollStudent with ValidationErrors, query and save operation should be in the same transaction boundary.
-  public void saveNominalRollStudentValidationErrors(final String nominalRollStudentID, final Map<String, String> errors) {
-    val nomRollStudOptional = this.findByNominalRollStudentID(nominalRollStudentID);
-    if (nomRollStudOptional.isPresent()) {
-      val nomRollStud = nomRollStudOptional.get();
-      nomRollStud.getNominalRollStudentValidationErrors().addAll(NominalRollHelper.populateValidationErrors(errors, nomRollStud));
-      nomRollStud.setStatus(NominalRollStudentStatus.ERROR.toString());
-      this.repository.save(nomRollStud);
+  public NominalRollStudentEntity saveNominalRollStudentValidationErrors(final String nominalRollStudentID, final Map<String, String> errors, NominalRollStudentEntity entity) {
+    if(entity == null) {
+      val nomRollStudOptional = this.findByNominalRollStudentID(nominalRollStudentID);
+      if (nomRollStudOptional.isPresent()) {
+        entity = nomRollStudOptional.get();
+      }else{
+        throw new NominalRollAPIRuntimeException("Error while saving NominalRollStudent with ValidationErrors - entity was null");
+      }
     }
+    entity.getNominalRollStudentValidationErrors().addAll(NominalRollHelper.populateValidationErrors(errors, entity));
+    entity.setStatus(NominalRollStudentStatus.ERROR.toString());
+    return this.repository.save(entity);
   }
 
   public List<NominalRollPostedStudentEntity> findAllBySurnameAndGivenNamesAndBirthDateAndGender(final String surname, final String givenNames, final LocalDate birthDate, final String gender) {
@@ -189,8 +194,8 @@ public class NominalRollService {
   }
 
   @Transactional
-  public List<NominalRollPostedStudentEntity> savePostedStudents(final List<NominalRollPostedStudentEntity> postedStudentEntities) {
-    return this.postedStudentRepository.saveAll(postedStudentEntities);
+  public void savePostedStudents(final List<NominalRollPostedStudentEntity> postedStudentEntities) {
+    this.postedStudentRepository.saveAll(postedStudentEntities);
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)

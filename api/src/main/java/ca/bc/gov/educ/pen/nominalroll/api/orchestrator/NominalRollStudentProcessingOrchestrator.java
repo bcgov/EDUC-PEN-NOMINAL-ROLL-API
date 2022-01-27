@@ -111,7 +111,7 @@ public class NominalRollStudentProcessingOrchestrator extends BaseOrchestrator<N
     final TypeReference<Map<String, String>> responseType = new TypeReference<>() {
     };
     val validationResults = JsonUtil.mapper.readValue(event.getEventPayload(), responseType);
-    this.nominalRollService.saveNominalRollStudentValidationErrors(nominalRollStudentSagaData.getNominalRollStudent().getNominalRollStudentID(), validationResults);
+    this.nominalRollService.saveNominalRollStudentValidationErrors(nominalRollStudentSagaData.getNominalRollStudent().getNominalRollStudentID(), validationResults, null);
   }
 
   protected void processPenMatch(final Event event, final Saga saga, final NominalRollStudentSagaData nominalRollStudentSagaData) throws JsonProcessingException {
