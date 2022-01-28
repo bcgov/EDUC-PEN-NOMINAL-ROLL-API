@@ -189,6 +189,9 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
         var errorsMap = this.rulesProcessor.processRules(studentEntity);
         if (!errorsMap.isEmpty()) {
           this.service.saveNominalRollStudentValidationErrors(studentEntity.getNominalRollStudentID().toString(), errorsMap, studentEntity);
+        }else{
+          studentEntity.setStatus(NominalRollStudentStatus.FIXABLE.toString());
+          this.service.updateNominalRollStudent(studentEntity);
         }
       }
     }
