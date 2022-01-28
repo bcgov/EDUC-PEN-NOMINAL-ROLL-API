@@ -4,10 +4,10 @@ import ca.bc.gov.educ.pen.nominalroll.api.exception.EntityNotFoundException;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
-import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollPostedStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepositoryCustom;
+import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +35,9 @@ public class NominalRollServiceTest {
   NominalRollPostedStudentRepository postedStudentRepository;
   @Autowired
   NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom;
+  @Autowired
+  RestUtils restUtils;
+
   NominalRollService service;
 
   @Mock

@@ -1,9 +1,10 @@
 package ca.bc.gov.educ.pen.nominalroll.api.rest;
 
 import ca.bc.gov.educ.pen.nominalroll.api.constants.CacheNames;
+import ca.bc.gov.educ.pen.nominalroll.api.exception.NominalRollAPIRuntimeException;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.LocalDateTimeMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.FedProvSchoolCodes;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.FedProvSchoolCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.School;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GenderCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GradeCode;
@@ -13,10 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -59,7 +63,24 @@ public class RestUtils {
     return Objects.requireNonNull(this.webClient.get()
       .uri(this.props.getSchoolApiURL().concat("/federal-province-codes"))
       .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-      .retrieve().bodyToFlux(FedProvSchoolCodes.class).buffer().blockLast()).stream().collect(Collectors.toMap(FedProvSchoolCodes::getFederalCode, FedProvSchoolCodes::getProvincialCode));
+      .retrieve().bodyToFlux(FedProvSchoolCode.class).buffer().blockLast()).stream().collect(Collectors.toMap(FedProvSchoolCode::getFederalCode, FedProvSchoolCode::getProvincialCode));
+  }
+
+  public void addFedProvSchoolCode(@NonNull final FedProvSchoolCode fedProvSchoolCode) {
+    try {
+      val response = this.webClient.post()
+        .uri(this.props.getSchoolApiURL().concat("/federal-province-codes"))
+        .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        .body(Mono.just(fedProvSchoolCode), FedProvSchoolCode.class)
+        .retrieve()
+        .bodyToMono(FedProvSchoolCode.class)
+        .block();
+      if (response == null) {
+        throw new NominalRollAPIRuntimeException("Error occurred while adding FedProvSchoolCode");
+      }
+    } catch (final WebClientResponseException e) {
+      throw new NominalRollAPIRuntimeException("Error occurred while adding FedProvSchoolCode");
+    }
   }
 
   @CacheEvict(value = CacheNames.FED_PROV_CODES, allEntries = true)

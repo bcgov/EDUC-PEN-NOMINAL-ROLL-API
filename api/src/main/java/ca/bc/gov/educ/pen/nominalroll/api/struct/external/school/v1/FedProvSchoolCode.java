@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FedProvSchoolCodes {
+public class FedProvSchoolCode {
   String key;
   String federalCode;
   String provincialCode;

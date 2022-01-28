@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.pen.nominalroll.api.endpoint.v1;
 
 import ca.bc.gov.educ.pen.nominalroll.api.constants.v1.URL;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.FedProvSchoolCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.*;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -16,8 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -124,4 +123,13 @@ public interface NominalRollApiEndpoint {
   @Transactional(readOnly = true)
   @Tag(name = "Endpoint to check if nominal roll posted students exist", description = "Endpoint to check if nominal roll posted students exist")
   ResponseEntity<Boolean> checkForNominalRollPostedStudents(@RequestParam(name = "processingYear") String processingYear);
+
+  @PostMapping(URL.FED_PROV_CODE)
+  @PreAuthorize("hasAuthority('SCOPE_NOMINAL_ROLL_CREATE_FED_PROV')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "CREATED"), @ApiResponse(responseCode = "400", description = "BAD REQUEST")})
+  @Transactional
+  @Tag(name = "Endpoint to add a federal to provincial mapping", description = "Endpoint to add a federal to provincial mapping")
+  @Schema(name = "FedProvSchoolCode", implementation = FedProvSchoolCode.class)
+  ResponseEntity<Void> addFedProvSchoolCode(@Validated @RequestBody FedProvSchoolCode fedProvSchoolCode);
+
 }

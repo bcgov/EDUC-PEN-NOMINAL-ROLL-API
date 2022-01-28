@@ -3,7 +3,7 @@ package ca.bc.gov.educ.pen.nominalroll.api.mappers.v1;
 import ca.bc.gov.educ.pen.nominalroll.api.helpers.NominalRollHelper;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollPostedStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
-import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentValidationError;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentValidationErrorEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import lombok.val;
 
@@ -20,7 +20,7 @@ public abstract class NominalRollStudentDecorator implements NominalRollStudentM
   @Override
   public NominalRollStudent toStruct(final NominalRollStudentEntity nominalRollStudentEntity) {
     val nomRollStudent = this.delegate.toStruct(nominalRollStudentEntity);
-    nomRollStudent.setValidationErrors(nominalRollStudentEntity.getNominalRollStudentValidationErrors().stream().collect(Collectors.toMap(NominalRollStudentValidationError::getFieldName, NominalRollStudentValidationError::getFieldError)));
+    nomRollStudent.setValidationErrors(nominalRollStudentEntity.getNominalRollStudentValidationErrors().stream().collect(Collectors.toMap(NominalRollStudentValidationErrorEntity::getFieldName, NominalRollStudentValidationErrorEntity::getFieldError)));
     return nomRollStudent;
   }
 

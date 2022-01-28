@@ -7,10 +7,13 @@ import ca.bc.gov.educ.pen.nominalroll.api.filter.FilterOperation;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollPostedStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentValidationErrorEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollPostedStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
+import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentValidationErrorRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.FedProvSchoolCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.*;
 import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -65,6 +68,8 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
   NominalRollApiController controller;
   @Autowired
   NominalRollStudentRepository repository;
+  @Autowired
+  NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository;
   @Autowired
   NominalRollPostedStudentRepository postedStudentRepository;
   @Autowired
@@ -710,7 +715,6 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
     final Map<String, String> searchCriteria = Map.of("surname", "B%");
     final ObjectMapper objectMapper = new ObjectMapper();
     final String criteriaJSON = objectMapper.writeValueAsString(searchCriteria);
-    System.out.println(criteriaJSON);
     this.repository.saveAll(entities.stream().map(mapper::toModel).collect(Collectors.toList()));
     this.mockMvc
       .perform(get(BASE_URL + NOM_ROLL_STUDENT_IDS).with(mockAuthority).param("searchCriteria", criteriaJSON)
@@ -843,6 +847,35 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
     this.mockMvc
       .perform(put(BASE_URL + "/" + nomRollStudent.getNominalRollStudentID().toString()).with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_WRITE_STUDENT")))
         .content(JsonUtil.getJsonStringFromObject(mapper.toStruct(nomRollStudent)))
+        .contentType(APPLICATION_JSON))
+      .andDo(print()).andExpect(status().isOk());
+  }
+
+  @Test
+  public void testAddFedProvCodes_ShouldReturnStatusOk() throws Exception {
+    FedProvSchoolCode fedProvSchoolCode = new FedProvSchoolCode();
+    fedProvSchoolCode.setProvincialCode("654987");
+    fedProvSchoolCode.setFederalCode("1234");
+    fedProvSchoolCode.setKey("NOM_SCHL");
+
+    NominalRollStudentEntity student = this.createNominalRollStudent();
+
+    final var nomRollStudent = this.repository.save(student);
+    NominalRollStudentValidationErrorEntity entity = new NominalRollStudentValidationErrorEntity();
+    entity.setFieldName("School Number");
+    entity.setFieldError("Invalid School Number");
+    entity.setNominalRollStudent(nomRollStudent);
+    entity.setCreateDate(LocalDateTime.now());
+    entity.setCreateUser("ABC");
+    entity.setUpdateDate(LocalDateTime.now());
+    entity.setUpdateUser("ABC");
+    student.getNominalRollStudentValidationErrors().add(entity);
+
+    this.repository.save(student);
+
+    this.mockMvc
+      .perform(post(BASE_URL + "/federal-province-code").with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_CREATE_FED_PROV")))
+        .content(JsonUtil.getJsonStringFromObject(fedProvSchoolCode))
         .contentType(APPLICATION_JSON))
       .andDo(print()).andExpect(status().isOk());
   }

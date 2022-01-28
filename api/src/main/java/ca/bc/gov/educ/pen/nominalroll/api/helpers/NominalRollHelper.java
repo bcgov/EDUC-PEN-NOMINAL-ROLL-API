@@ -3,7 +3,7 @@ package ca.bc.gov.educ.pen.nominalroll.api.helpers;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.GradeCodes;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollPostedStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
-import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentValidationError;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentValidationErrorEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import com.google.common.collect.ArrayListMultimap;
@@ -126,10 +126,10 @@ public final class NominalRollHelper {
   }
 
 
-  public static Set<NominalRollStudentValidationError> populateValidationErrors(final Map<String, String> errors, final NominalRollStudentEntity nominalRollStudentEntity) {
-    final Set<NominalRollStudentValidationError> validationErrors = new HashSet<>();
+  public static Set<NominalRollStudentValidationErrorEntity> populateValidationErrors(final Map<String, String> errors, final NominalRollStudentEntity nominalRollStudentEntity) {
+    final Set<NominalRollStudentValidationErrorEntity> validationErrors = new HashSet<>();
     errors.forEach((k, v) -> {
-      final NominalRollStudentValidationError error = new NominalRollStudentValidationError();
+      final NominalRollStudentValidationErrorEntity error = new NominalRollStudentValidationErrorEntity();
       error.setFieldName(k);
       error.setFieldError(v);
       error.setNominalRollStudent(nominalRollStudentEntity);
