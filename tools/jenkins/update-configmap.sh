@@ -113,6 +113,13 @@ curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scope
   -H "Authorization: Bearer $TKN" \
   -d "{\"description\": \"Write nominal roll saga information\",\"id\": \"NOMINAL_ROLL_WRITE_SAGA\",\"name\": \"NOMINAL_ROLL_WRITE_SAGA\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
 
+echo
+echo Writing scope NOMINAL_ROLL_CREATE_FED_PROV
+curl -sX POST "https://$SOAM_KC/auth/admin/realms/$SOAM_KC_REALM_ID/client-scopes" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TKN" \
+  -d "{\"description\": \"Create nominal roll fed prov code\",\"id\": \"NOMINAL_ROLL_CREATE_FED_PROV\",\"name\": \"NOMINAL_ROLL_CREATE_FED_PROV\",\"protocol\": \"openid-connect\",\"attributes\" : {\"include.in.token.scope\" : \"true\",\"display.on.consent.screen\" : \"false\"}}"
+
 
 ###########################################################
 #Setup for config-map
