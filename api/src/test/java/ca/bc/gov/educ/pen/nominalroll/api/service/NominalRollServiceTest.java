@@ -35,8 +35,6 @@ public class NominalRollServiceTest {
   NominalRollPostedStudentRepository postedStudentRepository;
   @Autowired
   NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom;
-  @Autowired
-  RestUtils restUtils;
 
   NominalRollService service;
 
