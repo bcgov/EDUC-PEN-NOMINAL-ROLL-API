@@ -8,7 +8,6 @@ import ca.bc.gov.educ.pen.nominalroll.api.exception.FileUnProcessableException;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.processor.FileProcessor;
-import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentValidationErrorRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
 import ca.bc.gov.educ.pen.nominalroll.api.rules.RulesProcessor;
@@ -49,16 +48,14 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   private final Map<FileTypes, FileProcessor> fileProcessorsMap;
   private final NominalRollService service;
   private final NominalRollStudentSearchService searchService;
-  private final NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository;
   private final RulesProcessor rulesProcessor;
   private final RestUtils restUtils;
 
-  public NominalRollApiController(final List<FileProcessor> fileProcessors, final NominalRollService service, final NominalRollStudentSearchService searchService, final NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository, final RulesProcessor rulesProcessor, final RestUtils restUtils) {
+  public NominalRollApiController(final List<FileProcessor> fileProcessors, final NominalRollService service, final NominalRollStudentSearchService searchService, final RulesProcessor rulesProcessor, final RestUtils restUtils) {
     this.fileProcessorsMap = fileProcessors.stream().collect(Collectors.toMap(FileProcessor::getFileType, Function.identity()));
     this.service = service;
     this.searchService = searchService;
     this.rulesProcessor = rulesProcessor;
-    this.nominalRollStudentValidationErrorRepository = nominalRollStudentValidationErrorRepository;
     this.restUtils = restUtils;
   }
 
@@ -184,7 +181,7 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   public ResponseEntity<Void> addFedProvSchoolCode(FedProvSchoolCode fedProvSchoolCode) {
     this.restUtils.addFedProvSchoolCode(fedProvSchoolCode);
     this.restUtils.evictFedProvSchoolCodesCache(); //evict cache bec
-    var validationErrorEntities = this.nominalRollStudentValidationErrorRepository.findAllByFieldName("School Number");
+    var validationErrorEntities = this.service.getSchoolNumberValidationErrors();
     if (!validationErrorEntities.isEmpty()) {
       for(val validationErrorEntity : validationErrorEntities) {
         val studentEntity = validationErrorEntity.getNominalRollStudent();
