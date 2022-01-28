@@ -11,9 +11,11 @@ import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollPostedStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentValidationErrorEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollPostedStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepositoryCustom;
+import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentValidationErrorRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Event;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollIDs;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudentCount;
@@ -51,17 +53,19 @@ public class NominalRollService {
   private final MessagePublisher messagePublisher;
   private final NominalRollStudentRepository repository;
   private final NominalRollPostedStudentRepository postedStudentRepository;
+  private final NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository;
   private final NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom;
   private final Executor paginatedQueryExecutor = new EnhancedQueueExecutor.Builder()
     .setThreadFactory(new ThreadFactoryBuilder().setNameFormat("async-pagination-query-executor-%d").build())
     .setCorePoolSize(2).setMaximumPoolSize(10).setKeepAliveTime(Duration.ofSeconds(60)).build();
 
   public NominalRollService(final MessagePublisher messagePublisher, final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository,
-                            final NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom) {
+                            final NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom, final NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository) {
     this.messagePublisher = messagePublisher;
     this.repository = repository;
     this.postedStudentRepository = postedStudentRepository;
     this.nominalRollStudentRepositoryCustom = nominalRollStudentRepositoryCustom;
+    this.nominalRollStudentValidationErrorRepository = nominalRollStudentValidationErrorRepository;
   }
 
   public boolean isAllRecordsProcessed() {
@@ -243,5 +247,9 @@ public class NominalRollService {
   public boolean hasPostedStudents(final String processingYear) {
     final Pair<LocalDateTime, LocalDateTime> firstAndLastDays = NominalRollHelper.getFirstAndLastDateTimesOfYear(processingYear);
     return this.postedStudentRepository.existsByProcessingYearBetween(firstAndLastDays.getLeft(), firstAndLastDays.getRight());
+  }
+
+  public List<NominalRollStudentValidationErrorEntity> getSchoolNumberValidationErrors(){
+    return this.nominalRollStudentValidationErrorRepository.findAllByFieldName("School Number");
   }
 }

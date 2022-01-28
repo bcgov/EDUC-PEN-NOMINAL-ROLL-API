@@ -20,7 +20,7 @@ import java.util.UUID;
 @Table(name = "NOMINAL_ROLL_STUDENT_VALIDATION_ERROR")
 @DynamicUpdate
 @ToString
-public class NominalRollStudentValidationError {
+public class NominalRollStudentValidationErrorEntity {
 
   @Id
   @GeneratedValue(generator = "UUID")
