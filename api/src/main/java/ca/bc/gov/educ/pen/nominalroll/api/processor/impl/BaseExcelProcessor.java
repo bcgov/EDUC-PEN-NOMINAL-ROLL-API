@@ -113,9 +113,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
     }
     val headerNameFromFile = StringUtils.trim(cell.getStringCellValue());
     val headerOptional = Headers.fromString(headerNameFromFile);
-    if (headerOptional.isPresent()) {
-      headersMap.put(cn, StringUtils.trim(cell.getStringCellValue()));
-    }
+    headerOptional.ifPresent(header -> headersMap.put(cn, StringUtils.trim(header.getCode())));
   }
 
   private void handleEachCell(final Row r, final int cn, final Map<Integer, String> headersMap, final NominalRollStudent nominalRollStudent, final Map<Headers, Integer> invalidValueCounterMap) {
