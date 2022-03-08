@@ -27,7 +27,7 @@ public abstract class NominalRollStudentDecorator implements NominalRollStudentM
   @Override
   public NominalRollPostedStudentEntity toPostedEntity(final NominalRollStudentEntity nominalRollStudentEntity) {
     val postedEntity = this.delegate.toPostedEntity(nominalRollStudentEntity);
-    postedEntity.setProcessingYear(LocalDateTime.now().withYear(Integer.parseInt(nominalRollStudentEntity.getProcessingYear())));
+    postedEntity.setProcessingYear(LocalDateTime.now().withYear(Integer.parseInt(nominalRollStudentEntity.getProcessingYear())).withMonth(9).withDayOfMonth(30));
     postedEntity.setAgreementType(NominalRollHelper.getAgreementTypeMap().get(nominalRollStudentEntity.getLeaProvincial()).get(0)); // always mapped to same value.
     postedEntity.setFederalBandCode(NominalRollHelper.removeLeadingZeros(postedEntity.getFederalBandCode()));
     postedEntity.setGrade(NominalRollHelper.getGradeCodeMap().get(postedEntity.getGrade()));
