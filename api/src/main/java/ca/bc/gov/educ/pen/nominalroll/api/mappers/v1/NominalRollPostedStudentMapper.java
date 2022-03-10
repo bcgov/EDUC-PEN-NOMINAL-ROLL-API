@@ -23,7 +23,7 @@ public interface NominalRollPostedStudentMapper {
   @Mapping(target = "schtype", ignore = true)
   @Mapping(target = "frbandnum", source = "nominalRollPostedStudentEntity.federalBandCode")
   @Mapping(target = "bandCode", source = "nominalRollPostedStudentEntity.federalBandCode")
-  @Mapping(target = "bandname", source = "nominalRollPostedStudentEntity.federalRecipientBandName")
+  @Mapping(target = "bandname", ignore = true)
   @Mapping(target = "studSurname", source = "nominalRollPostedStudentEntity.surname")
   @Mapping(target = "studGiven", source = "nominalRollPostedStudentEntity.givenNames")
   @Mapping(target = "studMiddle", ignore = true)
@@ -40,7 +40,6 @@ public interface NominalRollPostedStudentMapper {
   @Mapping(target = "usualGiven", ignore = true)
   @Mapping(target = "distNo", ignore = true)
   @Mapping(target = "schlNo", ignore = true)
-
   @Mapping(target = "comment", ignore = true)
   @Mapping(target = "penStatus", ignore = true)
   @Mapping(target = "origPen", ignore = true)
