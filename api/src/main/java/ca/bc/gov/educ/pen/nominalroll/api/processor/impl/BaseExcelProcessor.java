@@ -70,9 +70,12 @@ public abstract class BaseExcelProcessor implements FileProcessor {
       this.populateRowData(correlationID, headersMap, nominalRollStudents, rowNum, nominalRollStudent);
     }
     log.info("contains for invalid counter map is {}", invalidValueCounterMap);
-    val isThresholdReached = invalidValueCounterMap.values().stream().filter(value -> value > this.applicationProperties.getNominalRollInvalidFieldThreshold()).findAny();
-    if (isThresholdReached.isPresent()) {
-      throw new FileUnProcessableException(FileError.FILE_THRESHOLD_CHECK_FAILED, correlationID);
+    val isThresholdReachedList = invalidValueCounterMap.entrySet().stream()
+      .filter(ivCounter -> ivCounter.getValue() > this.applicationProperties.getNominalRollInvalidFieldThreshold())
+      .map(value -> value.getKey().toString())
+      .collect(Collectors.toList());
+    if (isThresholdReachedList.size() > 0) {
+      throw new FileUnProcessableException(FileError.FILE_THRESHOLD_CHECK_FAILED, correlationID, "File threshold failed with field(s): " + String.join(",", isThresholdReachedList));
     }
     return NominalRollFileProcessResponse.builder().headers(new ArrayList<>(headersMap.values())).nominalRollStudents(nominalRollStudents).build();
   }
