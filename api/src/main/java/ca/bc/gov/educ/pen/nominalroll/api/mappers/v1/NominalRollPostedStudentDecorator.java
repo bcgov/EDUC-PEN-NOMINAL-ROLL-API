@@ -22,16 +22,25 @@ public abstract class NominalRollPostedStudentDecorator implements NominalRollPo
     sldDiaStudent.setSchtype(NominalRollHelper.getSldSchTypeMap().get(nominalRollPostedStudentEntity.getAgreementType()));
     sldDiaStudent.setStudBirth(nominalRollPostedStudentEntity.getBirthDate().format(YYYY_MM_DD_FORMATTER));
     sldDiaStudent.setFteVal(nominalRollPostedStudentEntity.getFte().longValue());
-    if(StringUtils.isNotBlank(nominalRollPostedStudentEntity.getFederalRecipientBandName()) && nominalRollPostedStudentEntity.getFederalRecipientBandName().length() > 20){
-      sldDiaStudent.setBandname(nominalRollPostedStudentEntity.getFederalRecipientBandName().substring(0, 20));
-    }else{
-      sldDiaStudent.setBandname(nominalRollPostedStudentEntity.getFederalRecipientBandName());
-    }
+    sldDiaStudent.setBandname(trimValueToLength(nominalRollPostedStudentEntity.getFederalRecipientBandName(), 20));
+    sldDiaStudent.setStudSurname(trimValueToLength(nominalRollPostedStudentEntity.getSurname(), 25));
+    sldDiaStudent.setStudGiven(trimValueToLength(nominalRollPostedStudentEntity.getGivenNames(), 25));
+    sldDiaStudent.setSchoolName(trimValueToLength(nominalRollPostedStudentEntity.getFederalSchoolName(), 40));
 
     sldDiaStudent.setReportDate(Long.parseLong(nominalRollPostedStudentEntity.getProcessingYear().format(YYYY_MM_DD_FORMATTER)));
     val mincode = restUtils.getFedProvSchoolCodes().get(nominalRollPostedStudentEntity.getFederalSchoolNumber());
     sldDiaStudent.setDistNo(mincode.substring(0, 3));
     sldDiaStudent.setSchlNo(mincode.substring(3));
     return sldDiaStudent;
+  }
+
+  private String trimValueToLength(String value, int length){
+    if(value == null){
+      return null;
+    }
+    if(value.length() > length){
+      return value.substring(0, length);
+    }
+    return value;
   }
 }
