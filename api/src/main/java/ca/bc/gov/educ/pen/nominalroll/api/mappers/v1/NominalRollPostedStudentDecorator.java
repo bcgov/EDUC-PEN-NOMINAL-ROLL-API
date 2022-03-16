@@ -21,12 +21,12 @@ public abstract class NominalRollPostedStudentDecorator implements NominalRollPo
     val sldDiaStudent = this.delegate.toDiaStudent(nominalRollPostedStudentEntity, restUtils);
     sldDiaStudent.setSchtype(NominalRollHelper.getSldSchTypeMap().get(nominalRollPostedStudentEntity.getAgreementType()));
     sldDiaStudent.setStudBirth(nominalRollPostedStudentEntity.getBirthDate().format(YYYY_MM_DD_FORMATTER));
-    sldDiaStudent.setFteVal(nominalRollPostedStudentEntity.getFte().longValue());
+    sldDiaStudent.setFteVal(nominalRollPostedStudentEntity.getFte().longValue() * 10000);
     sldDiaStudent.setBandname(trimValueToLength(nominalRollPostedStudentEntity.getFederalRecipientBandName(), 20));
     sldDiaStudent.setStudSurname(trimValueToLength(nominalRollPostedStudentEntity.getSurname(), 25));
     sldDiaStudent.setStudGiven(trimValueToLength(nominalRollPostedStudentEntity.getGivenNames(), 25));
     sldDiaStudent.setSchoolName(trimValueToLength(nominalRollPostedStudentEntity.getFederalSchoolName(), 40));
-
+    sldDiaStudent.setSchboard(StringUtils.leftPad(nominalRollPostedStudentEntity.getFederalSchoolBoard(),3,"0"));
     sldDiaStudent.setReportDate(Long.parseLong(nominalRollPostedStudentEntity.getProcessingYear().format(YYYY_MM_DD_FORMATTER)));
     val mincode = restUtils.getFedProvSchoolCodes().get(nominalRollPostedStudentEntity.getFederalSchoolNumber());
     sldDiaStudent.setDistNo(mincode.substring(0, 3));

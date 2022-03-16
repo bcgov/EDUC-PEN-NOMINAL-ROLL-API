@@ -16,7 +16,7 @@ import org.mapstruct.factory.Mappers;
 public interface NominalRollPostedStudentMapper {
   NominalRollPostedStudentMapper mapper = Mappers.getMapper(NominalRollPostedStudentMapper.class);
 
-  @Mapping(target = "schboard", source = "nominalRollPostedStudentEntity.federalSchoolBoard")
+  @Mapping(target = "schboard", ignore = true)
   @Mapping(target = "schnum", source = "nominalRollPostedStudentEntity.federalSchoolNumber")
   @Mapping(target = "schoolName", ignore = true)
   @Mapping(target = "agreementType", source = "nominalRollPostedStudentEntity.agreementType")
