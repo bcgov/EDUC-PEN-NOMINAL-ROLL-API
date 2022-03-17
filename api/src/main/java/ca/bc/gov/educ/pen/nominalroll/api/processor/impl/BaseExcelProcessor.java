@@ -190,7 +190,7 @@ public abstract class BaseExcelProcessor implements FileProcessor {
 
   private void setGrade(final NominalRollStudent nominalRollStudent, final Cell cell, final Map<Headers, Integer> invalidValueCounterMap, final ColumnType columnType) {
     val fieldValue = this.getCellValueString(cell, columnType);
-    if (StringUtils.isBlank(fieldValue) || !NominalRollHelper.isValidGradeCode(fieldValue)) {
+    if (!StringUtils.isBlank(fieldValue) && !NominalRollHelper.isValidGradeCode(fieldValue)) {
       this.addToInvalidCounterMap(invalidValueCounterMap, GRADE);
     }
     nominalRollStudent.setGrade(this.getCellValueString(cell, columnType));
