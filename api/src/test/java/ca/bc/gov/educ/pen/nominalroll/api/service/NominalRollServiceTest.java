@@ -39,7 +39,7 @@ public class NominalRollServiceTest {
   @Autowired
   NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository;
 
-  @Autowired
+  @Mock
   RestUtils restUtils;
 
   NominalRollService service;
