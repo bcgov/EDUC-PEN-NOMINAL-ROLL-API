@@ -59,32 +59,16 @@ public class NominalRollServiceTest {
 
   @Test
   public void testRemoveFedProvCodes_ShouldReturnOk() {
-    when(this.restUtils.getSchools()).thenReturn(List.of(School.builder().distNo("504").schlNo("00001").openedDate("20100101").closedDate("20180101").build()));
+    var schoolList = new ArrayList<School>();
+    schoolList.add(School.builder().distNo("504").schlNo("00023").openedDate("20100101").closedDate("00000000").build());
+    schoolList.add(School.builder().distNo("504").schlNo("00001").openedDate("20100101").closedDate("20180101").build());
+    schoolList.add(School.builder().distNo("504").schlNo("00011").openedDate("20100101").closedDate(null).build());
+    when(this.restUtils.getSchools()).thenReturn(schoolList);
     when(this.restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "50400001"));
     this.service.removeClosedSchoolsFedProvMappings();
     verify(this.restUtils, atMost(1)).getFedProvSchoolCodes();
     verify(this.restUtils, atMost(1)).getSchools();
     verify(this.restUtils, atMost(1)).deleteFedProvCode(any());
-  }
-
-  @Test
-  public void testRemoveFedProvCodesMultipleSchools_ShouldReturnOk() {
-    when(this.restUtils.getSchools()).thenReturn(List.of(School.builder().distNo("504").schlNo("00001").openedDate("20100101").closedDate("00000000").build()));
-    when(this.restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "50400001"));
-    this.service.removeClosedSchoolsFedProvMappings();
-    verify(this.restUtils, atMost(1)).getFedProvSchoolCodes();
-    verify(this.restUtils, atMost(1)).getSchools();
-    verify(this.restUtils, atMost(0)).deleteFedProvCode(any());
-  }
-
-  @Test
-  public void testRemoveFedProvCodesMultipleSchoolsNullCloseDate_ShouldReturnOk() {
-    when(this.restUtils.getSchools()).thenReturn(List.of(School.builder().distNo("504").schlNo("00001").openedDate("20100101").closedDate(null).build()));
-    when(this.restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "50400001"));
-    this.service.removeClosedSchoolsFedProvMappings();
-    verify(this.restUtils, atMost(1)).getFedProvSchoolCodes();
-    verify(this.restUtils, atMost(1)).getSchools();
-    verify(this.restUtils, atMost(0)).deleteFedProvCode(any());
   }
 
   @Test
