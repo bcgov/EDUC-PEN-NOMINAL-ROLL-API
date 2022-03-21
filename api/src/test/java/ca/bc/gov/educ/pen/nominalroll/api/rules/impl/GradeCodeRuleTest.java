@@ -36,7 +36,7 @@ public class GradeCodeRuleTest {
 
   @Test
   @Parameters({
-    "null, 1, Field value is missing.",
+    "null, 0, Field value is missing.",
     "1, 0, null",
     "01, 0, null",
     "2, 0, null",
