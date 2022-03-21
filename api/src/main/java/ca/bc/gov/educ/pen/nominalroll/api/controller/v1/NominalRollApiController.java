@@ -79,6 +79,7 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   @Override
   public ResponseEntity<Void> processNominalRollStudents(final List<NominalRollStudent> nominalRollStudents, final String correlationID) {
     val nomRollStudentEntities = nominalRollStudents.stream().map(NominalRollStudentMapper.mapper::toModel).map(TransformUtil::uppercaseFields).collect(Collectors.toList());
+    service.removeClosedSchoolsFedProvMappings();
     this.service.saveNominalRollStudents(nomRollStudentEntities, correlationID);
     return ResponseEntity.accepted().build();
   }

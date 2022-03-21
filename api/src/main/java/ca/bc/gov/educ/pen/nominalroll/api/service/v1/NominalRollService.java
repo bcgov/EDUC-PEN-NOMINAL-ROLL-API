@@ -16,6 +16,8 @@ import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollPostedStudent
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepositoryCustom;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentValidationErrorRepository;
+import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.FedProvSchoolCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Event;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollIDs;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudentCount;
@@ -33,6 +35,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,17 +43,22 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
+
+@Component
 @Service
 @Slf4j
 public class NominalRollService {
   private static final String STUDENT_ID_ATTRIBUTE = "nominalRollStudentID";
   private final MessagePublisher messagePublisher;
+  private final RestUtils restUtils;
   private final NominalRollStudentRepository repository;
   private final NominalRollPostedStudentRepository postedStudentRepository;
   private final NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository;
@@ -59,9 +67,10 @@ public class NominalRollService {
     .setThreadFactory(new ThreadFactoryBuilder().setNameFormat("async-pagination-query-executor-%d").build())
     .setCorePoolSize(2).setMaximumPoolSize(10).setKeepAliveTime(Duration.ofSeconds(60)).build();
 
-  public NominalRollService(final MessagePublisher messagePublisher, final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository,
+  public NominalRollService(final RestUtils restUtils,final MessagePublisher messagePublisher, final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository,
                             final NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom, final NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository) {
     this.messagePublisher = messagePublisher;
+    this.restUtils = restUtils;
     this.repository = repository;
     this.postedStudentRepository = postedStudentRepository;
     this.nominalRollStudentRepositoryCustom = nominalRollStudentRepositoryCustom;
@@ -251,5 +260,40 @@ public class NominalRollService {
 
   public List<NominalRollStudentValidationErrorEntity> getSchoolNumberValidationErrors(){
     return this.nominalRollStudentValidationErrorRepository.findAllByFieldName("School Number");
+  }
+
+  public void removeClosedSchoolsFedProvMappings() {
+    val schools = this.restUtils.getSchools();
+    Map<String, String> schoolCodes = this.restUtils.getFedProvSchoolCodes();
+    Set<String> closedSchools = new HashSet<>();
+    for (val school: schools) {
+      if (StringUtils.isNotBlank(school.getClosedDate()) && futureClosedDate(school.getClosedDate())) {
+        closedSchools.add(school.getDistNo() + school.getSchlNo());
+      }
+    }
+    for (Map.Entry<String,String> fedCodeEntry : schoolCodes.entrySet())
+    {
+      val mincode = fedCodeEntry.getValue();
+      if(closedSchools.contains(mincode)){
+        FedProvSchoolCode federalCode = new FedProvSchoolCode();
+        federalCode.setProvincialCode(mincode);
+        federalCode.setFederalCode(fedCodeEntry.getKey());
+        federalCode.setKey("NOM_SCHL");
+        restUtils.deleteFedProvCode(federalCode);
+      }
+    }
+  }
+
+  private boolean futureClosedDate(String closedDate) {
+    try {
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+      LocalDate closed = LocalDate.parse(closedDate, formatter);
+      if (closed.isBefore(LocalDate.now())) {
+        return true;
+      }
+    } catch (DateTimeParseException e) {
+      //Do nothing here
+    }
+    return false;
   }
 }
