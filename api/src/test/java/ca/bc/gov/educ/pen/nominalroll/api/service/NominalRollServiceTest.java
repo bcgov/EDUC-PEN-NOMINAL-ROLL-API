@@ -8,6 +8,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollPostedStudent
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepositoryCustom;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentValidationErrorRepository;
+import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +39,9 @@ public class NominalRollServiceTest {
   @Autowired
   NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository;
 
+  @Autowired
+  RestUtils restUtils;
+
   NominalRollService service;
 
   @Mock
@@ -45,7 +49,7 @@ public class NominalRollServiceTest {
 
   @Before
   public void before() {
-    this.service = new NominalRollService(this.messagePublisher, this.repository, this.postedStudentRepository, this.nominalRollStudentRepositoryCustom, this.nominalRollStudentValidationErrorRepository);
+    this.service = new NominalRollService(this.restUtils, this.messagePublisher, this.repository, this.postedStudentRepository, this.nominalRollStudentRepositoryCustom, this.nominalRollStudentValidationErrorRepository);
   }
 
 //  @Test

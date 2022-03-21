@@ -28,4 +28,10 @@ public class School implements Serializable {
   @Size(max = 5)
   @NotNull(message = "schlNo can not be null.")
   private String schlNo;
+
+  @Size(max = 8)
+  private String openedDate;
+
+  @Size(max = 8)
+  private String closedDate;
 }

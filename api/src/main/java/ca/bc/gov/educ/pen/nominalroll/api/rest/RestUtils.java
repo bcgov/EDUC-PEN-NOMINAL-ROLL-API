@@ -13,11 +13,13 @@ import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
@@ -93,6 +95,23 @@ public class RestUtils {
       .uri(this.props.getStudentApiURL().concat("/gender-codes"))
       .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
       .retrieve().bodyToFlux(GenderCode.class).buffer().blockLast()).stream().filter(this::filterGenderCodes).collect(Collectors.toList());
+  }
+
+  @Retryable(value = {Exception.class}, backoff = @Backoff(multiplier = 2, delay = 2000))
+  public void deleteFedProvCode(@NonNull final FedProvSchoolCode fedProvSchoolCode) {
+    try {
+    val response = webClient
+              .method(HttpMethod.DELETE)
+              .uri(this.props.getSchoolApiURL().concat("/federal-province-codes"))
+              .body(BodyInserters.fromProducer(Mono.just(fedProvSchoolCode), FedProvSchoolCode.class))
+              .retrieve()
+              .toBodilessEntity();
+    if (response == null) {
+      throw new NominalRollAPIRuntimeException("Error occurred while deleting FedProvSchoolCode");
+    }
+  } catch (final WebClientResponseException e) {
+    throw new NominalRollAPIRuntimeException("Error occurred while deleting FedProvSchoolCode");
+  }
   }
 
   @Retryable(value = {Exception.class}, backoff = @Backoff(multiplier = 2, delay = 2000))
