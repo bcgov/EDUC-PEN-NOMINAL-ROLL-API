@@ -105,7 +105,7 @@ public class RestUtils {
               .uri(this.props.getSchoolApiURL().concat("/federal-province-codes"))
               .body(BodyInserters.fromProducer(Mono.just(fedProvSchoolCode), FedProvSchoolCode.class))
               .retrieve()
-              .toBodilessEntity();
+              .toBodilessEntity().block();
     if (response == null) {
       throw new NominalRollAPIRuntimeException("Error occurred while deleting FedProvSchoolCode");
     }
