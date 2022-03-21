@@ -68,6 +68,26 @@ public class NominalRollServiceTest {
   }
 
   @Test
+  public void testRemoveFedProvCodesMultipleSchools_ShouldReturnOk() {
+    when(this.restUtils.getSchools()).thenReturn(List.of(School.builder().distNo("504").schlNo("00001").openedDate("20100101").closedDate("00000000").build()));
+    when(this.restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "50400001"));
+    this.service.removeClosedSchoolsFedProvMappings();
+    verify(this.restUtils, atMost(1)).getFedProvSchoolCodes();
+    verify(this.restUtils, atMost(1)).getSchools();
+    verify(this.restUtils, atMost(0)).deleteFedProvCode(any());
+  }
+
+  @Test
+  public void testRemoveFedProvCodesMultipleSchoolsNullCloseDate_ShouldReturnOk() {
+    when(this.restUtils.getSchools()).thenReturn(List.of(School.builder().distNo("504").schlNo("00001").openedDate("20100101").closedDate(null).build()));
+    when(this.restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "50400001"));
+    this.service.removeClosedSchoolsFedProvMappings();
+    verify(this.restUtils, atMost(1)).getFedProvSchoolCodes();
+    verify(this.restUtils, atMost(1)).getSchools();
+    verify(this.restUtils, atMost(0)).deleteFedProvCode(any());
+  }
+
+  @Test
   public void testRetrieveStudent_WhenStudentDoesNotExistInDB_ShouldThrowEntityNotFoundException() {
     final var studentID = UUID.fromString("00000000-0000-0000-0000-f3b2d4f20000");
     assertThrows(EntityNotFoundException.class, () -> this.service.getNominalRollStudentByID(studentID));

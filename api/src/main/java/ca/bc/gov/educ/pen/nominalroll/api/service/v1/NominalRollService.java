@@ -40,11 +40,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -267,7 +267,7 @@ public class NominalRollService {
     Map<String, String> schoolCodes = this.restUtils.getFedProvSchoolCodes();
     Set<String> closedSchools = new HashSet<>();
     for (val school: schools) {
-      if (school.getClosedDate().length() > 0 && !StringUtils.equalsIgnoreCase(school.getClosedDate(), "00000000") && futureClosedDate(school.getClosedDate())) {
+      if (StringUtils.isNotBlank(school.getClosedDate()) && futureClosedDate(school.getClosedDate())) {
         closedSchools.add(school.getDistNo() + school.getSchlNo());
       }
     }
@@ -286,13 +286,12 @@ public class NominalRollService {
 
   private boolean futureClosedDate(String closedDate) {
     try {
-      Date date = new Date();
-      SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
-      Date closed = formatter.parse(closedDate);
-      if (closed.before(date)) {
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+      LocalDate closed = LocalDate.parse(closedDate, formatter);
+      if (closed.isBefore(LocalDate.now())) {
         return true;
       }
-    } catch (ParseException e) {
+    } catch (DateTimeParseException e) {
       //Do nothing here
     }
     return false;
