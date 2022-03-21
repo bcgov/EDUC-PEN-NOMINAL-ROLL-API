@@ -10,6 +10,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentReposi
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentValidationErrorRepository;
 import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.School;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,12 +19,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -52,58 +57,21 @@ public class NominalRollServiceTest {
     this.service = new NominalRollService(this.restUtils, this.messagePublisher, this.repository, this.postedStudentRepository, this.nominalRollStudentRepositoryCustom, this.nominalRollStudentValidationErrorRepository);
   }
 
-//  @Test
-//  public void testRetrieveStudent_WhenStudentExistInDB_ShouldReturnStudent() throws JsonProcessingException {
-//    StudentEntity student = service.createStudent(getStudentCreate()).getLeft();
-//    assertNotNull(student);
-//    assertNotNull(service.retrieveStudent(student.getStudentID()));
-//  }
+  @Test
+  public void testRemoveFedProvCodes_ShouldReturnOk() {
+    when(this.restUtils.getSchools()).thenReturn(List.of(School.builder().distNo("504").schlNo("00001").openedDate("20100101").closedDate("20180101").build()));
+    when(this.restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "50400001"));
+    this.service.removeClosedSchoolsFedProvMappings();
+    verify(this.restUtils, atMost(1)).getFedProvSchoolCodes();
+    verify(this.restUtils, atMost(1)).getSchools();
+    verify(this.restUtils, atMost(1)).deleteFedProvCode(any());
+  }
 
   @Test
   public void testRetrieveStudent_WhenStudentDoesNotExistInDB_ShouldThrowEntityNotFoundException() {
     final var studentID = UUID.fromString("00000000-0000-0000-0000-f3b2d4f20000");
     assertThrows(EntityNotFoundException.class, () -> this.service.getNominalRollStudentByID(studentID));
   }
-
-//  @Test
-//  public void testUpdateStudent_WhenPayloadIsValid_ShouldReturnTheUpdatedObject() throws JsonProcessingException {
-//
-//    StudentEntity student = service.createStudent(getStudentCreate()).getLeft();
-//    student.setLegalFirstName("updatedFirstName");
-//    var trueStudentID = UUID.randomUUID();
-//    student.setTrueStudentID(trueStudentID);
-//
-//    var studentUpdate = new StudentUpdate();
-//    studentUpdate.setStudentID(student.getStudentID().toString());
-//    studentUpdate.setHistoryActivityCode("USEREDIT");
-//    studentUpdate.setUpdateUser("Test Update");
-//    BeanUtils.copyProperties(StudentMapper.mapper.toStructure(student), studentUpdate);
-//    StudentEntity updateEntity = service.updateStudent(studentUpdate, UUID.fromString(studentUpdate.getStudentID())).getLeft();
-//    assertNotNull(updateEntity);
-//    assertThat(updateEntity.getLegalFirstName()).isEqualTo("updatedFirstName".toUpperCase());
-//
-//    var history = studentHistoryRepository.findByStudentID(student.getStudentID(), PageRequest.of(0, 10));
-//    assertThat(history.getTotalElements()).isEqualTo(2);
-//    assertThat(history.getContent().get(1).getHistoryActivityCode()).isEqualTo("USEREDIT");
-//    assertThat(history.getContent().get(1).getCreateUser()).isEqualTo(studentUpdate.getUpdateUser());
-//    assertThat(history.getContent().get(1).getLegalFirstName()).isEqualTo(studentUpdate.getLegalFirstName().toUpperCase());
-//    assertThat(history.getContent().get(1).getTrueStudentID()).isEqualTo(trueStudentID);
-//
-//  }
-
-//  @Test(expected = EntityNotFoundException.class)
-//  public void testUpdateStudent_WhenStudentNotExist_ShouldThrowException() throws JsonProcessingException {
-//
-//    StudentEntity student = getStudentEntity();
-//    student.setStudentID(UUID.randomUUID());
-//    student.setLegalFirstName("updatedFirstName");
-//
-//    var studentUpdate = new StudentUpdate();
-//    studentUpdate.setStudentID(student.getStudentID().toString());
-//    studentUpdate.setHistoryActivityCode("USEREDIT");
-//    BeanUtils.copyProperties(StudentMapper.mapper.toStructure(student), studentUpdate);
-//    service.updateStudent(studentUpdate, UUID.fromString(studentUpdate.getStudentID()));
-//  }
 
   @Test
   public void testFindAllStudent_WhenPayloadIsValid_ShouldReturnAllStudentsObject() throws ExecutionException, InterruptedException {

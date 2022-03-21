@@ -262,26 +262,26 @@ public class NominalRollService {
     return this.nominalRollStudentValidationErrorRepository.findAllByFieldName("School Number");
   }
 
-  public void removeClosedSchools(List<NominalRollStudentEntity> nomRollStudentEntities, String correlationID) {
+  public void removeClosedSchoolsFedProvMappings() {
     val schools = this.restUtils.getSchools();
     Map<String, String> schoolCodes = this.restUtils.getFedProvSchoolCodes();
-    Set<String> closedSchools = new HashSet<String>();
-    for (val school: schools)
-      if (school.getClosedDate().length()>0 && !StringUtils.equalsIgnoreCase(school.getClosedDate(),"00000000") && futureClosedDate(school.getClosedDate())) {
+    Set<String> closedSchools = new HashSet<>();
+    for (val school: schools) {
+      if (school.getClosedDate().length() > 0 && !StringUtils.equalsIgnoreCase(school.getClosedDate(), "00000000") && futureClosedDate(school.getClosedDate())) {
         closedSchools.add(school.getDistNo() + school.getSchlNo());
       }
-     for (String fedCode : schoolCodes.keySet())
-     {
-       val mincode = schoolCodes.get(fedCode);
-
-       if(closedSchools.contains(mincode)){
-         FedProvSchoolCode federalCode = new FedProvSchoolCode();
-         federalCode.setProvincialCode(mincode);
-         federalCode.setFederalCode(fedCode);
-         federalCode.setKey("NOM_SCHL");
-         restUtils.deleteFedProvCode(federalCode);
-       }
-     }
+    }
+    for (Map.Entry<String,String> fedCodeEntry : schoolCodes.entrySet())
+    {
+      val mincode = fedCodeEntry.getValue();
+      if(closedSchools.contains(mincode)){
+        FedProvSchoolCode federalCode = new FedProvSchoolCode();
+        federalCode.setProvincialCode(mincode);
+        federalCode.setFederalCode(fedCodeEntry.getKey());
+        federalCode.setKey("NOM_SCHL");
+        restUtils.deleteFedProvCode(federalCode);
+      }
+    }
   }
 
   private boolean futureClosedDate(String closedDate) {
@@ -293,7 +293,7 @@ public class NominalRollService {
         return true;
       }
     } catch (ParseException e) {
-      e.printStackTrace();
+      //Do nothing here
     }
     return false;
   }
