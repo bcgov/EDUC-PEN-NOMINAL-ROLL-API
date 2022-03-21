@@ -16,16 +16,16 @@ import org.mapstruct.factory.Mappers;
 public interface NominalRollPostedStudentMapper {
   NominalRollPostedStudentMapper mapper = Mappers.getMapper(NominalRollPostedStudentMapper.class);
 
-  @Mapping(target = "schboard", source = "nominalRollPostedStudentEntity.federalSchoolBoard")
+  @Mapping(target = "schboard", ignore = true)
   @Mapping(target = "schnum", source = "nominalRollPostedStudentEntity.federalSchoolNumber")
-  @Mapping(target = "schoolName", source = "nominalRollPostedStudentEntity.federalSchoolName")
+  @Mapping(target = "schoolName", ignore = true)
   @Mapping(target = "agreementType", source = "nominalRollPostedStudentEntity.agreementType")
   @Mapping(target = "schtype", ignore = true)
   @Mapping(target = "frbandnum", source = "nominalRollPostedStudentEntity.federalBandCode")
   @Mapping(target = "bandCode", source = "nominalRollPostedStudentEntity.federalBandCode")
-  @Mapping(target = "bandname", source = "nominalRollPostedStudentEntity.federalRecipientBandName")
-  @Mapping(target = "studSurname", source = "nominalRollPostedStudentEntity.surname")
-  @Mapping(target = "studGiven", source = "nominalRollPostedStudentEntity.givenNames")
+  @Mapping(target = "bandname", ignore = true)
+  @Mapping(target = "studSurname", ignore = true)
+  @Mapping(target = "studGiven", ignore = true)
   @Mapping(target = "studMiddle", ignore = true)
   @Mapping(target = "studSex", source = "nominalRollPostedStudentEntity.gender")
   @Mapping(target = "studBirth", ignore = true)
@@ -40,7 +40,6 @@ public interface NominalRollPostedStudentMapper {
   @Mapping(target = "usualGiven", ignore = true)
   @Mapping(target = "distNo", ignore = true)
   @Mapping(target = "schlNo", ignore = true)
-
   @Mapping(target = "comment", ignore = true)
   @Mapping(target = "penStatus", ignore = true)
   @Mapping(target = "origPen", ignore = true)
