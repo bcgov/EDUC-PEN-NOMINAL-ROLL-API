@@ -83,15 +83,16 @@ public class EventTaskSchedulerAsyncService {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void findAndPublishLoadedStudentRecordsForProcessing() {
     if (this.getSagaRepository().countAllByStatusIn(this.getStatusFilters()) > 20) { // at max there will be 40 parallel sagas.
-      log.debug("Saga count is greater than 20, so not processing student records");
+      log.info("Saga count is greater than 20, so not processing student records");
       return;
     }
     final List<NominalRollStudentEntity> studentEntities = new ArrayList<>();
     final var nominalRollStudentEntities = this.getNominalRollStudentRepository().findTop100ByStatusOrderByCreateDate(NominalRollStudentStatus.LOADED.toString());
-    log.debug("found :: {}  records in loaded status", nominalRollStudentEntities.size());
+    log.info("found :: {}  records in loaded status", nominalRollStudentEntities.size());
     if (!nominalRollStudentEntities.isEmpty()) {
       for (val entity : nominalRollStudentEntities) {
         if (this.getSagaRepository().findByNominalRollStudentIDAndSagaName(entity.getNominalRollStudentID(), SagaEnum.NOMINAL_ROLL_PROCESS_STUDENT_SAGA.toString()).isEmpty()) {
+          log.info("Adding student record :: {}", entity.toString());
           studentEntities.add(entity);
         }
       }

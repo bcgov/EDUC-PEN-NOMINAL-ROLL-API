@@ -142,6 +142,7 @@ public class NominalRollService {
 
   @Async("publisherExecutor")
   public void prepareAndSendNominalRollStudentsForFurtherProcessing(final List<NominalRollStudentEntity> nominalRollStudentEntities) {
+    log.info("preparing and sending nominal roll students for further processing {}", nominalRollStudentEntities.size());
     final List<NominalRollStudentSagaData> nominalRollStudentSagaDatas = nominalRollStudentEntities.stream()
       .map(el -> {
         val nominalRollStudentSagaData = new NominalRollStudentSagaData();

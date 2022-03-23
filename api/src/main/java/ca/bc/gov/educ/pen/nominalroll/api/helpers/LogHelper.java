@@ -91,6 +91,7 @@ public final class LogHelper {
       retrySagaMap.put("retryCount", saga.getRetryCount());
       MDC.putCloseable("sagaRetry", mapper.writeValueAsString(retrySagaMap));
       log.info("Saga is being retried.");
+      log.info("Saga is: " + saga.getSagaId() + " and status is: " + saga.getStatus() + " and update time is: " + saga.getUpdateDate());
       MDC.clear();
     } catch (final Exception ex) {
       log.error(EXCEPTION, ex);
