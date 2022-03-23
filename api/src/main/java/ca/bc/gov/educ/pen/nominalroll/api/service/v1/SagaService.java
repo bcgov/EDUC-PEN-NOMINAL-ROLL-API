@@ -82,14 +82,16 @@ public class SagaService {
    * @param saga            the saga object.
    * @param sagaEventStates the saga event
    */
+  @Retryable(value = {Exception.class}, maxAttempts = 5, backoff = @Backoff(multiplier = 2, delay = 2000))
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void updateAttachedSagaWithEvents(final Saga saga, final SagaEventStates sagaEventStates) {
     saga.setUpdateDate(LocalDateTime.now());
-    log.info("Updating saga with id {}", saga.getSagaId() + " to status {}" + saga.getStatus());
+    log.info("Updating saga with id {} to status {} and Saga State {} :: Date {}", saga.getSagaId(), saga.getStatus(), saga.getSagaState(), LocalDateTime.now());
     this.getSagaRepository().save(saga);
     val result = this.getSagaEventRepository()
       .findBySagaAndSagaEventOutcomeAndSagaEventStateAndSagaStepNumber(saga, sagaEventStates.getSagaEventOutcome(), sagaEventStates.getSagaEventState(), sagaEventStates.getSagaStepNumber() - 1); //check if the previous step was same and had same outcome, and it is due to replay.
     if (result.isEmpty()) {
+      log.info("Saving event states {}", sagaEventStates.toString());
       this.getSagaEventRepository().save(sagaEventStates);
     }
   }
