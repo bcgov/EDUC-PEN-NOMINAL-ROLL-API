@@ -86,6 +86,7 @@ public class SagaService {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void updateAttachedSagaWithEvents(final Saga saga, final SagaEventStates sagaEventStates) {
     saga.setUpdateDate(LocalDateTime.now());
+    log.info("Updating saga with id {}", saga.getSagaId() + " to status {}" + saga.getStatus());
     this.getSagaRepository().save(saga);
     val result = this.getSagaEventRepository()
       .findBySagaAndSagaEventOutcomeAndSagaEventStateAndSagaStepNumber(saga, sagaEventStates.getSagaEventOutcome(), sagaEventStates.getSagaEventState(), sagaEventStates.getSagaStepNumber() - 1); //check if the previous step was same and had same outcome, and it is due to replay.
