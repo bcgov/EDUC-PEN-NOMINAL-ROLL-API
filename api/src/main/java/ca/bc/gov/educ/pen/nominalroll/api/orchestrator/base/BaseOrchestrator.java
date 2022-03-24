@@ -329,6 +329,8 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
     saga.setStatus(COMPLETED.toString());
     saga.setUpdateDate(LocalDateTime.now());
     this.getSagaService().updateAttachedSagaWithEvents(saga, sagaEventStates);
+    var freshSaga = this.getSagaService().findSagaById(saga.getSagaId());
+    log.info("Saga {} is fresh", freshSaga.get());
     log.info("Saga {} is completed at time {}", saga.getSagaId(), LocalDateTime.now());
   }
 
