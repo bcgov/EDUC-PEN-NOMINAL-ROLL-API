@@ -349,6 +349,7 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    * @param nextEvent the next event object.
    */
   protected void postMessageToTopic(final String topicName, final Event nextEvent) {
+    log.info("posting message event {} to topic {}", nextEvent.toString(), topicName);
     final var eventStringOptional = JsonUtil.getJsonString(nextEvent);
     if (eventStringOptional.isPresent()) {
       this.getMessagePublisher().dispatchMessage(topicName, eventStringOptional.get().getBytes());
@@ -464,10 +465,11 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
   @Async("subscriberExecutor")
   @Transactional
   public void handleEvent(@NotNull final Event event) throws InterruptedException, IOException, TimeoutException {
-    log.info("executing saga event {}", event);
     if (this.sagaEventExecutionNotRequired(event)) {
       log.trace("Execution is not required for this message returning EVENT is :: {}", event);
       return;
+    }else{
+      log.info("executing saga event {}", event);
     }
     this.broadcastSagaInitiatedMessage(event);
 

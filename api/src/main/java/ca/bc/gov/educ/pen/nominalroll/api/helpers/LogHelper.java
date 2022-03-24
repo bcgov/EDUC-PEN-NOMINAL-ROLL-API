@@ -76,7 +76,7 @@ public final class LogHelper {
   public static void logMessagingEventDetails(final String event) {
     try {
       MDC.putCloseable("messageEvent", event);
-      log.info("");
+      log.info("Message event detail {}", event.toString());
       MDC.clear();
     } catch (final Exception exception) {
       log.error(EXCEPTION, exception);

@@ -91,8 +91,9 @@ public class SagaService {
     val result = this.getSagaEventRepository()
       .findBySagaAndSagaEventOutcomeAndSagaEventStateAndSagaStepNumber(saga, sagaEventStates.getSagaEventOutcome(), sagaEventStates.getSagaEventState(), sagaEventStates.getSagaStepNumber() - 1); //check if the previous step was same and had same outcome, and it is due to replay.
     if (result.isEmpty()) {
-      log.info("Saving event states {}", sagaEventStates.toString());
+      log.info("Saving event states {} for SAGA ID {} at time {}", sagaEventStates.toString(), saga.getSagaId(), LocalDateTime.now());
       this.getSagaEventRepository().save(sagaEventStates);
+      log.info("After saving event states {} for SAGA ID {} at time {}", sagaEventStates.toString(), saga.getSagaId(), LocalDateTime.now());
     }
   }
 
