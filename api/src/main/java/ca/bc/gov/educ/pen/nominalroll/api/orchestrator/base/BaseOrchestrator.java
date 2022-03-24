@@ -319,6 +319,7 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
         finalEvent.setNominalRollStudentID(saga.getNominalRollStudentID().toString());
       }
       finalEvent.setSagaName(this.getSagaName());
+      finalEvent.setSagaId(saga.getSagaId());
       finalEvent.setEventPayload(payloadToSubscribers);
       this.postMessageToTopic(this.getTopicToSubscribe(), finalEvent);
     }
@@ -328,7 +329,7 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
     saga.setStatus(COMPLETED.toString());
     saga.setUpdateDate(LocalDateTime.now());
     this.getSagaService().updateAttachedSagaWithEvents(saga, sagaEventStates);
-
+    log.info("Saga {} is completed at time {}", saga.getSagaId(), LocalDateTime.now());
   }
 
   /**
