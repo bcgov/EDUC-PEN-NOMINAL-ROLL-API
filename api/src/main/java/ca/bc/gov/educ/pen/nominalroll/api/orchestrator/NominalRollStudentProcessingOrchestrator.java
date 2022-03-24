@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 
@@ -163,6 +164,7 @@ public class NominalRollStudentProcessingOrchestrator extends BaseOrchestrator<N
     saga.setSagaState(VALIDATE_NOMINAL_ROLL_STUDENT.toString());
     saga.setStatus(IN_PROGRESS.toString());
     this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
+    log.info("Saga {} DB write is updated for validateStudent at time {}", saga.getSagaId(), LocalDateTime.now());
     val validationErrors = this.rulesProcessor.processRules(NominalRollStudentMapper.mapper.toModel(nominalRollStudentSagaData.getNominalRollStudent()));
     final Event.EventBuilder eventBuilder = Event.builder();
     eventBuilder.sagaId(saga.getSagaId()).eventType(VALIDATE_NOMINAL_ROLL_STUDENT);
