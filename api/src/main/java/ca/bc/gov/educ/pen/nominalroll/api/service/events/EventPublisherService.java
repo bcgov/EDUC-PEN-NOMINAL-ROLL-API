@@ -38,6 +38,7 @@ public class EventPublisherService {
   public void send(final NominalRollEvent event) throws JsonProcessingException {
     if (event.getReplyChannel() != null) {
       log.info(RESPONDING_BACK_TO_NATS_ON_CHANNEL, event.getReplyChannel());
+      log.info("Sending event {} for SAGA ID {}", event.toString(), event.getSagaId());
       this.getMessagePublisher().dispatchMessage(event.getReplyChannel(), this.nominalRollEventProcessed(event));
     }
   }

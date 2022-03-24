@@ -57,6 +57,9 @@ public class EventTaskSchedulerAsyncService {
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void findAndProcessUncompletedSagas() {
     final var sagas = this.getSagaRepository().findTop100ByStatusInOrderByCreateDate(this.getStatusFilters());
+    for(val saga : sagas) {
+      log.info("findAndProcessUncompletedSagas :: saga :: {}", saga.getSagaId());
+    }
     if (!sagas.isEmpty()) {
       this.processUncompletedSagas(sagas);
     }

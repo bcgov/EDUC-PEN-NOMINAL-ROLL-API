@@ -162,6 +162,7 @@ public class NominalRollService {
       final Event event = Event.builder().eventType(EventType.READ_FROM_TOPIC).eventOutcome(EventOutcome.READ_FROM_TOPIC_SUCCESS).eventPayload(eventPayload.get()).nominalRollStudentID(nominalRollStudentSagaData.getNominalRollStudent().getNominalRollStudentID()).build();
       final var eventString = JsonUtil.getJsonString(event);
       if (eventString.isPresent()) {
+        log.info("sending nominal roll student saga data to topic :: {} for SAGA ID: {}", eventString.get(), nominalRollStudentSagaData.getNominalRollStudent().getNominalRollStudentID());
         this.messagePublisher.dispatchMessage(TopicsEnum.NOMINAL_ROLL_API_TOPIC.toString(), eventString.get().getBytes());
       } else {
         log.error("Event String is empty, skipping the publish to topic :: {}", nominalRollStudentSagaData);
