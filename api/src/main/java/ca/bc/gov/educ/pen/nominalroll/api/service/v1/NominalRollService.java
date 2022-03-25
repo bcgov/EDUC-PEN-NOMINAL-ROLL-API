@@ -181,6 +181,7 @@ public class NominalRollService {
     this.repository.save(nomRollStud);
   }
 
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void deleteNominalRollStudentValidationErrors(final String nominalRollStudentID) {
     var student = this.repository.findById(UUID.fromString(nominalRollStudentID));
     if(student.isPresent()) {
