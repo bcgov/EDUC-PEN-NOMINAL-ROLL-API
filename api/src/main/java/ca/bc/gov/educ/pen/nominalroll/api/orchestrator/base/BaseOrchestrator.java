@@ -308,6 +308,13 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    * @param payloadToSubscribers the event payload to subscribers
    */
   protected void markSagaComplete(final Event event, final Saga saga, final T sagaData, final String payloadToSubscribers) {
+    //Test
+    try {
+      Thread.sleep(1000);
+    }catch(InterruptedException ex) {
+      log.error("Error in Thread.sleep()", ex);
+    }
+
     log.trace("payload is {}", sagaData);
     if (this.shouldSendNotificationEvent) {
       final var finalEvent = new NotificationEvent();
