@@ -44,7 +44,8 @@ public class EventTaskSchedulerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testFindAndProcessPendingSagaEvents_givenInProgressSagas_shouldBeRetried() {
-    val saga = this.testHelper.getSagaRepository().save(this.creatMockSaga(null));
+    var studentEntity = this.testHelper.getRepository().save(this.createNominalRollStudentEntity());
+    val saga = this.testHelper.getSagaRepository().save(this.creatMockSaga(createMockNominalRollStudent(studentEntity.getNominalRollStudentID().toString())));
     this.eventTaskScheduler.findAndProcessPendingSagaEvents();
     val sagaEvents = this.testHelper.getSagaEventRepository().findBySaga(saga);
     assertThat(sagaEvents).isNotEmpty();
@@ -53,7 +54,7 @@ public class EventTaskSchedulerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testProcessLoadedNominalRollStudents_givenRecordInLOADEDSTATE_shouldBeRetried() throws InterruptedException {
-    val entity = NominalRollStudentMapper.mapper.toModel(this.createMockNominalRollStudent());
+    val entity = NominalRollStudentMapper.mapper.toModel(this.createMockNominalRollStudent(null));
     entity.setCreateDate(LocalDateTime.now().minusMinutes(14));
     entity.setUpdateDate(LocalDateTime.now());
     entity.setCreateUser(ApplicationProperties.API_NAME);

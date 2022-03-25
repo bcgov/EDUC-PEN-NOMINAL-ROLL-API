@@ -181,6 +181,15 @@ public class NominalRollService {
     this.repository.save(nomRollStud);
   }
 
+  public void deleteNominalRollStudentValidationErrors(final String nominalRollStudentID) {
+    var student = this.repository.findById(UUID.fromString(nominalRollStudentID));
+    if(student.isPresent()) {
+      this.nominalRollStudentValidationErrorRepository.deleteAllByNominalRollStudent(student.get());
+    }else{
+      throw new NominalRollAPIRuntimeException( "Nominal Roll Student not found: " + nominalRollStudentID.toString() );
+    }
+  }
+
   //To save NominalRollStudent with ValidationErrors, query and save operation should be in the same transaction boundary.
   public NominalRollStudentEntity saveNominalRollStudentValidationErrors(final String nominalRollStudentID, final Map<String, String> errors, NominalRollStudentEntity entity) {
     if(entity == null) {

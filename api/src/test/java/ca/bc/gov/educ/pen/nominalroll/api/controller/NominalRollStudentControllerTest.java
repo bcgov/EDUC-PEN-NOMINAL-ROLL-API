@@ -809,7 +809,7 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
   @Test
   public void testValidateNomRollStudent_givenNomRollStudent_ShouldReturnStatusOk() throws Exception {
-    final var nomRollStudent = this.createMockNominalRollStudent();
+    final var nomRollStudent = this.createMockNominalRollStudent(null);
     this.mockMvc
       .perform(post(BASE_URL + VALIDATE).with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_VALIDATE")))
         .content(JsonUtil.getJsonStringFromObject(nomRollStudent))

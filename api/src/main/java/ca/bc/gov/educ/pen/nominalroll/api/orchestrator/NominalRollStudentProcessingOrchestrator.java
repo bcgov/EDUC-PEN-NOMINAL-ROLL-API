@@ -165,6 +165,10 @@ public class NominalRollStudentProcessingOrchestrator extends BaseOrchestrator<N
     saga.setStatus(IN_PROGRESS.toString());
     this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
     log.info("Saga {} DB write is updated for validateStudent at time {}", saga.getSagaId(), LocalDateTime.now());
+
+    //Callout to delete all validation records for this student
+    this.nominalRollService.deleteNominalRollStudentValidationErrors(nominalRollStudentSagaData.getNominalRollStudent().getNominalRollStudentID());
+
     val validationErrors = this.rulesProcessor.processRules(NominalRollStudentMapper.mapper.toModel(nominalRollStudentSagaData.getNominalRollStudent()));
     final Event.EventBuilder eventBuilder = Event.builder();
     eventBuilder.sagaId(saga.getSagaId()).eventType(VALIDATE_NOMINAL_ROLL_STUDENT);

@@ -64,7 +64,7 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
   @SneakyThrows
   @Test
   public void testHandleEvent_givenEventTypeInitiated_shouldExecuteValidateStudentWithEventOutComeVALIDATION_SUCCESS_WITH_ERROR() {
-    val entity = NominalRollStudentMapper.mapper.toModel(this.createMockNominalRollStudent());
+    val entity = NominalRollStudentMapper.mapper.toModel(this.createMockNominalRollStudent(null));
     entity.setCreateDate(LocalDateTime.now().minusMinutes(14));
     entity.setUpdateDate(LocalDateTime.now());
     entity.setCreateUser(ApplicationProperties.API_NAME);
@@ -102,7 +102,7 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
     when(this.restUtils.getActiveGradeCodes()).thenReturn(gradeCodes);
     when(this.restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "10200001"));
     when(this.restUtils.districtCodes()).thenReturn(List.of("102", "103", "021", "006", "005"));
-    val entity = NominalRollStudentMapper.mapper.toModel(this.createMockNominalRollStudent());
+    val entity = NominalRollStudentMapper.mapper.toModel(this.createMockNominalRollStudent(null));
     entity.setCreateDate(LocalDateTime.now().minusMinutes(14));
     entity.setUpdateDate(LocalDateTime.now());
     entity.setCreateUser(ApplicationProperties.API_NAME);
@@ -131,7 +131,7 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
   @SneakyThrows
   @Test
   public void testHandleEvent_givenEventTypeVALIDATE_NOMINAL_ROLL_STUDENTAndEventOutComeVALIDATION_SUCCESS_WITH_ERROR_shouldExecuteMarkSagaComplete() {
-    final NominalRollStudent nominalRollStudent = this.createMockNominalRollStudent();
+    final NominalRollStudent nominalRollStudent = this.createMockNominalRollStudent(null);
     NominalRollStudentEntity entity = NominalRollStudentMapper.mapper.toModel(nominalRollStudent);
     entity.setCreateDate(LocalDateTime.now().minusMinutes(14));
     entity.setUpdateDate(LocalDateTime.now());
@@ -166,7 +166,7 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
   @Test
   public void testHandleEvent_givenEventTypeVALIDATE_NOMINAL_ROLL_STUDENTAndEventOutComeVALIDATION_SUCCESS_NO_ERROR_shouldExecuteProcessPenMatch() {
     when(this.restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "10200001"));
-    final NominalRollStudent nominalRollStudent = this.createMockNominalRollStudent();
+    final NominalRollStudent nominalRollStudent = this.createMockNominalRollStudent(null);
     NominalRollStudentEntity entity = NominalRollStudentMapper.mapper.toModel(nominalRollStudent);
     entity.setCreateDate(LocalDateTime.now().minusMinutes(14));
     entity.setUpdateDate(LocalDateTime.now());
@@ -204,7 +204,7 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
   @SneakyThrows
   @Test
   public void testHandleEvent_givenEventTypeVALIDATE_NOMINAL_ROLL_STUDENTAndEventOutComeVALIDATION_SUCCESS_NO_ERRORAndExactMatchInPostedStudent_shouldMarkSagaComplete() {
-    final NominalRollStudent nominalRollStudent = this.createMockNominalRollStudent();
+    final NominalRollStudent nominalRollStudent = this.createMockNominalRollStudent(null);
     NominalRollStudentEntity entity = TransformUtil.uppercaseFields(NominalRollStudentMapper.mapper.toModel(nominalRollStudent));
     entity.setCreateDate(LocalDateTime.now().minusMinutes(14));
     entity.setUpdateDate(LocalDateTime.now());
@@ -272,7 +272,7 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
   @Test
   public void testHandleEvent_givenEventTypePROCESS_PEN_MATCH_RESULTSAndEventOutComePEN_MATCH_RESULTS_PROCESSED_shouldExecuteMarkSagaComplete() {
     when(this.restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "10200001"));
-    final NominalRollStudent nominalRollStudent = this.createMockNominalRollStudent();
+    final NominalRollStudent nominalRollStudent = this.createMockNominalRollStudent(null);
     NominalRollStudentEntity entity = NominalRollStudentMapper.mapper.toModel(nominalRollStudent);
     entity.setCreateDate(LocalDateTime.now().minusMinutes(14));
     entity.setUpdateDate(LocalDateTime.now());
@@ -308,7 +308,7 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
   }
 
   private void runBasedOnPenStatus(final String penStatus, final String status, final String pen) throws InterruptedException, IOException, TimeoutException {
-    final NominalRollStudent nominalRollStudent = this.createMockNominalRollStudent();
+    final NominalRollStudent nominalRollStudent = this.createMockNominalRollStudent(null);
     NominalRollStudentEntity entity = NominalRollStudentMapper.mapper.toModel(nominalRollStudent);
     entity.setCreateDate(LocalDateTime.now().minusMinutes(14));
     entity.setUpdateDate(LocalDateTime.now());

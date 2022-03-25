@@ -2,6 +2,7 @@ package ca.bc.gov.educ.pen.nominalroll.api;
 
 import ca.bc.gov.educ.pen.nominalroll.api.constants.SagaEnum;
 import ca.bc.gov.educ.pen.nominalroll.api.helper.TestHelper;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.Saga;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
@@ -65,12 +66,13 @@ public abstract class BaseNominalRollAPITest {
       .sagaName(SagaEnum.NOMINAL_ROLL_PROCESS_STUDENT_SAGA.toString())
       .status(IN_PROGRESS.toString())
       .sagaState(INITIATED.toString())
-      .payload(JsonUtil.getJsonStringFromObject(NominalRollStudentSagaData.builder().nominalRollStudent(student == null ? this.createMockNominalRollStudent() : student).build()))
+      .payload(JsonUtil.getJsonStringFromObject(NominalRollStudentSagaData.builder().nominalRollStudent(student == null ? this.createMockNominalRollStudent(null) : student).build()))
       .build();
   }
 
-  protected NominalRollStudent createMockNominalRollStudent() {
+  protected NominalRollStudent createMockNominalRollStudent(String studentID) {
     final NominalRollStudent student = new NominalRollStudent();
+    student.setNominalRollStudentID(studentID);
     student.setGivenNames("John");
     student.setSurname("Wayne");
     student.setBirthDate("1907-05-26");
@@ -80,6 +82,26 @@ public abstract class BaseNominalRollAPITest {
     student.setLeaProvincial("Provincial");
     student.setGrade("01");
     student.setProcessingYear(String.valueOf(LocalDate.now().getYear()));
+    student.setSchoolName("Test Highschool");
+    student.setSchoolNumber("5465");
+    student.setSchoolDistrictNumber("5");
+    student.setRecipientName("Test FN Band");
+    student.setRecipientNumber("8554");
+    student.setStatus("LOADED");
+    return student;
+  }
+
+  protected NominalRollStudentEntity createNominalRollStudentEntity() {
+    final NominalRollStudentEntity student = new NominalRollStudentEntity();
+    student.setGivenNames("John");
+    student.setSurname("Wayne");
+    student.setBirthDate("1907-05-26");
+    student.setGender("M");
+    student.setBandOfResidence("4664");
+    student.setFte("1.0");
+    student.setLeaProvincial("Provincial");
+    student.setGrade("01");
+    student.setProcessingYear("2021");
     student.setSchoolName("Test Highschool");
     student.setSchoolNumber("5465");
     student.setSchoolDistrictNumber("5");

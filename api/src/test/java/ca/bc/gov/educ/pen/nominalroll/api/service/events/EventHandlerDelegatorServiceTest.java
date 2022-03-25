@@ -26,7 +26,7 @@ public class EventHandlerDelegatorServiceTest extends BaseNominalRollAPITest {
 
   @Test
   public void testHandleEvent_givenEventTypeREADFROMTOPIC_shouldProcess() throws JsonProcessingException {
-    val mockStudent = this.createMockNominalRollStudent();
+    val mockStudent = this.createMockNominalRollStudent(null);
     val savedStudent = this.testHelper.getRepository().save(NominalRollStudentMapper.mapper.toModel(mockStudent));
     val event = Event.builder().eventType(EventType.READ_FROM_TOPIC).eventOutcome(EventOutcome.READ_FROM_TOPIC_SUCCESS).eventPayload(JsonUtil.getJsonStringFromObject(NominalRollStudentSagaData.builder().nominalRollStudent(NominalRollStudentMapper.mapper.toStruct(savedStudent)).build())).build();
     this.eventHandlerDelegatorService.handleEvent(event);
