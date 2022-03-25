@@ -55,9 +55,6 @@ public class EventHandlerService {
     this.studentProcessingOrchestrator = studentProcessingOrchestrator;
   }
 
-
-
-  @Transactional(propagation = REQUIRES_NEW)
   public void handleReadFromTopicEvent(final Event event) throws JsonProcessingException {
     if (event.getEventOutcome() == EventOutcome.READ_FROM_TOPIC_SUCCESS) {
       final NominalRollStudentSagaData sagaData = JsonUtil.getJsonObjectFromString(NominalRollStudentSagaData.class, event.getEventPayload());

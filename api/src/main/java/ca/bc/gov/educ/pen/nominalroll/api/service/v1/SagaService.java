@@ -69,7 +69,7 @@ public class SagaService {
    * @param saga the saga
    * @return the saga
    */
-  @Transactional(propagation = Propagation.MANDATORY)
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public Saga createSagaRecord(final Saga saga) {
     return this.getSagaRepository().save(saga);
   }
@@ -123,7 +123,7 @@ public class SagaService {
    *
    * @param saga the saga
    */
-  @Transactional(propagation = Propagation.MANDATORY)
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void updateSagaRecord(final Saga saga) { // saga here MUST be an attached entity
     this.getSagaRepository().save(saga);
   }

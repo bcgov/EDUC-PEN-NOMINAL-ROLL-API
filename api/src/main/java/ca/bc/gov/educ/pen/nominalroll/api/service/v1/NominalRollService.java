@@ -198,6 +198,7 @@ public class NominalRollService {
   }
 
   //To save NominalRollStudent with ValidationErrors, query and save operation should be in the same transaction boundary.
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public NominalRollStudentEntity saveNominalRollStudentValidationErrors(final String nominalRollStudentID, final Map<String, String> errors, NominalRollStudentEntity entity) {
     if(entity == null) {
       val nomRollStudOptional = this.findByNominalRollStudentID(nominalRollStudentID);
@@ -224,7 +225,7 @@ public class NominalRollService {
     return this.repository.findAllByProcessingYear(processingYear);
   }
 
-  @Transactional
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void savePostedStudents(final List<NominalRollPostedStudentEntity> postedStudentEntities) {
     this.postedStudentRepository.saveAll(postedStudentEntities);
   }

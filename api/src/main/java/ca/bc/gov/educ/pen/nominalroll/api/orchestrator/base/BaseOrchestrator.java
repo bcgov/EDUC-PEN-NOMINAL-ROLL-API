@@ -308,12 +308,12 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    * @param payloadToSubscribers the event payload to subscribers
    */
   protected void markSagaComplete(final Event event, final Saga saga, final T sagaData, final String payloadToSubscribers) {
-    //Test
-    try {
-      Thread.sleep(1000);
-    }catch(InterruptedException ex) {
-      log.error("Error in Thread.sleep()", ex);
-    }
+//    //Test
+//    try {
+//      Thread.sleep(1000);
+//    }catch(InterruptedException ex) {
+//      log.error("Error in Thread.sleep()", ex);
+//    }
 
     log.trace("payload is {}", sagaData);
     if (this.shouldSendNotificationEvent) {
@@ -508,7 +508,6 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    */
   @Override
   @Async("subscriberExecutor")
-  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void startSaga(@NotNull final Saga saga) {
     try {
       this.handleEvent(Event.builder()
@@ -534,7 +533,6 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    * @return saga record
    */
   @Override
-  @Transactional
   public Saga createSaga(@NotNull final String payload, final UUID nominalRollStudentID, final String userName, final String processingYear) {
     return this.sagaService.createSagaRecordInDB(this.sagaName, userName, payload, nominalRollStudentID, processingYear);
   }
@@ -547,7 +545,6 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    * @return saga record
    */
   @Override
-  @Transactional
   public List<Saga> createMultipleSagas(@NotNull final List<Pair<UUID, String>> payloads, final String userName, final String processingYear) {
     return this.getSagaService().createMultipleBatchSagaRecordsInDB(this.getSagaName(), userName, payloads, processingYear);
   }
