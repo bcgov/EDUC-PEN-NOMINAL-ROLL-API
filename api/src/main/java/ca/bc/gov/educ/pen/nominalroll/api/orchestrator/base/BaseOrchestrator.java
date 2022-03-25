@@ -508,6 +508,7 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    */
   @Override
   @Async("subscriberExecutor")
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void startSaga(@NotNull final Saga saga) {
     try {
       this.handleEvent(Event.builder()

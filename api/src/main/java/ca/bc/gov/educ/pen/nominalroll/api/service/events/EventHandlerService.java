@@ -49,7 +49,7 @@ public class EventHandlerService {
    * @param studentProcessingOrchestrator the student processing orchestrator
    */
   @Autowired
-  public EventHandlerService(final NominalRollService nominalRollService, final SagaService sagaService, NominalRollStudentProcessingOrchestrator studentProcessingOrchestrator) {
+  public EventHandlerService(final NominalRollService nominalRollService, final SagaService sagaService, final NominalRollStudentProcessingOrchestrator studentProcessingOrchestrator) {
     this.nominalRollService = nominalRollService;
     this.sagaService = sagaService;
     this.studentProcessingOrchestrator = studentProcessingOrchestrator;
