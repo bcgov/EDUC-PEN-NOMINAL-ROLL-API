@@ -466,6 +466,7 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    */
   @Override
   @Async("subscriberExecutor")
+  @Transactional
   public void handleEvent(@NotNull final Event event) throws InterruptedException, IOException, TimeoutException {
     if (this.sagaEventExecutionNotRequired(event)) {
       log.trace("Execution is not required for this message returning EVENT is :: {}", event);
