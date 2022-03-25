@@ -183,11 +183,15 @@ public class NominalRollService {
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void deleteNominalRollStudentValidationErrors(final String nominalRollStudentID) {
-    var student = this.repository.findById(UUID.fromString(nominalRollStudentID));
-    if(student.isPresent()) {
-      this.nominalRollStudentValidationErrorRepository.deleteAllByNominalRollStudent(student.get());
-    }else{
-      throw new NominalRollAPIRuntimeException( "Nominal Roll Student not found: " + nominalRollStudentID.toString() );
+    try {
+      var student = this.repository.findById(UUID.fromString(nominalRollStudentID));
+      if (student.isPresent()) {
+        this.nominalRollStudentValidationErrorRepository.deleteAllByNominalRollStudent(student.get());
+      } else {
+        throw new NominalRollAPIRuntimeException("Nominal Roll Student not found: " + nominalRollStudentID);
+      }
+    } catch (final Throwable ex) {
+      log.error("Error occurred while deleting Nominal Roll Student Validation Errors for Nominal Roll Student ID: {}", nominalRollStudentID, ex);
     }
   }
 
