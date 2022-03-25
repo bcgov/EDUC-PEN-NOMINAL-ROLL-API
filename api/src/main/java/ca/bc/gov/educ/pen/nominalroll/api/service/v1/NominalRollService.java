@@ -186,7 +186,9 @@ public class NominalRollService {
     try {
       var student = this.repository.findById(UUID.fromString(nominalRollStudentID));
       if (student.isPresent()) {
+        log.info("deleting nominal roll student validation errors for nominal roll student ID: {}", nominalRollStudentID);
         this.nominalRollStudentValidationErrorRepository.deleteAllByNominalRollStudent(student.get());
+        log.info("deleting nominal roll student validation errors complete for student ID: {}", nominalRollStudentID);
       } else {
         throw new NominalRollAPIRuntimeException("Nominal Roll Student not found: " + nominalRollStudentID);
       }
