@@ -381,7 +381,6 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    * @throws TimeoutException     if connection to messaging system times out.
    */
   @Override
-  @Transactional
   @Async("taskExecutor")
   public void replaySaga(final Saga saga) throws IOException, InterruptedException, TimeoutException {
     final var eventStates = this.getSagaService().findAllSagaStates(saga);
@@ -466,7 +465,6 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
    */
   @Override
   @Async("subscriberExecutor")
-  @Transactional
   public void handleEvent(@NotNull final Event event) throws InterruptedException, IOException, TimeoutException {
     if (this.sagaEventExecutionNotRequired(event)) {
       log.trace("Execution is not required for this message returning EVENT is :: {}", event);
