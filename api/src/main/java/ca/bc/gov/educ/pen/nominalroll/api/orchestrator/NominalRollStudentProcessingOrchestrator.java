@@ -4,7 +4,6 @@ import ca.bc.gov.educ.pen.nominalroll.api.constants.SagaEnum;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.v1.NominalRollStudentStatus;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.NominalRollAPIRuntimeException;
-import ca.bc.gov.educ.pen.nominalroll.api.helpers.NominalRollHelper;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.PenMatchSagaMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
@@ -111,6 +110,7 @@ public class NominalRollStudentProcessingOrchestrator extends BaseOrchestrator<N
     final TypeReference<Map<String, String>> responseType = new TypeReference<>() {
     };
     val validationResults = JsonUtil.mapper.readValue(event.getEventPayload(), responseType);
+    this.nominalRollService.deleteNominalRollStudentValidationErrors(nominalRollStudentSagaData.getNominalRollStudent().getNominalRollStudentID());
     this.nominalRollService.saveNominalRollStudentValidationErrors(nominalRollStudentSagaData.getNominalRollStudent().getNominalRollStudentID(), validationResults, null);
   }
 

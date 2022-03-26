@@ -49,13 +49,11 @@ public class EventHandlerService {
    * @param studentProcessingOrchestrator the student processing orchestrator
    */
   @Autowired
-  public EventHandlerService(final NominalRollService nominalRollService, final SagaService sagaService, NominalRollStudentProcessingOrchestrator studentProcessingOrchestrator) {
+  public EventHandlerService(final NominalRollService nominalRollService, final SagaService sagaService, final NominalRollStudentProcessingOrchestrator studentProcessingOrchestrator) {
     this.nominalRollService = nominalRollService;
     this.sagaService = sagaService;
     this.studentProcessingOrchestrator = studentProcessingOrchestrator;
   }
-
-
 
   @Transactional(propagation = REQUIRES_NEW)
   public void handleReadFromTopicEvent(final Event event) throws JsonProcessingException {

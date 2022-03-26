@@ -179,6 +179,11 @@ public class NominalRollService {
     this.repository.save(nomRollStud);
   }
 
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void deleteNominalRollStudentValidationErrors(final String nominalRollStudentID) {
+    this.nominalRollStudentValidationErrorRepository.deleteNominalRollStudentValidationErrors(UUID.fromString(nominalRollStudentID));
+  }
+
   //To save NominalRollStudent with ValidationErrors, query and save operation should be in the same transaction boundary.
   public NominalRollStudentEntity saveNominalRollStudentValidationErrors(final String nominalRollStudentID, final Map<String, String> errors, NominalRollStudentEntity entity) {
     if(entity == null) {
