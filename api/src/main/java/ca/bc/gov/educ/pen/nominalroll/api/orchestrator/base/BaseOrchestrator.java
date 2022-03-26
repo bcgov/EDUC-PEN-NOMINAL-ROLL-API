@@ -312,7 +312,7 @@ public abstract class BaseOrchestrator<T> implements EventHandler, Orchestrator 
     try {
       Thread.sleep(1000);
     }catch (InterruptedException e) {
-      log.error("Error while waiting for complete write", e);
+      Thread.currentThread().interrupt();
     }
     
     log.trace("payload is {}", sagaData);
