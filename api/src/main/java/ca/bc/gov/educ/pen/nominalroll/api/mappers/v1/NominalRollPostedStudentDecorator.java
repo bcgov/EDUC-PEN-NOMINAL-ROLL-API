@@ -21,7 +21,7 @@ public abstract class NominalRollPostedStudentDecorator implements NominalRollPo
     val sldDiaStudent = this.delegate.toDiaStudent(nominalRollPostedStudentEntity, restUtils);
     sldDiaStudent.setSchtype(NominalRollHelper.getSldSchTypeMap().get(nominalRollPostedStudentEntity.getAgreementType()));
     sldDiaStudent.setStudBirth(nominalRollPostedStudentEntity.getBirthDate().format(YYYY_MM_DD_FORMATTER));
-    sldDiaStudent.setFteVal(nominalRollPostedStudentEntity.getFte().longValue() * 10000);
+    sldDiaStudent.setFteVal(nominalRollPostedStudentEntity.getFte().doubleValue() * 10000);
     sldDiaStudent.setBandname(trimValueToLength(nominalRollPostedStudentEntity.getFederalRecipientBandName(), 20));
     sldDiaStudent.setStudSurname(trimValueToLength(nominalRollPostedStudentEntity.getSurname(), 25));
     sldDiaStudent.setStudGiven(trimValueToLength(nominalRollPostedStudentEntity.getGivenNames(), 25));

@@ -55,7 +55,7 @@ public class SldDiaStudent {
   @Size(max = 2)
   private String studGrade;
 
-  private Long fteVal;
+  private Double fteVal;
 
   @Size(max = 1)
   private String agreementType;
