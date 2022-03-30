@@ -37,5 +37,4 @@ public abstract class NominalRollStudentDecorator implements NominalRollStudentM
     return postedEntity;
   }
 
-
 }
