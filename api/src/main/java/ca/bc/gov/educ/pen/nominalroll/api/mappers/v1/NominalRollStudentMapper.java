@@ -30,6 +30,7 @@ public interface NominalRollStudentMapper {
   @Mapping(target = "federalBandCode", source = "recipientNumber")
   @Mapping(target = "agreementType", ignore = true)
   @Mapping(target = "processingYear", ignore = true)
+  @Mapping(target = "fte", ignore = true)
   NominalRollPostedStudentEntity toPostedEntity(NominalRollStudentEntity nominalRollStudentEntity);
 
 }

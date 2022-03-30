@@ -7,6 +7,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentValidationE
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import lombok.val;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,7 @@ public abstract class NominalRollStudentDecorator implements NominalRollStudentM
     postedEntity.setProcessingYear(LocalDateTime.now().withYear(Integer.parseInt(nominalRollStudentEntity.getProcessingYear())).withMonth(9).withDayOfMonth(30));
     postedEntity.setAgreementType(NominalRollHelper.getAgreementTypeMap().get(nominalRollStudentEntity.getLeaProvincial()).get(0)); // always mapped to same value.
     postedEntity.setFederalBandCode(NominalRollHelper.removeLeadingZeros(postedEntity.getFederalBandCode()));
+    postedEntity.setFte(BigDecimal.valueOf(Double.parseDouble(nominalRollStudentEntity.getFte())));
     postedEntity.setGrade(NominalRollHelper.getGradeCodeMap().get(postedEntity.getGrade()));
     postedEntity.setBandOfResidence(NominalRollHelper.removeLeadingZeros(postedEntity.getBandOfResidence()));
     return postedEntity;
