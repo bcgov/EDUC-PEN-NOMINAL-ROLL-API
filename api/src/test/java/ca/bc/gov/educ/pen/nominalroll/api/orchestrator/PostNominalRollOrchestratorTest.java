@@ -152,6 +152,7 @@ public class PostNominalRollOrchestratorTest extends BaseNominalRollAPITest {
     assertThatJson(newEvent.getEventPayload()).isArray().hasSize(4);
     assertThatJson(newEvent.getEventPayload()).inPath("$[*].distNo").isArray().contains(value("102"), value("103"));
     assertThatJson(newEvent.getEventPayload()).inPath("$[*].recordNumber").isArray().containsExactly(value(1), value(2), value(3), value(4));
+    assertThatJson(newEvent.getEventPayload()).inPath("$[*].reportDate").isArray().contains(value(20200930),value(20200930),value(20200930),value(20200930));
 
     var firstAndLastDays = NominalRollHelper.getFirstAndLastDateTimesOfYear("2021");
     var postedStudents = postedStudentRepository.findAllByProcessingYearBetween(firstAndLastDays.getLeft(), firstAndLastDays.getRight());
