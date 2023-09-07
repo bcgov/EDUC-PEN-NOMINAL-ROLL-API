@@ -2,7 +2,7 @@ package ca.bc.gov.educ.pen.nominalroll.api.struct.v1;
 
 import lombok.*;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 @Data
 @Builder

@@ -98,6 +98,15 @@ public class NominalRollSagaControllerTest extends BaseNominalRollAPITest {
   }
 
   @Test
+  public void testPostData_WithWrongScope_ShouldReturnStatusForbidden() throws Exception {
+    this.mockMvc.perform(post(BASE_URL + SAGA + "/post-data")
+            .with(jwt().jwt((jwt) -> jwt.claim("scope", "WRONG_SCOPE")))
+            .contentType(MediaType.APPLICATION_JSON)
+            .accept(MediaType.APPLICATION_JSON).content(this.placeholderPostDataSagaData())).andDo(print())
+        .andExpect(status().isForbidden());
+  }
+
+  @Test
   public void testPostData_GivenOtherSagaWithSameProcessingYearInProcess_ShouldReturnStatusConflict() throws Exception {
     final var payload = this.placeholderPostDataSagaData();
     this.sagaService.createSagaRecordInDB(NOMINAL_ROLL_POST_DATA_SAGA.toString(), "Test", payload, UUID.fromString(this.nominalRollStudentID), "2021");

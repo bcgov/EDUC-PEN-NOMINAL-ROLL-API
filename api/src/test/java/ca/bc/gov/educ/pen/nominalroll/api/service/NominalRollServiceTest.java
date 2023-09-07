@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.pen.nominalroll.api.service;
 
+import ca.bc.gov.educ.pen.nominalroll.api.NominalRollApiApplication;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.EntityNotFoundException;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
@@ -16,12 +17,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -31,7 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
-@DataJpaTest
+@SpringBootTest(classes = NominalRollApiApplication.class)
+@ActiveProfiles("test")
 public class NominalRollServiceTest {
   private static final NominalRollStudentMapper mapper = NominalRollStudentMapper.mapper;
 
