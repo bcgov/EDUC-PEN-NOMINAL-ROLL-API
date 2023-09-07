@@ -1,3 +1,4 @@
+echo DEBUG:: update config map $1 $2 $3
 envValue=$1
 APP_NAME=$2
 PEN_NAMESPACE=$3
