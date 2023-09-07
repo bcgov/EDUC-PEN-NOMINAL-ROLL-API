@@ -38,6 +38,8 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
+      - name: create temp directory
+        run: mkdir -p /home/runner/work/EDUC-PEN-NOMINAL-ROLL-API/EDUC-PEN-NOMINAL-ROLL-API/temp
       - name: Run unit tests
         run: mvn -f pom.xml clean package
       - name: Cache SonarCloud packages
