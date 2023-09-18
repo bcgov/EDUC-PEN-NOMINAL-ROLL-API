@@ -8,7 +8,7 @@ env:
   OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
   OPENSHIFT_NAMESPACE: ${{ secrets.PEN_NAMESPACE_NO_ENV }}-dev
 
-  REPO_NAME: "educ-pen-services-api"
+  REPO_NAME: "educ-pen-nominal-roll-api"
   BRANCH: "main"
   NAMESPACE: ${{ secrets.PEN_NAMESPACE_NO_ENV }}
 
