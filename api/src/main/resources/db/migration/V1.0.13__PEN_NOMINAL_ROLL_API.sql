@@ -1,12 +1,12 @@
 CREATE TABLE FED_BAND_CODE
 (
-    FED_BAND_CODE_ID   UUID                             NOT NULL,
-    SCHOOL_ID          UUID                             NOT NULL,
-    FED_BAND_CODE      VARCHAR(10)                      NOT NULL,
-    CREATE_USER     VARCHAR(32)                         NOT NULL,
-    CREATE_DATE     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    UPDATE_USER     VARCHAR(32)                         NOT NULL,
-    UPDATE_DATE     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FED_BAND_CODE_ID   RAW(16)                          NOT NULL,
+    SCHOOL_ID          RAW(16)                          NOT NULL,
+    FED_BAND_CODE      VARCHAR2(20)                     NOT NULL,
+    CREATE_USER     VARCHAR2(50)                        NOT NULL,
+    CREATE_DATE     DATE DEFAULT SYSDATE                NOT NULL,
+    UPDATE_USER     VARCHAR2(50)                       NOT NULL,
+    UPDATE_DATE     DATE DEFAULT SYSDATE               NOT NULL,
     CONSTRAINT FED_BAND_CODE_ID_PK PRIMARY KEY (FED_BAND_CODE_ID),
     CONSTRAINT UNQ_FED_BAND_CODE UNIQUE (FED_BAND_CODE)
 
