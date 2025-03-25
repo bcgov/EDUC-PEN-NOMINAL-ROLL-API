@@ -5,13 +5,11 @@ import ca.bc.gov.educ.pen.nominalroll.api.exception.EntityNotFoundException;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
-import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollPostedStudentRepository;
-import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
-import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepositoryCustom;
-import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentValidationErrorRepository;
+import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.*;
 import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.School;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.SchoolTombstone;
+import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,6 +43,10 @@ public class NominalRollServiceTest {
   @Autowired
   NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository;
 
+  @Autowired
+  private final FedProvCodeRepository fedProvCodeRepository;
+
+
   @Mock
   RestUtils restUtils;
 
@@ -53,6 +55,10 @@ public class NominalRollServiceTest {
   @Mock
   MessagePublisher messagePublisher;
 
+  public NominalRollServiceTest(FedProvCodeRepository fedProvCodeRepository) {
+    this.fedProvCodeRepository = fedProvCodeRepository;
+  }
+
   @Before
   public void before() {
     this.service = new NominalRollService(this.restUtils, this.messagePublisher, this.repository, this.postedStudentRepository, this.nominalRollStudentRepositoryCustom, this.nominalRollStudentValidationErrorRepository);
@@ -60,16 +66,16 @@ public class NominalRollServiceTest {
 
   @Test
   public void testRemoveFedProvCodes_ShouldReturnOk() {
-    var schoolList = new ArrayList<School>();
-    schoolList.add(School.builder().distNo("504").schlNo("00023").openedDate("20100101").closedDate("00000000").build());
-    schoolList.add(School.builder().distNo("504").schlNo("00001").openedDate("20100101").closedDate("20180101").build());
-    schoolList.add(School.builder().distNo("504").schlNo("00011").openedDate("20100101").closedDate(null).build());
+    var schoolList = new ArrayList<SchoolTombstone>();
+    schoolList.add(SchoolTombstone.builder().schoolNumber("00023").openedDate("20100101").closedDate("00000000").build());
+    schoolList.add(SchoolTombstone.builder().schoolNumber("00001").openedDate("20100101").closedDate("20180101").build());
+    schoolList.add(SchoolTombstone.builder().schoolNumber("00011").openedDate("20100101").closedDate(null).build());
     when(this.restUtils.getSchools()).thenReturn(schoolList);
     when(this.restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "50400001"));
     this.service.removeClosedSchoolsFedProvMappings();
     verify(this.restUtils, atMost(1)).getFedProvSchoolCodes();
     verify(this.restUtils, atMost(1)).getSchools();
-    verify(this.restUtils, atMost(1)).deleteFedProvCode(any());
+    verify(this.fedProvCodeRepository, atMost(1)).deleteAllBySchoolID(any());
   }
 
   @Test

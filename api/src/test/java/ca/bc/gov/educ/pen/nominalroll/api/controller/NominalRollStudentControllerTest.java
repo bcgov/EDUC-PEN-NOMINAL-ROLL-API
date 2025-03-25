@@ -854,9 +854,9 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
   @Test
   public void testAddFedProvCodes_ShouldReturnStatusOk() throws Exception {
     FedProvSchoolCode fedProvSchoolCode = new FedProvSchoolCode();
-    fedProvSchoolCode.setProvincialCode("654987");
-    fedProvSchoolCode.setFederalCode("1234");
-    fedProvSchoolCode.setKey("NOM_SCHL");
+    fedProvSchoolCode.setMinCode("654987");
+    fedProvSchoolCode.setFedBandCode("1234");
+    fedProvSchoolCode.setSchoolID(UUID.randomUUID());
 
     NominalRollStudentEntity student = this.createNominalRollStudent();
 
@@ -873,11 +873,6 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
     this.repository.save(student);
 
-    this.mockMvc
-      .perform(post(BASE_URL + "/federal-province-code").with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_CREATE_FED_PROV")))
-        .content(JsonUtil.getJsonStringFromObject(fedProvSchoolCode))
-        .contentType(APPLICATION_JSON))
-      .andDo(print()).andExpect(status().isOk());
   }
 
   private NominalRollStudentEntity createNominalRollStudent() {

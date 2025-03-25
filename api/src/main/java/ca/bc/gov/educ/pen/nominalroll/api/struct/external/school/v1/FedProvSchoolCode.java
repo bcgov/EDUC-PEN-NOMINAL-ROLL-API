@@ -1,12 +1,16 @@
 package ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1;
 
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.BaseRequest;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FedProvSchoolCode {
-  String key;
-  String federalCode;
-  String provincialCode;
+public class FedProvSchoolCode extends BaseRequest {
+  UUID fedBandCodeID;
+  UUID schoolID;
+  String fedBandCode;
+  String minCode;
 }

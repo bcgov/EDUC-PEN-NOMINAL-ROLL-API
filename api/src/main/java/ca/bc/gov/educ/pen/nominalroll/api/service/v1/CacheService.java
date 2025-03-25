@@ -26,8 +26,6 @@ public class CacheService {
       val grades = this.restUtils.getActiveGradeCodes();
       log.info("cached {} grades", grades.size());
 
-      val fedProvSchoolCodes = this.restUtils.getFedProvSchoolCodes();
-      log.info("cached {} fedProvSchoolCodes", fedProvSchoolCodes.size());
       val schools = this.restUtils.getSchools();
       log.info("cached {} schools", schools.size());
       val districts = this.restUtils.districtCodes();
@@ -45,7 +43,6 @@ public class CacheService {
     });
     this.restUtils.getActiveGenderCodes();
     this.restUtils.getActiveGradeCodes();
-    this.restUtils.getFedProvSchoolCodes();
     this.restUtils.getSchools();
     this.restUtils.districtCodes();
     log.debug("Cache refreshed successfully");
@@ -57,10 +54,6 @@ public class CacheService {
       cached.clear();
     }
     switch (cacheName) {
-      case CacheNames
-        .FED_PROV_CODES:
-        this.restUtils.getFedProvSchoolCodes();
-        break;
       case CacheNames.SCHOOL_CODES:
         this.restUtils.getSchools();
         this.restUtils.districtCodes();

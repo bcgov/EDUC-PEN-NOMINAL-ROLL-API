@@ -9,19 +9,14 @@ import ca.bc.gov.educ.pen.nominalroll.api.exception.NominalRollAPIRuntimeExcepti
 import ca.bc.gov.educ.pen.nominalroll.api.helpers.NominalRollHelper;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.FedProvCodeEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollPostedStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentValidationErrorEntity;
-import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollPostedStudentRepository;
-import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepository;
-import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentRepositoryCustom;
-import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.NominalRollStudentValidationErrorRepository;
+import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.*;
 import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.FedProvSchoolCode;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.Event;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollIDs;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudentCount;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudentSagaData;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.*;
 import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -62,12 +57,14 @@ public class NominalRollService {
   private final NominalRollStudentRepository repository;
   private final NominalRollPostedStudentRepository postedStudentRepository;
   private final NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository;
+  private FedProvCodeRepository fedProvCodeRepository;
+
   private final NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom;
   private final Executor paginatedQueryExecutor = new EnhancedQueueExecutor.Builder()
     .setThreadFactory(new ThreadFactoryBuilder().setNameFormat("async-pagination-query-executor-%d").build())
     .setCorePoolSize(2).setMaximumPoolSize(10).setKeepAliveTime(Duration.ofSeconds(60)).build();
 
-  public NominalRollService(final RestUtils restUtils,final MessagePublisher messagePublisher, final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository,
+  public NominalRollService(final RestUtils restUtils, final MessagePublisher messagePublisher, final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository,
                             final NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom, final NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository) {
     this.messagePublisher = messagePublisher;
     this.restUtils = restUtils;
@@ -75,6 +72,7 @@ public class NominalRollService {
     this.postedStudentRepository = postedStudentRepository;
     this.nominalRollStudentRepositoryCustom = nominalRollStudentRepositoryCustom;
     this.nominalRollStudentValidationErrorRepository = nominalRollStudentValidationErrorRepository;
+    this.fedProvCodeRepository = fedProvCodeRepository;
   }
 
   public boolean isAllRecordsProcessed() {
@@ -268,27 +266,20 @@ public class NominalRollService {
   }
 
   public void removeClosedSchoolsFedProvMappings() {
-    val schools = this.restUtils.getSchools();
-    Map<String, String> schoolCodes = this.restUtils.getFedProvSchoolCodes();
+    val schools = restUtils.getSchools();
+    val schoolCodes = this.fedProvCodeRepository.findAll();
     Set<String> closedSchools = new HashSet<>();
     for (val school: schools) {
       if (StringUtils.isNotBlank(school.getClosedDate()) && futureClosedDate(school.getClosedDate())) {
-        closedSchools.add(school.getDistNo() + school.getSchlNo());
+        closedSchools.add(school.getSchoolId());
       }
     }
-    for (Map.Entry<String,String> fedCodeEntry : schoolCodes.entrySet())
-    {
-      val mincode = fedCodeEntry.getValue();
-      if(closedSchools.contains(mincode)){
-        FedProvSchoolCode federalCode = new FedProvSchoolCode();
-        federalCode.setProvincialCode(mincode);
-        federalCode.setFederalCode(fedCodeEntry.getKey());
-        federalCode.setKey("NOM_SCHL");
-        restUtils.deleteFedProvCode(federalCode);
+    for (FedProvCodeEntity code : schoolCodes) {
+      if (closedSchools.contains(code.getSchoolID())){
+        fedProvCodeRepository.deleteAllBySchoolID(code.getSchoolID());
       }
     }
   }
-
   private boolean futureClosedDate(String closedDate) {
     try {
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
@@ -300,5 +291,19 @@ public class NominalRollService {
       //Do nothing here
     }
     return false;
+  }
+
+  public void addFedProvSchoolCode(FedProvSchoolCode fedProvSchoolCode) {
+    FedProvCodeEntity fedCodeEntity = null;
+    fedCodeEntity.setFedBandCode(fedProvSchoolCode.getFedBandCode());
+    Optional<SchoolTombstone> currSchoolTombstone = restUtils.getSchoolByMincode(fedProvSchoolCode.getMinCode());
+    SchoolTombstone currentSchool = currSchoolTombstone.orElseThrow(() ->
+            new EntityNotFoundException(SchoolTombstone.class, "SchoolTombstone", fedProvSchoolCode.getMinCode()));
+    fedCodeEntity.setCreateUser(fedProvSchoolCode.createUser);
+    fedCodeEntity.setCreateDate(LocalDateTime.now());
+    fedCodeEntity.setSchoolID(UUID.fromString(currentSchool.getSchoolId()));
+    fedCodeEntity.setUpdateUser(fedProvSchoolCode.updateUser);
+    fedCodeEntity.setUpdateDate(LocalDateTime.now());
+    fedProvCodeRepository.save(fedCodeEntity);
   }
 }
