@@ -8,6 +8,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
+import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.penmatch.v1.PenMatchRecord;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.penmatch.v1.PenMatchResult;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GenderCode;
@@ -52,6 +53,9 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
 
   @Autowired
   MessagePublisher messagePublisher;
+
+  @Autowired
+  NominalRollService service;
   @Captor
   ArgumentCaptor<byte[]> eventCaptor;
 
@@ -100,7 +104,7 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
       gradeCodes.add(GradeCode.builder().gradeCode(grade.getCode()).build());
     }
     when(this.restUtils.getActiveGradeCodes()).thenReturn(gradeCodes);
-    when(this.restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "10200001"));
+    when(service.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "10200001"));
     when(this.restUtils.districtCodes()).thenReturn(List.of("102", "103", "021", "006", "005"));
     val entity = NominalRollStudentMapper.mapper.toModel(this.createMockNominalRollStudent());
     entity.setCreateDate(LocalDateTime.now().minusMinutes(14));
@@ -165,7 +169,7 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
   @SneakyThrows
   @Test
   public void testHandleEvent_givenEventTypeVALIDATE_NOMINAL_ROLL_STUDENTAndEventOutComeVALIDATION_SUCCESS_NO_ERROR_shouldExecuteProcessPenMatch() {
-    when(this.restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "10200001"));
+    when(this.service.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "10200001"));
     final NominalRollStudent nominalRollStudent = this.createMockNominalRollStudent();
     NominalRollStudentEntity entity = NominalRollStudentMapper.mapper.toModel(nominalRollStudent);
     entity.setCreateDate(LocalDateTime.now().minusMinutes(14));
@@ -271,7 +275,7 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
   @SneakyThrows
   @Test
   public void testHandleEvent_givenEventTypePROCESS_PEN_MATCH_RESULTSAndEventOutComePEN_MATCH_RESULTS_PROCESSED_shouldExecuteMarkSagaComplete() {
-    when(this.restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "10200001"));
+    when(this.service.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "10200001"));
     final NominalRollStudent nominalRollStudent = this.createMockNominalRollStudent();
     NominalRollStudentEntity entity = NominalRollStudentMapper.mapper.toModel(nominalRollStudent);
     entity.setCreateDate(LocalDateTime.now().minusMinutes(14));
