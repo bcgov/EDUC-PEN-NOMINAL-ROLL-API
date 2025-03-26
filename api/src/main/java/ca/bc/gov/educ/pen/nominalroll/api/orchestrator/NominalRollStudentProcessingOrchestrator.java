@@ -144,7 +144,7 @@ public class NominalRollStudentProcessingOrchestrator extends BaseOrchestrator<N
 
   protected void postToPenMatchAPI(final Saga saga, final NominalRollStudentSagaData nominalRollStudentSagaData) throws JsonProcessingException {
     val nominalRollStudent = nominalRollStudentSagaData.getNominalRollStudent();
-    final String mincode = this.restUtils.getFedProvSchoolCodes().get(nominalRollStudent.getSchoolNumber());
+    final String mincode = this.restUtils.getSchoolBySchoolNumber(nominalRollStudent.getSchoolNumber()).get().getMincode();
     val penMatchRequest = PenMatchSagaMapper.mapper.toPenMatchStudent(nominalRollStudent, mincode);
     penMatchRequest.setDob(StringUtils.replace(penMatchRequest.getDob(), "-", "")); // pen-match api expects yyyymmdd
     val penMatchRequestJson = JsonUtil.mapper.writeValueAsString(penMatchRequest);

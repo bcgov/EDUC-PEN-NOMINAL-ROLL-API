@@ -57,7 +57,7 @@ public class NominalRollService {
   private final NominalRollStudentRepository repository;
   private final NominalRollPostedStudentRepository postedStudentRepository;
   private final NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository;
-  private FedProvCodeRepository fedProvCodeRepository;
+  private final FedProvCodeRepository fedProvCodeRepository;
 
   private final NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom;
   private final Executor paginatedQueryExecutor = new EnhancedQueueExecutor.Builder()
@@ -65,7 +65,7 @@ public class NominalRollService {
     .setCorePoolSize(2).setMaximumPoolSize(10).setKeepAliveTime(Duration.ofSeconds(60)).build();
 
   public NominalRollService(final RestUtils restUtils, final MessagePublisher messagePublisher, final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository,
-                            final NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom, final NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository) {
+                            final NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom, final NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository, final FedProvCodeRepository fedProvCodeRepository) {
     this.messagePublisher = messagePublisher;
     this.restUtils = restUtils;
     this.repository = repository;
@@ -293,12 +293,25 @@ public class NominalRollService {
     return false;
   }
 
+
+
+  public Map<String, String> getFedProvSchoolCodes() {
+    List<FedProvCodeEntity> schoolCodes = fedProvCodeRepository.findAll();
+
+    return schoolCodes.stream()
+            .collect(Collectors.toMap(
+                    FedProvCodeEntity::getFedBandCode,
+                    entity -> restUtils.getSchoolBySchoolID(entity.getSchoolID()).get().getMincode()
+            ));
+  }
+
+  @Transactional
   public void addFedProvSchoolCode(FedProvSchoolCode fedProvSchoolCode) {
-    FedProvCodeEntity fedCodeEntity = null;
-    fedCodeEntity.setFedBandCode(fedProvSchoolCode.getFedBandCode());
-    Optional<SchoolTombstone> currSchoolTombstone = restUtils.getSchoolByMincode(fedProvSchoolCode.getMinCode());
+    FedProvCodeEntity fedCodeEntity = new FedProvCodeEntity() ;
+    fedCodeEntity.setFedBandCode(fedProvSchoolCode.getFederalCode());
+    Optional<SchoolTombstone> currSchoolTombstone = restUtils.getSchoolByMincode(fedProvSchoolCode.getProvincialCode());
     SchoolTombstone currentSchool = currSchoolTombstone.orElseThrow(() ->
-            new EntityNotFoundException(SchoolTombstone.class, "SchoolTombstone", fedProvSchoolCode.getMinCode()));
+            new EntityNotFoundException(SchoolTombstone.class, "SchoolTombstone", fedProvSchoolCode.getProvincialCode()));
     fedCodeEntity.setCreateUser(fedProvSchoolCode.createUser);
     fedCodeEntity.setCreateDate(LocalDateTime.now());
     fedCodeEntity.setSchoolID(UUID.fromString(currentSchool.getSchoolId()));

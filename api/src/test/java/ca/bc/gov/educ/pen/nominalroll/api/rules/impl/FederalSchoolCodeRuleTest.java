@@ -3,6 +3,7 @@ package ca.bc.gov.educ.pen.nominalroll.api.rules.impl;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.Headers;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
+import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
@@ -22,6 +23,8 @@ import static org.mockito.Mockito.when;
 public class FederalSchoolCodeRuleTest {
 
   private static FederalSchoolCodeRule rule;
+
+  private static NominalRollService service;
   @Mock
   static RestUtils restUtils;
 
@@ -47,7 +50,7 @@ public class FederalSchoolCodeRuleTest {
       fieldError = null;
     }
     if("1002".equals(fedSchoolCode)){
-      when(restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("1002","10200001"));
+      when(service.getFedProvSchoolCodes()).thenReturn(Map.of("1002","10200001"));
     }
     val nomRoll = NominalRollStudent.builder().schoolNumber(fedSchoolCode).build();
     val result = rule.validate(NominalRollStudentMapper.mapper.toModel(nomRoll));

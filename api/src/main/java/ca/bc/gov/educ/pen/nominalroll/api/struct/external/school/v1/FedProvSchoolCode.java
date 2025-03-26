@@ -9,8 +9,7 @@ import java.util.UUID;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FedProvSchoolCode extends BaseRequest {
-  UUID fedBandCodeID;
-  UUID schoolID;
-  String fedBandCode;
-  String minCode;
+  String key;
+  String federalCode;
+  String provincialCode;
 }

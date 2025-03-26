@@ -4,6 +4,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.BaseNominalRollAPITest;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.GradeCodes;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.Headers;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
+import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GenderCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GradeCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
@@ -24,6 +25,9 @@ public class RulesProcessorTest extends BaseNominalRollAPITest {
   @Autowired
   RulesProcessor processor;
 
+  @Autowired
+  NominalRollService service;
+
   @Before
   public void before() {
     when(restUtils.getActiveGenderCodes()).thenReturn(List.of(GenderCode.builder().genderCode("F").build()));
@@ -32,7 +36,7 @@ public class RulesProcessorTest extends BaseNominalRollAPITest {
       gradeCodes.add(GradeCode.builder().gradeCode(grade.getCode()).build());
     }
     when(restUtils.getActiveGradeCodes()).thenReturn(gradeCodes);
-    when(restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("102", "10200001"));
+    when(service.getFedProvSchoolCodes()).thenReturn(Map.of("102", "10200001"));
     when(restUtils.districtCodes()).thenReturn(List.of("102", "103", "021", "006"));
   }
 

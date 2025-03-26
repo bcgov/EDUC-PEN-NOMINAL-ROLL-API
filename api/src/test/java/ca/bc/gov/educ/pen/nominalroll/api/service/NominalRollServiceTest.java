@@ -61,7 +61,7 @@ public class NominalRollServiceTest {
 
   @Before
   public void before() {
-    this.service = new NominalRollService(this.restUtils, this.messagePublisher, this.repository, this.postedStudentRepository, this.nominalRollStudentRepositoryCustom, this.nominalRollStudentValidationErrorRepository);
+    this.service = new NominalRollService(this.restUtils, this.messagePublisher, this.repository, this.postedStudentRepository, this.nominalRollStudentRepositoryCustom, this.nominalRollStudentValidationErrorRepository, this.fedProvCodeRepository);
   }
 
   @Test
@@ -71,9 +71,9 @@ public class NominalRollServiceTest {
     schoolList.add(SchoolTombstone.builder().schoolNumber("00001").openedDate("20100101").closedDate("20180101").build());
     schoolList.add(SchoolTombstone.builder().schoolNumber("00011").openedDate("20100101").closedDate(null).build());
     when(this.restUtils.getSchools()).thenReturn(schoolList);
-    when(this.restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "50400001"));
+    when(this.service.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "50400001"));
     this.service.removeClosedSchoolsFedProvMappings();
-    verify(this.restUtils, atMost(1)).getFedProvSchoolCodes();
+    verify(this.service, atMost(1)).getFedProvSchoolCodes();
     verify(this.restUtils, atMost(1)).getSchools();
     verify(this.fedProvCodeRepository, atMost(1)).deleteAllBySchoolID(any());
   }

@@ -35,7 +35,7 @@ public class FederalSchoolCodeRule extends BaseRule {
     if (StringUtils.isBlank(schoolNum)) {
       errorsMap.put(Headers.SCHOOL_NUMBER.getCode(), "Field value is missing.");
     } else {
-      val mincode = this.restUtils.getFedProvSchoolCodes().get(schoolNum);
+      val mincode = this.restUtils.getSchoolBySchoolNumber(schoolNum).get().getMincode();;
       if (StringUtils.isBlank(mincode)) {
         errorsMap.put(Headers.SCHOOL_NUMBER.getCode(), String.format("Field value %s is not recognized.", schoolNum));
       }

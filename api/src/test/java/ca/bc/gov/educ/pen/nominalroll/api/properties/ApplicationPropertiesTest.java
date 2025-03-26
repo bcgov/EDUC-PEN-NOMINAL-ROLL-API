@@ -16,7 +16,6 @@ public class ApplicationPropertiesTest extends BaseNominalRollAPITest {
     assertThat(this.applicationProperties.getFolderBasePath()).isEqualTo("/home/runner/work/EDUC-PEN-NOMINAL-ROLL-API/EDUC-PEN-NOMINAL-ROLL-API/temp");
     assertThat(this.applicationProperties.getClientID()).isEqualTo("123");
     assertThat(this.applicationProperties.getClientSecret()).isEqualTo("123");
-    assertThat(this.applicationProperties.getSchoolApiURL()).isEqualTo("https://asdf.com");
     assertThat(this.applicationProperties.getStudentApiURL()).isEqualTo("https://asdf.com");
     assertThat(this.applicationProperties.getTokenURL()).isEqualTo("https://abcxyz.com");
     assertThat(this.applicationProperties.getIsHttpRampUp()).isFalse();

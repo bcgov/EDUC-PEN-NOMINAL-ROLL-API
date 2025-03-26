@@ -32,10 +32,6 @@ public class FedProvCodeEntity {
   @Column(name = "FED_BAND_CODE")
   private String fedBandCode;
 
-  @Basic
-  @Column(name = "MINCODE")
-  private String mincode;
-
   @Column(name = "CREATE_USER", updatable = false, length = 32)
   String createUser;
 

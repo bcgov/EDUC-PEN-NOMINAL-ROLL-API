@@ -52,8 +52,6 @@ public class RestUtils {
 
   private final Map<String, SchoolTombstone> schoolMincodeMap = new ConcurrentHashMap<>();
 
-  private final FedProvCodeRepository fedProvCodeRepository;
-
 
   private final ApplicationProperties props;
   private final Map<String, List<UUID>> independentAuthorityToSchoolIDMap = new ConcurrentHashMap<>();
@@ -72,8 +70,7 @@ public class RestUtils {
     }
   }
 
-  public RestUtils(FedProvCodeRepository fedProvCodeRepository, @Autowired final ApplicationProperties props, final WebClient webClient) {
-    this.fedProvCodeRepository = fedProvCodeRepository;
+  public RestUtils(@Autowired final ApplicationProperties props, final WebClient webClient) {
     this.props = props;
     this.webClient = webClient;
   }
@@ -135,10 +132,7 @@ public class RestUtils {
   }
 
 
-  public Map<String, String> getFedProvSchoolCodes() {
-    List<FedProvCodeEntity> schoolCodes = fedProvCodeRepository.findAll();
-    return schoolCodes.stream().collect(Collectors.toMap(FedProvCodeEntity::getFedBandCode, FedProvCodeEntity::getMincode));
-  }
+
 
   public void populateDistrictMap() {
     val writeLock = this.districtLock.writeLock();
@@ -155,13 +149,14 @@ public class RestUtils {
     log.info("Loaded  {} districts to memory", this.districtMap.values().size());
   }
 
-  public boolean validateFedBandCode(final String fedBandCode){
-    val schoolCodes = this.fedProvCodeRepository.findAll();
-    if(schoolCodes.contains(fedBandCode)){
-      return true;
+  public Optional<SchoolTombstone> getSchoolBySchoolID(final UUID schoolId) {
+    if (this.schoolMap.isEmpty()) {
+      log.info("School map is empty reloading schools");
+      this.populateSchoolMap();
     }
-    return false;
+    return Optional.ofNullable(this.schoolMap.get(schoolId));
   }
+
   public Optional<SchoolTombstone> getSchoolBySchoolNumber(final String schoolNumber) {
     if (this.schoolMap.isEmpty()) {
       log.info("School map is empty reloading schools");

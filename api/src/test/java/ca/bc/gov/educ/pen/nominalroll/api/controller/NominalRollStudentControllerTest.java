@@ -854,9 +854,9 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
   @Test
   public void testAddFedProvCodes_ShouldReturnStatusOk() throws Exception {
     FedProvSchoolCode fedProvSchoolCode = new FedProvSchoolCode();
-    fedProvSchoolCode.setMinCode("654987");
-    fedProvSchoolCode.setFedBandCode("1234");
-    fedProvSchoolCode.setSchoolID(UUID.randomUUID());
+    fedProvSchoolCode.setProvincialCode("654987");
+    fedProvSchoolCode.setFederalCode("1234");
+    fedProvSchoolCode.setKey("NOM_SCHL");
 
     NominalRollStudentEntity student = this.createNominalRollStudent();
 
