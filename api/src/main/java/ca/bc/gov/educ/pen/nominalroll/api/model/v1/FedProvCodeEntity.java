@@ -30,7 +30,7 @@ public class FedProvCodeEntity {
   UUID fedBandCodeID;
 
   @Basic
-  @Column(name = "SCHOOL_ID", insertable = false, columnDefinition = "BINARY(16)", updatable = false)
+  @Column(name = "SCHOOL_ID", columnDefinition = "BINARY(16)", updatable = false)
   private UUID schoolID;
 
   @Basic

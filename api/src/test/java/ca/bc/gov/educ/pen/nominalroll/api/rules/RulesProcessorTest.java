@@ -17,8 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 public class RulesProcessorTest extends BaseNominalRollAPITest {
@@ -26,6 +28,8 @@ public class RulesProcessorTest extends BaseNominalRollAPITest {
   @Autowired
   RulesProcessor processor;
 
+  @Mock
+  NominalRollService service;
 
   @Before
   public void before() {
@@ -35,7 +39,10 @@ public class RulesProcessorTest extends BaseNominalRollAPITest {
       gradeCodes.add(GradeCode.builder().gradeCode(grade.getCode()).build());
     }
     when(restUtils.getActiveGradeCodes()).thenReturn(gradeCodes);
-    when(restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("102", "10200001"));
+    val fedCodeEntity = this.createFedBandCode();
+    this.testHelper.getFedProvCodeRepository().save(fedCodeEntity);
+    var schoolMock = this.createMockSchool();
+    when(this.restUtils.getSchoolBySchoolID(anyString())).thenReturn(Optional.of(schoolMock));
     when(restUtils.districtCodes()).thenReturn(List.of("102", "103", "021", "006"));
   }
 
@@ -78,6 +85,6 @@ public class RulesProcessorTest extends BaseNominalRollAPITest {
   }
 
   private NominalRollStudent getNominalRollStudent() {
-    return NominalRollStudent.builder().schoolNumber("102").leaProvincial("L").schoolName("school").schoolDistrictNumber("006").birthDate("2000-01-01").gender("F").grade("12").surname("surname").bandOfResidence("bor").fte("1.0").givenNames("givenNames").processingYear("2021").recipientName("recipientName").recipientNumber("recipientNumber").build();
+    return NominalRollStudent.builder().schoolNumber("5465").leaProvincial("L").schoolName("school").schoolDistrictNumber("006").birthDate("2000-01-01").gender("F").grade("12").surname("surname").bandOfResidence("bor").fte("1.0").givenNames("givenNames").processingYear("2021").recipientName("recipientName").recipientNumber("recipientNumber").build();
   }
 }

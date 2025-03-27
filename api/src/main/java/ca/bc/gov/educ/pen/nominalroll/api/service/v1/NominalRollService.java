@@ -330,6 +330,6 @@ public class NominalRollService {
     fedCodeEntity.setSchoolID(UUID.fromString(currentSchool.getSchoolId()));
     fedCodeEntity.setUpdateUser(fedProvSchoolCode.updateUser);
     fedCodeEntity.setUpdateDate(LocalDateTime.now());
-    fedProvCodeRepository.save(fedCodeEntity);
+    this.fedProvCodeRepository.save(fedCodeEntity);
   }
 }
