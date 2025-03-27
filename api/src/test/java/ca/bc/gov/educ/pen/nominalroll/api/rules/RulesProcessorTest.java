@@ -11,6 +11,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -25,8 +26,6 @@ public class RulesProcessorTest extends BaseNominalRollAPITest {
   @Autowired
   RulesProcessor processor;
 
-  @Autowired
-  NominalRollService service;
 
   @Before
   public void before() {
@@ -36,7 +35,7 @@ public class RulesProcessorTest extends BaseNominalRollAPITest {
       gradeCodes.add(GradeCode.builder().gradeCode(grade.getCode()).build());
     }
     when(restUtils.getActiveGradeCodes()).thenReturn(gradeCodes);
-    when(service.getFedProvSchoolCodes()).thenReturn(Map.of("102", "10200001"));
+    when(restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("102", "10200001"));
     when(restUtils.districtCodes()).thenReturn(List.of("102", "103", "021", "006"));
   }
 

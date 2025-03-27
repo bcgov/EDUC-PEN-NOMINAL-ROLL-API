@@ -4,8 +4,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.constants.CacheNames;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.LocalDateTimeMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.FedProvCodeEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
-import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.FedProvCodeRepository;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.FedProvSchoolCode;
+import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GenderCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GradeCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.District;
@@ -16,6 +15,7 @@ import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
@@ -24,7 +24,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.lang.module.FindException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -51,8 +50,6 @@ public class RestUtils {
   private final Map<String, District> districtMap = new ConcurrentHashMap<>();
 
   private final Map<String, SchoolTombstone> schoolMincodeMap = new ConcurrentHashMap<>();
-
-
   private final ApplicationProperties props;
   private final Map<String, List<UUID>> independentAuthorityToSchoolIDMap = new ConcurrentHashMap<>();
 
@@ -70,8 +67,8 @@ public class RestUtils {
     }
   }
 
-  public RestUtils(@Autowired final ApplicationProperties props, final WebClient webClient) {
-    this.props = props;
+  public RestUtils( @Autowired final ApplicationProperties props, final WebClient webClient) {
+      this.props = props;
     this.webClient = webClient;
   }
 
@@ -123,6 +120,8 @@ public class RestUtils {
   }
 
 
+
+
   public Optional<SchoolTombstone> getSchoolByMincode(final String mincode) {
     if (this.schoolMincodeMap.isEmpty()) {
       log.info("School mincode map is empty reloading schools");
@@ -149,20 +148,12 @@ public class RestUtils {
     log.info("Loaded  {} districts to memory", this.districtMap.values().size());
   }
 
-  public Optional<SchoolTombstone> getSchoolBySchoolID(final UUID schoolId) {
+  public Optional<SchoolTombstone> getSchoolBySchoolID(final String schoolId) {
     if (this.schoolMap.isEmpty()) {
       log.info("School map is empty reloading schools");
       this.populateSchoolMap();
     }
     return Optional.ofNullable(this.schoolMap.get(schoolId));
-  }
-
-  public Optional<SchoolTombstone> getSchoolBySchoolNumber(final String schoolNumber) {
-    if (this.schoolMap.isEmpty()) {
-      log.info("School map is empty reloading schools");
-      this.populateSchoolMap();
-    }
-    return Optional.ofNullable(this.schoolMap.get(schoolNumber));
   }
 
   @Retryable(value = {Exception.class}, backoff = @Backoff(multiplier = 2, delay = 2000))
@@ -174,7 +165,8 @@ public class RestUtils {
       .retrieve().bodyToFlux(GenderCode.class).buffer().blockLast()).stream().filter(this::filterGenderCodes).collect(Collectors.toList());
   }
 
-
+  @CacheEvict(value = CacheNames.FED_PROV_CODES, allEntries = true)
+  public void evictFedProvSchoolCodesCache() {}
   @Retryable(value = {Exception.class}, backoff = @Backoff(multiplier = 2, delay = 2000))
   @Cacheable(CacheNames.GRADE_CODES)
   public List<GradeCode> getActiveGradeCodes() {
@@ -226,4 +218,5 @@ public class RestUtils {
   public List<String> districtCodes() {
     return this.getDistricts().stream().map(District::getDistrictNumber).filter(Objects::nonNull).collect(Collectors.toList());
   }
+
 }

@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.pen.nominalroll.api.service.v1;
 
+import ca.bc.gov.educ.pen.nominalroll.api.constants.CacheNames;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.EventOutcome;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.EventType;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum;
@@ -19,11 +20,14 @@ import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.FedProvSchoo
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.*;
 import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jboss.threads.EnhancedQueueExecutor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -43,6 +47,7 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
@@ -59,11 +64,14 @@ public class NominalRollService {
   private final NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository;
   private final FedProvCodeRepository fedProvCodeRepository;
 
+  private Map<String, String> schoolCodeMap = new ConcurrentHashMap<>();
+
   private final NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom;
   private final Executor paginatedQueryExecutor = new EnhancedQueueExecutor.Builder()
     .setThreadFactory(new ThreadFactoryBuilder().setNameFormat("async-pagination-query-executor-%d").build())
     .setCorePoolSize(2).setMaximumPoolSize(10).setKeepAliveTime(Duration.ofSeconds(60)).build();
 
+  @Autowired
   public NominalRollService(final RestUtils restUtils, final MessagePublisher messagePublisher, final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository,
                             final NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom, final NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository, final FedProvCodeRepository fedProvCodeRepository) {
     this.messagePublisher = messagePublisher;
@@ -293,18 +301,23 @@ public class NominalRollService {
     return false;
   }
 
-
-
+  @Cacheable(CacheNames.FED_PROV_CODES)
   public Map<String, String> getFedProvSchoolCodes() {
-    List<FedProvCodeEntity> schoolCodes = fedProvCodeRepository.findAll();
-
-    return schoolCodes.stream()
-            .collect(Collectors.toMap(
-                    FedProvCodeEntity::getFedBandCode,
-                    entity -> restUtils.getSchoolBySchoolID(entity.getSchoolID()).get().getMincode()
-            ));
+    if (this.schoolCodeMap.isEmpty()) {
+      List<FedProvCodeEntity> schoolCodes = fedProvCodeRepository.findAll();
+      schoolCodeMap = schoolCodes.stream()
+              .collect(Collectors.toMap(
+                      FedProvCodeEntity::getFedBandCode,
+                      entity -> restUtils.getSchoolBySchoolID(entity.getSchoolID().toString()).get().getMincode()
+              ));
+    }
+    return schoolCodeMap;
   }
 
+  public String getMincodeByFedBandCode(String fedBandCode) {
+    Map<String, String> schoolCodeMap = getFedProvSchoolCodes();
+    return schoolCodeMap.getOrDefault(fedBandCode, null);
+  }
   @Transactional
   public void addFedProvSchoolCode(FedProvSchoolCode fedProvSchoolCode) {
     FedProvCodeEntity fedCodeEntity = new FedProvCodeEntity() ;

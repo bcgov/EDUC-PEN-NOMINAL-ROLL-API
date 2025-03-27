@@ -1,7 +1,8 @@
 package ca.bc.gov.educ.pen.nominalroll.api.model.v1;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Immutable;
 
@@ -12,10 +13,14 @@ import java.util.UUID;
  * The type FedProvCode entity.
  *
  */
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "FED_BAND_CODE")
-@Data
-@Immutable
+@DynamicUpdate
+@ToString
 public class FedProvCodeEntity {
   @Id
   @GeneratedValue(generator = "UUID")

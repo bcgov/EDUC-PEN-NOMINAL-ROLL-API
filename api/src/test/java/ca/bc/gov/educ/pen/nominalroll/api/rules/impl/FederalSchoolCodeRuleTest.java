@@ -31,7 +31,7 @@ public class FederalSchoolCodeRuleTest {
   @Before
   public void setUp() {
     MockitoAnnotations.openMocks(this);
-    rule = new FederalSchoolCodeRule(restUtils);
+    rule = new FederalSchoolCodeRule(restUtils, service);
   }
 
   @Test
@@ -50,7 +50,7 @@ public class FederalSchoolCodeRuleTest {
       fieldError = null;
     }
     if("1002".equals(fedSchoolCode)){
-      when(service.getFedProvSchoolCodes()).thenReturn(Map.of("1002","10200001"));
+      when(this.restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("1002","10200001"));
     }
     val nomRoll = NominalRollStudent.builder().schoolNumber(fedSchoolCode).build();
     val result = rule.validate(NominalRollStudentMapper.mapper.toModel(nomRoll));
