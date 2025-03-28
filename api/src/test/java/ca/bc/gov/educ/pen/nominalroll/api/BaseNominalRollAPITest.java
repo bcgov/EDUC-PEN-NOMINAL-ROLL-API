@@ -84,7 +84,7 @@ public abstract class BaseNominalRollAPITest {
     schoolTombstone.setFacilityTypeCode("STANDARD");
     return schoolTombstone;
   }
-  protected FedProvCodeEntity createFedBandCode() {
+  public FedProvCodeEntity createFedBandCode() {
     FedProvCodeEntity fedProvCodeEntity = new FedProvCodeEntity();
     fedProvCodeEntity.setFedBandCode("5465");
     fedProvCodeEntity.setFedBandCodeID(UUID.randomUUID());
