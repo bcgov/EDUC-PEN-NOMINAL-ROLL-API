@@ -11,6 +11,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -45,7 +46,13 @@ public class RulesProcessorTest extends BaseNominalRollAPITest {
     when(this.restUtils.getSchoolBySchoolID(anyString())).thenReturn(Optional.of(schoolMock));
     when(restUtils.districtCodes()).thenReturn(List.of("102", "103", "021", "006"));
   }
-
+  @AfterEach
+  void cleanup(){
+    testHelper.getFedProvCodeRepository().deleteAll();
+    testHelper.getRepository().deleteAll();
+    testHelper.getFedProvCodeRepository().deleteAll();
+    testHelper.getSagaRepository().deleteAll();
+  }
   @Test
   public void testProcessRules_givenValidObject_shouldReturnEmptyMap() {
     NominalRollStudent student = getNominalRollStudent();

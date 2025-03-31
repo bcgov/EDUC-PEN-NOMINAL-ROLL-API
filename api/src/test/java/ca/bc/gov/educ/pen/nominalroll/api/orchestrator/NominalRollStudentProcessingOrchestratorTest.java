@@ -23,6 +23,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -30,6 +31,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
@@ -63,6 +65,7 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
     Mockito.reset(this.messagePublisher);
     Mockito.reset(this.restUtils);
   }
+
 
   @SneakyThrows
   @Test
@@ -208,7 +211,7 @@ public class NominalRollStudentProcessingOrchestratorTest extends BaseNominalRol
     assertThat(newEvent.getEventType()).isEqualTo(PROCESS_PEN_MATCH);
     assertThat(newEvent.getEventOutcome()).isNull();
     assertThat(newEvent.getEventPayload()).isEqualTo("{\"pen\":null,\"dob\":\"19070526\",\"sex\":\"M\",\"enrolledGradeCode\":\"01\",\"surname\":\"Wayne\",\"givenName\":\"John\",\"middleName\":null,\"usualSurname\":null,\"usualGivenName\":null,\"usualMiddleName\":null,\"mincode\":\"10200001\",\"localID\":null,\"postal\":null}");
-  }
+   }
 
   @SneakyThrows
   @Test

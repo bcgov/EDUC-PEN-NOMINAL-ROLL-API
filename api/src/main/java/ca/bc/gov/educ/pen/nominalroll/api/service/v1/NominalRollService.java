@@ -331,5 +331,6 @@ public class NominalRollService {
     fedCodeEntity.setUpdateUser(fedProvSchoolCode.updateUser);
     fedCodeEntity.setUpdateDate(LocalDateTime.now());
     this.fedProvCodeRepository.save(fedCodeEntity);
+    restUtils.evictFedProvSchoolCodesCache();
   }
 }

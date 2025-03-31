@@ -54,6 +54,9 @@ public abstract class BaseNominalRollAPITest {
   @After
   public void after() {
     this.testHelper.cleanDB();
+    testHelper.getRepository().deleteAll();
+    testHelper.getFedProvCodeRepository().deleteAll();
+    testHelper.getSagaRepository().deleteAll();
   }
 
   @SneakyThrows

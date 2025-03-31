@@ -61,6 +61,10 @@ public class NominalRollServiceTest extends BaseNominalRollAPITest {
     this.service = new NominalRollService(this.restUtils, this.messagePublisher, this.repository, this.postedStudentRepository, this.nominalRollStudentRepositoryCustom, this.nominalRollStudentValidationErrorRepository, this.fedProvCodeRepository);
   }
 
+  @AfterEach
+  void cleanup(){
+    fedProvCodeRepository.deleteAll();
+  }
   @Test
   public void testRemoveFedProvCodes_ShouldReturnOk() {
     var schoolList = new ArrayList<SchoolTombstone>();
@@ -75,6 +79,8 @@ public class NominalRollServiceTest extends BaseNominalRollAPITest {
     when(this.restUtils.getSchoolBySchoolID(anyString())).thenReturn(Optional.of(schoolMock));
     assertNotNull(service.getFedProvSchoolCodes());
     assertNotNull(restUtils.getSchools());
+    this.testHelper.getFedProvCodeRepository().delete(fedCodeEntity);
+    restUtils.evictFedProvSchoolCodesCache();
   }
 
   @Test
