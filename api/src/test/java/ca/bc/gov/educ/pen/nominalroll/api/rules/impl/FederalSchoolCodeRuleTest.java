@@ -1,10 +1,7 @@
 package ca.bc.gov.educ.pen.nominalroll.api.rules.impl;
 
-import ca.bc.gov.educ.pen.nominalroll.api.BaseNominalRollAPITest;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.Headers;
-import ca.bc.gov.educ.pen.nominalroll.api.helper.TestHelper;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
-import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import junitparams.JUnitParamsRunner;
@@ -15,13 +12,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Map;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(JUnitParamsRunner.class)
@@ -29,15 +21,10 @@ public class FederalSchoolCodeRuleTest {
 
   private static FederalSchoolCodeRule rule;
 
-  private static NominalRollService service;
+
   @Mock
-  static RestUtils restUtils;
+  NominalRollService service;
 
-  @Autowired
-  BaseNominalRollAPITest baseNominalRollAPITest;
-
-  @Autowired
-  protected TestHelper testHelper;
 
   @Before
   public void setUp() {
@@ -48,7 +35,7 @@ public class FederalSchoolCodeRuleTest {
   @Test
   @Parameters({
     "null, 1, Field value is missing.",
-    "1002, 0, null",
+    "5465, 0, null",
     "abc, 1, Field value %s is not recognized.",
     "def, 1, Field value %s is not recognized.",
     "1003, 1, Field value %s is not recognized.",
@@ -61,11 +48,9 @@ public class FederalSchoolCodeRuleTest {
       fieldError = null;
     }
     if("5465".equals(fedSchoolCode)){
-      //when(this.service.getFedProvSchoolCodes()).thenReturn(Map.of("5465","10200001"));
-      val fedCodeEntity = baseNominalRollAPITest.createFedBandCode();
-      testHelper.getFedProvCodeRepository().save(fedCodeEntity);
-      var schoolMock = baseNominalRollAPITest.createMockSchool();
-      when(this.restUtils.getSchoolBySchoolID(anyString())).thenReturn(Optional.of(schoolMock));
+      when(this.service.getMincodeByFedBandCode("5465")).thenReturn("10200001");
+
+     // when(restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("1002","10200001"));
     }
     val nomRoll = NominalRollStudent.builder().schoolNumber(fedSchoolCode).build();
     val result = rule.validate(NominalRollStudentMapper.mapper.toModel(nomRoll));
