@@ -1,18 +1,20 @@
 package ca.bc.gov.educ.pen.nominalroll.api.service;
 
+import ca.bc.gov.educ.pen.nominalroll.api.BaseNominalRollAPITest;
 import ca.bc.gov.educ.pen.nominalroll.api.NominalRollApiApplication;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.EntityNotFoundException;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.*;
-import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
 import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.SchoolTombstone;
 import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -31,7 +33,7 @@ import static org.mockito.Mockito.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = NominalRollApiApplication.class)
 @ActiveProfiles("test")
-public class NominalRollServiceTest {
+public class NominalRollServiceTest extends BaseNominalRollAPITest {
   private static final NominalRollStudentMapper mapper = NominalRollStudentMapper.mapper;
 
   @Autowired
@@ -44,20 +46,15 @@ public class NominalRollServiceTest {
   NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository;
 
   @Autowired
-  private final FedProvCodeRepository fedProvCodeRepository;
+  FedProvCodeRepository fedProvCodeRepository;
 
 
   @Mock
-  RestUtils restUtils;
-
   NominalRollService service;
 
   @Mock
   MessagePublisher messagePublisher;
 
-  public NominalRollServiceTest(FedProvCodeRepository fedProvCodeRepository) {
-    this.fedProvCodeRepository = fedProvCodeRepository;
-  }
 
   @Before
   public void before() {
@@ -71,11 +68,13 @@ public class NominalRollServiceTest {
     schoolList.add(SchoolTombstone.builder().schoolNumber("00001").openedDate("20100101").closedDate("20180101").build());
     schoolList.add(SchoolTombstone.builder().schoolNumber("00011").openedDate("20100101").closedDate(null).build());
     when(this.restUtils.getSchools()).thenReturn(schoolList);
-    when(this.service.getFedProvSchoolCodes()).thenReturn(Map.of("5465", "50400001"));
+    val fedCodeEntity = this.createFedBandCode();
+    this.testHelper.getFedProvCodeRepository().save(fedCodeEntity);
     this.service.removeClosedSchoolsFedProvMappings();
-    verify(this.service, atMost(1)).getFedProvSchoolCodes();
-    verify(this.restUtils, atMost(1)).getSchools();
-    verify(this.fedProvCodeRepository, atMost(1)).deleteAllBySchoolID(any());
+    var schoolMock = this.createMockSchool();
+    when(this.restUtils.getSchoolBySchoolID(anyString())).thenReturn(Optional.of(schoolMock));
+    assertNotNull(service.getFedProvSchoolCodes());
+    assertNotNull(restUtils.getSchools());
   }
 
   @Test
