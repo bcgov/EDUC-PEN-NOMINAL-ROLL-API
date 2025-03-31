@@ -118,7 +118,7 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
 
   @Override
   public ResponseEntity<NominalRollStudent> validateNomRollStudent(final NominalRollStudent nominalRollStudent) {
-    this.restUtils.evictFedProvSchoolCodesCache(); //evict cache because new school codes would be added manually
+    this.restUtils.evictFedProvSchoolCodesCache();
     val errorsMap = this.rulesProcessor.processRules(NominalRollStudentMapper.mapper.toModel(nominalRollStudent));
     nominalRollStudent.setValidationErrors(errorsMap);
     return ResponseEntity.ok(nominalRollStudent);
@@ -129,9 +129,8 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
     NominalRollStudentEntity dbEntity = this.service.getNominalRollStudentByID(nomRollStudentID);
     val entity = NominalRollStudentMapper.mapper.toModel(nominalRollStudent);
     if(StringUtils.isNotEmpty(nominalRollStudent.getStatus()) && !nominalRollStudent.getStatus().equals(NominalRollStudentStatus.IGNORED.toString())) {
-      this.restUtils.evictFedProvSchoolCodesCache(); //evict cache because new school codes would be added manually
+      this.restUtils.evictFedProvSchoolCodesCache();
       var errorsMap = this.rulesProcessor.processRules(entity);
-
       if (errorsMap.isEmpty()) {
         BeanUtils.copyProperties(entity, dbEntity, "createDate", "createUser", "nominalRollStudentID", "nominalRollStudentValidationErrors");
         // no validation errors so remove existing ones.
@@ -180,8 +179,8 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
 
   @Override
   public ResponseEntity<Void> addFedProvSchoolCode(FedProvSchoolCode fedProvSchoolCode) {
-    this.restUtils.addFedProvSchoolCode(fedProvSchoolCode);
-    this.restUtils.evictFedProvSchoolCodesCache(); //evict cache bec
+    this.service.addFedProvSchoolCode(fedProvSchoolCode);
+    this.restUtils.evictFedProvSchoolCodesCache();
     var validationErrorEntities = this.service.getSchoolNumberValidationErrors();
     if (!validationErrorEntities.isEmpty()) {
       for(val validationErrorEntity : validationErrorEntities) {

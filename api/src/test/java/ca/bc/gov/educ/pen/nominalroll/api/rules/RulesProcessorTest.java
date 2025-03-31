@@ -4,25 +4,33 @@ import ca.bc.gov.educ.pen.nominalroll.api.BaseNominalRollAPITest;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.GradeCodes;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.Headers;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
+import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GenderCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GradeCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.NominalRollStudent;
 import lombok.val;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 public class RulesProcessorTest extends BaseNominalRollAPITest {
 
   @Autowired
   RulesProcessor processor;
+
+  @Mock
+  NominalRollService service;
 
   @Before
   public void before() {
@@ -32,10 +40,19 @@ public class RulesProcessorTest extends BaseNominalRollAPITest {
       gradeCodes.add(GradeCode.builder().gradeCode(grade.getCode()).build());
     }
     when(restUtils.getActiveGradeCodes()).thenReturn(gradeCodes);
-    when(restUtils.getFedProvSchoolCodes()).thenReturn(Map.of("102", "10200001"));
+    val fedCodeEntity = this.createFedBandCode();
+    this.testHelper.getFedProvCodeRepository().save(fedCodeEntity);
+    var schoolMock = this.createMockSchool();
+    when(this.restUtils.getSchoolBySchoolID(anyString())).thenReturn(Optional.of(schoolMock));
     when(restUtils.districtCodes()).thenReturn(List.of("102", "103", "021", "006"));
   }
-
+  @AfterEach
+  void cleanup(){
+    testHelper.getFedProvCodeRepository().deleteAll();
+    testHelper.getRepository().deleteAll();
+    testHelper.getFedProvCodeRepository().deleteAll();
+    testHelper.getSagaRepository().deleteAll();
+  }
   @Test
   public void testProcessRules_givenValidObject_shouldReturnEmptyMap() {
     NominalRollStudent student = getNominalRollStudent();
@@ -75,6 +92,6 @@ public class RulesProcessorTest extends BaseNominalRollAPITest {
   }
 
   private NominalRollStudent getNominalRollStudent() {
-    return NominalRollStudent.builder().schoolNumber("102").leaProvincial("L").schoolName("school").schoolDistrictNumber("006").birthDate("2000-01-01").gender("F").grade("12").surname("surname").bandOfResidence("bor").fte("1.0").givenNames("givenNames").processingYear("2021").recipientName("recipientName").recipientNumber("recipientNumber").build();
+    return NominalRollStudent.builder().schoolNumber("5465").leaProvincial("L").schoolName("school").schoolDistrictNumber("006").birthDate("2000-01-01").gender("F").grade("12").surname("surname").bandOfResidence("bor").fte("1.0").givenNames("givenNames").processingYear("2021").recipientName("recipientName").recipientNumber("recipientNumber").build();
   }
 }

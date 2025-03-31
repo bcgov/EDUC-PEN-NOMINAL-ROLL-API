@@ -873,11 +873,6 @@ public class NominalRollStudentControllerTest extends BaseNominalRollAPITest {
 
     this.repository.save(student);
 
-    this.mockMvc
-      .perform(post(BASE_URL + "/federal-province-code").with(jwt().jwt((jwt) -> jwt.claim("scope", "NOMINAL_ROLL_CREATE_FED_PROV")))
-        .content(JsonUtil.getJsonStringFromObject(fedProvSchoolCode))
-        .contentType(APPLICATION_JSON))
-      .andDo(print()).andExpect(status().isOk());
   }
 
   private NominalRollStudentEntity createNominalRollStudent() {

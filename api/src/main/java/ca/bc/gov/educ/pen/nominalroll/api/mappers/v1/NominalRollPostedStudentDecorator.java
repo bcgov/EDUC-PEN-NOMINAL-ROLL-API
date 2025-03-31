@@ -16,7 +16,7 @@ public abstract class NominalRollPostedStudentDecorator implements NominalRollPo
     this.delegate = delegate;
   }
 
-  @Override
+/*  @Override
   public SldDiaStudent toDiaStudent(final NominalRollPostedStudentEntity nominalRollPostedStudentEntity, RestUtils restUtils) {
     val sldDiaStudent = this.delegate.toDiaStudent(nominalRollPostedStudentEntity, restUtils);
     sldDiaStudent.setSchtype(NominalRollHelper.getSldSchTypeMap().get(nominalRollPostedStudentEntity.getAgreementType()));
@@ -32,7 +32,7 @@ public abstract class NominalRollPostedStudentDecorator implements NominalRollPo
     sldDiaStudent.setDistNo(mincode.substring(0, 3));
     sldDiaStudent.setSchlNo(mincode.substring(3));
     return sldDiaStudent;
-  }
+  }*/
 
   private String trimValueToLength(String value, int length){
     if(value == null){

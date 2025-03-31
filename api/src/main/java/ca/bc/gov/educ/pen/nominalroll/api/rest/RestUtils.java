@@ -1,33 +1,34 @@
 package ca.bc.gov.educ.pen.nominalroll.api.rest;
 
 import ca.bc.gov.educ.pen.nominalroll.api.constants.CacheNames;
-import ca.bc.gov.educ.pen.nominalroll.api.exception.NominalRollAPIRuntimeException;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.LocalDateTimeMapper;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.FedProvCodeEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.FedProvSchoolCode;
-import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.School;
+import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GenderCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GradeCode;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.District;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.SchoolTombstone;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.lang.NonNull;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 /**
@@ -40,53 +41,120 @@ public class RestUtils {
    * The constant CONTENT_TYPE.
    */
   public static final String CONTENT_TYPE = "Content-Type";
-  private final ApplicationProperties props;
+  private final ReadWriteLock schoolLock = new ReentrantReadWriteLock();
 
+  private final ReadWriteLock districtLock = new ReentrantReadWriteLock();
+
+  private final Map<String, SchoolTombstone> schoolMap = new ConcurrentHashMap<>();
+
+  private final Map<String, District> districtMap = new ConcurrentHashMap<>();
+
+  private final Map<String, SchoolTombstone> schoolMincodeMap = new ConcurrentHashMap<>();
+  private final ApplicationProperties props;
+  private final Map<String, List<UUID>> independentAuthorityToSchoolIDMap = new ConcurrentHashMap<>();
+
+  @Value("${initialization.background.enabled}")
+  private Boolean isBackgroundInitializationEnabled;
   /**
    * The Web client.
    */
   private final WebClient webClient;
 
-  /**
-   * Instantiates a new Rest utils.
-   *
-   * @param props     the props
-   * @param webClient the web client
-   */
-  public RestUtils(@Autowired final ApplicationProperties props, final WebClient webClient) {
-    this.props = props;
-    this.webClient = webClient;
-  }
-
-
-  @Retryable(value = {Exception.class}, backoff = @Backoff(multiplier = 2, delay = 2000))
-  @Cacheable(CacheNames.FED_PROV_CODES)
-  public Map<String, String> getFedProvSchoolCodes() {
-    return Objects.requireNonNull(this.webClient.get()
-      .uri(this.props.getSchoolApiURL().concat("/federal-province-codes"))
-      .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-      .retrieve().bodyToFlux(FedProvSchoolCode.class).buffer().blockLast()).stream().collect(Collectors.toMap(FedProvSchoolCode::getFederalCode, FedProvSchoolCode::getProvincialCode));
-  }
-
-  public void addFedProvSchoolCode(@NonNull final FedProvSchoolCode fedProvSchoolCode) {
-    try {
-      val response = this.webClient.post()
-        .uri(this.props.getSchoolApiURL().concat("/federal-province-codes"))
-        .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        .body(Mono.just(fedProvSchoolCode), FedProvSchoolCode.class)
-        .retrieve()
-        .bodyToMono(FedProvSchoolCode.class)
-        .block();
-      if (response == null) {
-        throw new NominalRollAPIRuntimeException("Error occurred while adding FedProvSchoolCode");
-      }
-    } catch (final WebClientResponseException e) {
-      throw new NominalRollAPIRuntimeException("Error occurred while adding FedProvSchoolCode");
+  @PostConstruct
+  public void init() {
+    if (this.isBackgroundInitializationEnabled != null && this.isBackgroundInitializationEnabled) {
+      ApplicationProperties.bgTask.execute(this::initialize);
     }
   }
 
-  @CacheEvict(value = CacheNames.FED_PROV_CODES, allEntries = true)
-  public void evictFedProvSchoolCodesCache() {}
+  public RestUtils( @Autowired final ApplicationProperties props, final WebClient webClient) {
+      this.props = props;
+    this.webClient = webClient;
+  }
+
+  @Scheduled(cron = "${schedule.jobs.load.school.cron}")
+  public void scheduled() {
+    this.init();
+  }
+  private void initialize() {
+    this.populateSchoolMap();
+    this.populateSchoolMincodeMap();
+    this.populateDistrictMap();
+
+  }
+
+  public void populateSchoolMap() {
+    val writeLock = this.schoolLock.writeLock();
+    try {
+      writeLock.lock();
+      for (val school : this.getSchools()) {
+        this.schoolMap.put(school.getSchoolId(), school);
+        if (StringUtils.isNotBlank(school.getIndependentAuthorityId())) {
+          this.independentAuthorityToSchoolIDMap.computeIfAbsent(school.getIndependentAuthorityId(), k -> new ArrayList<>()).add(UUID.fromString(school.getSchoolId()));
+        }
+      }
+    } catch (Exception ex) {
+      log.error("Unable to load map cache school {}", ex);
+    } finally {
+      writeLock.unlock();
+    }
+    log.info("Loaded  {} schools to memory", this.schoolMap.values().size());
+  }
+
+  public void populateSchoolMincodeMap() {
+    val writeLock = this.schoolLock.writeLock();
+    try {
+      writeLock.lock();
+      for (val school : this.getSchools()) {
+        this.schoolMincodeMap.put(school.getMincode(), school);
+        if (StringUtils.isNotBlank(school.getIndependentAuthorityId())) {
+          this.independentAuthorityToSchoolIDMap.computeIfAbsent(school.getIndependentAuthorityId(), k -> new ArrayList<>()).add(UUID.fromString(school.getSchoolId()));
+        }
+      }
+    } catch (Exception ex) {
+      log.error("Unable to load map cache school mincodes {}", ex);
+    } finally {
+      writeLock.unlock();
+    }
+    log.info("Loaded  {} school mincodes to memory", this.schoolMincodeMap.values().size());
+  }
+
+
+
+
+  public Optional<SchoolTombstone> getSchoolByMincode(final String mincode) {
+    if (this.schoolMincodeMap.isEmpty()) {
+      log.info("School mincode map is empty reloading schools");
+      this.populateSchoolMincodeMap();
+    }
+    return Optional.ofNullable(this.schoolMincodeMap.get(mincode));
+  }
+
+
+
+
+  public void populateDistrictMap() {
+    val writeLock = this.districtLock.writeLock();
+    try {
+      writeLock.lock();
+      for (val district : this.getDistricts()) {
+        this.districtMap.put(district.getDistrictId(), district);
+      }
+    } catch (Exception ex) {
+      log.error("Unable to load map cache district {}", ex);
+    } finally {
+      writeLock.unlock();
+    }
+    log.info("Loaded  {} districts to memory", this.districtMap.values().size());
+  }
+
+  public Optional<SchoolTombstone> getSchoolBySchoolID(final String schoolId) {
+    if (this.schoolMap.isEmpty()) {
+      log.info("School map is empty reloading schools");
+      this.populateSchoolMap();
+    }
+    return Optional.ofNullable(this.schoolMap.get(schoolId));
+  }
 
   @Retryable(value = {Exception.class}, backoff = @Backoff(multiplier = 2, delay = 2000))
   @Cacheable(CacheNames.GENDER_CODES)
@@ -97,23 +165,8 @@ public class RestUtils {
       .retrieve().bodyToFlux(GenderCode.class).buffer().blockLast()).stream().filter(this::filterGenderCodes).collect(Collectors.toList());
   }
 
-  @Retryable(value = {Exception.class}, backoff = @Backoff(multiplier = 2, delay = 2000))
-  public void deleteFedProvCode(@NonNull final FedProvSchoolCode fedProvSchoolCode) {
-    try {
-    val response = webClient
-              .method(HttpMethod.DELETE)
-              .uri(this.props.getSchoolApiURL().concat("/federal-province-codes"))
-              .body(BodyInserters.fromProducer(Mono.just(fedProvSchoolCode), FedProvSchoolCode.class))
-              .retrieve()
-              .toBodilessEntity().block();
-    if (response == null) {
-      throw new NominalRollAPIRuntimeException("Error occurred while deleting FedProvSchoolCode");
-    }
-  } catch (final WebClientResponseException e) {
-    throw new NominalRollAPIRuntimeException("Error occurred while deleting FedProvSchoolCode");
-  }
-  }
-
+  @CacheEvict(value = CacheNames.FED_PROV_CODES, allEntries = true)
+  public void evictFedProvSchoolCodesCache() {}
   @Retryable(value = {Exception.class}, backoff = @Backoff(multiplier = 2, delay = 2000))
   @Cacheable(CacheNames.GRADE_CODES)
   public List<GradeCode> getActiveGradeCodes() {
@@ -140,20 +193,30 @@ public class RestUtils {
   }
 
 
-  @Retryable(value = {Exception.class}, backoff = @Backoff(multiplier = 2, delay = 2000))
-  @Cacheable(CacheNames.SCHOOL_CODES)
-  public List<School> getSchools() {
+  public List<SchoolTombstone> getSchools() {
+    log.info("Calling Institute api to load schools to memory");
     return this.webClient.get()
-      .uri(this.props.getSchoolApiURL())
-      .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-      .retrieve()
-      .bodyToFlux(School.class)
-      .collectList()
-      .block();
+            .uri(this.props.getInstituteApiURL() + "/school")
+            .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .retrieve()
+            .bodyToFlux(SchoolTombstone.class)
+            .collectList()
+            .block();
   }
 
+  public List<District> getDistricts() {
+    log.info("Calling Institute api to load districts to memory");
+    return this.webClient.get()
+            .uri(this.props.getInstituteApiURL() + "/district")
+            .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .retrieve()
+            .bodyToFlux(District.class)
+            .collectList()
+            .block();
+  }
   @Cacheable(CacheNames.DISTRICT_CODES)
   public List<String> districtCodes() {
-    return this.getSchools().stream().map(School::getDistNo).filter(Objects::nonNull).collect(Collectors.toList());
+    return this.getDistricts().stream().map(District::getDistrictNumber).filter(Objects::nonNull).collect(Collectors.toList());
   }
+
 }

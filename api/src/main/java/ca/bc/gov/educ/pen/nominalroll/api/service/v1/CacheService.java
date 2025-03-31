@@ -14,10 +14,13 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class CacheService {
   private final RestUtils restUtils;
+
+  private final NominalRollService service;
   private final CacheManager cacheManager;
 
-  public CacheService(final RestUtils restUtils, final ApplicationProperties applicationProperties, final CacheManager cacheManager) {
+  public CacheService(final RestUtils restUtils, final ApplicationProperties applicationProperties, NominalRollService service, final CacheManager cacheManager) {
     this.restUtils = restUtils;
+    this.service = service;
     this.cacheManager = cacheManager;
     if (applicationProperties.getIsHttpRampUp()) {
       val genders = this.restUtils.getActiveGenderCodes();
@@ -26,8 +29,9 @@ public class CacheService {
       val grades = this.restUtils.getActiveGradeCodes();
       log.info("cached {} grades", grades.size());
 
-      val fedProvSchoolCodes = this.restUtils.getFedProvSchoolCodes();
+      val fedProvSchoolCodes = this.service.getFedProvSchoolCodes();
       log.info("cached {} fedProvSchoolCodes", fedProvSchoolCodes.size());
+
       val schools = this.restUtils.getSchools();
       log.info("cached {} schools", schools.size());
       val districts = this.restUtils.districtCodes();
@@ -43,9 +47,9 @@ public class CacheService {
         cached.clear();
       }
     });
+    this.service.getFedProvSchoolCodes();
     this.restUtils.getActiveGenderCodes();
     this.restUtils.getActiveGradeCodes();
-    this.restUtils.getFedProvSchoolCodes();
     this.restUtils.getSchools();
     this.restUtils.districtCodes();
     log.debug("Cache refreshed successfully");
@@ -58,8 +62,8 @@ public class CacheService {
     }
     switch (cacheName) {
       case CacheNames
-        .FED_PROV_CODES:
-        this.restUtils.getFedProvSchoolCodes();
+              .FED_PROV_CODES:
+        this.service.getFedProvSchoolCodes();
         break;
       case CacheNames.SCHOOL_CODES:
         this.restUtils.getSchools();

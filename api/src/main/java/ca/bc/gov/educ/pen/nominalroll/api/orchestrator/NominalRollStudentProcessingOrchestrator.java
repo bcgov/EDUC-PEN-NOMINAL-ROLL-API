@@ -39,7 +39,7 @@ import static ca.bc.gov.educ.pen.nominalroll.api.constants.TopicsEnum.PEN_MATCH_
 public class NominalRollStudentProcessingOrchestrator extends BaseOrchestrator<NominalRollStudentSagaData> {
   private final RulesProcessor rulesProcessor;
   private final NominalRollService nominalRollService;
-  private final RestUtils restUtils;
+
 
   /**
    * Instantiates a new Base orchestrator.
@@ -48,13 +48,11 @@ public class NominalRollStudentProcessingOrchestrator extends BaseOrchestrator<N
    * @param messagePublisher   the message publisher
    * @param rulesProcessor     the rules processor
    * @param nominalRollService the nominal roll service
-   * @param restUtils          the rest utils
    */
-  protected NominalRollStudentProcessingOrchestrator(final SagaService sagaService, final MessagePublisher messagePublisher, final RulesProcessor rulesProcessor, final NominalRollService nominalRollService, final RestUtils restUtils) {
+  protected NominalRollStudentProcessingOrchestrator(final SagaService sagaService, final MessagePublisher messagePublisher, final RulesProcessor rulesProcessor, final NominalRollService nominalRollService) {
     super(sagaService, messagePublisher, NominalRollStudentSagaData.class, SagaEnum.NOMINAL_ROLL_PROCESS_STUDENT_SAGA.toString(), TopicsEnum.NOMINAL_ROLL_PROCESS_STUDENT_SAGA_TOPIC.toString());
     this.rulesProcessor = rulesProcessor;
     this.nominalRollService = nominalRollService;
-    this.restUtils = restUtils;
   }
 
   @Override
@@ -144,7 +142,7 @@ public class NominalRollStudentProcessingOrchestrator extends BaseOrchestrator<N
 
   protected void postToPenMatchAPI(final Saga saga, final NominalRollStudentSagaData nominalRollStudentSagaData) throws JsonProcessingException {
     val nominalRollStudent = nominalRollStudentSagaData.getNominalRollStudent();
-    final String mincode = this.restUtils.getFedProvSchoolCodes().get(nominalRollStudent.getSchoolNumber());
+    final String mincode = this.nominalRollService.getMincodeByFedBandCode(nominalRollStudent.getSchoolNumber());
     val penMatchRequest = PenMatchSagaMapper.mapper.toPenMatchStudent(nominalRollStudent, mincode);
     penMatchRequest.setDob(StringUtils.replace(penMatchRequest.getDob(), "-", "")); // pen-match api expects yyyymmdd
     val penMatchRequestJson = JsonUtil.mapper.writeValueAsString(penMatchRequest);

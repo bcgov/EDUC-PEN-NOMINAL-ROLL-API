@@ -15,12 +15,15 @@ public class TestHelper {
   private final SagaRepository sagaRepository;
   private final SagaEventRepository sagaEventRepository;
 
-  public TestHelper(final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository, final NominalRollEventRepository eventRepository, final SagaRepository sagaRepository, final SagaEventRepository sagaEventRepository) {
+  private final FedProvCodeRepository fedProvCodeRepository;
+
+  public TestHelper(final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository, final NominalRollEventRepository eventRepository, final SagaRepository sagaRepository, final SagaEventRepository sagaEventRepository,final  FedProvCodeRepository fedProvCodeRepository) {
     this.repository = repository;
     this.postedStudentRepository = postedStudentRepository;
     this.eventRepository = eventRepository;
     this.sagaRepository = sagaRepository;
     this.sagaEventRepository = sagaEventRepository;
+    this.fedProvCodeRepository =fedProvCodeRepository;
   }
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
