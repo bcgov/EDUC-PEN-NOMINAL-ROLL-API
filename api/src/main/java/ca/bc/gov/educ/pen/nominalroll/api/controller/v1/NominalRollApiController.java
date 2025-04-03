@@ -5,6 +5,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.constants.v1.NominalRollStudentStatus;
 import ca.bc.gov.educ.pen.nominalroll.api.endpoint.v1.NominalRollApiEndpoint;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.FileError;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.FileUnProcessableException;
+import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.FedProvCodeMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
 import ca.bc.gov.educ.pen.nominalroll.api.processor.FileProcessor;
@@ -175,6 +176,11 @@ public class NominalRollApiController implements NominalRollApiEndpoint {
   @Override
   public ResponseEntity<Boolean> checkForNominalRollPostedStudents(String processingYear) {
     return ResponseEntity.ok(this.service.hasPostedStudents(processingYear));
+  }
+
+  @Override
+  public List<FedProvSchoolCode> getFedProvCodes() {
+    return this.service.getFedProvCodes();
   }
 
   @Override

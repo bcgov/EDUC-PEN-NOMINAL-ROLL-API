@@ -8,6 +8,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.constants.v1.NominalRollStudentStatus;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.EntityNotFoundException;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.NominalRollAPIRuntimeException;
 import ca.bc.gov.educ.pen.nominalroll.api.helpers.NominalRollHelper;
+import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.FedProvCodeMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.FedProvCodeEntity;
@@ -20,7 +21,6 @@ import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.FedProvSchoo
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.*;
 import ca.bc.gov.educ.pen.nominalroll.api.util.JsonUtil;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
@@ -64,6 +64,8 @@ public class NominalRollService {
   private final NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository;
   private final FedProvCodeRepository fedProvCodeRepository;
 
+  private final FedProvCodeMapper fedProvCodeMapper;
+
   private Map<String, String> schoolCodeMap = new ConcurrentHashMap<>();
 
   private final NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom;
@@ -73,7 +75,7 @@ public class NominalRollService {
 
   @Autowired
   public NominalRollService(final RestUtils restUtils, final MessagePublisher messagePublisher, final NominalRollStudentRepository repository, final NominalRollPostedStudentRepository postedStudentRepository,
-                            final NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom, final NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository, final FedProvCodeRepository fedProvCodeRepository) {
+                            final NominalRollStudentRepositoryCustom nominalRollStudentRepositoryCustom, final NominalRollStudentValidationErrorRepository nominalRollStudentValidationErrorRepository, final FedProvCodeRepository fedProvCodeRepository, FedProvCodeMapper fedProvCodeMapper) {
     this.messagePublisher = messagePublisher;
     this.restUtils = restUtils;
     this.repository = repository;
@@ -81,6 +83,7 @@ public class NominalRollService {
     this.nominalRollStudentRepositoryCustom = nominalRollStudentRepositoryCustom;
     this.nominalRollStudentValidationErrorRepository = nominalRollStudentValidationErrorRepository;
     this.fedProvCodeRepository = fedProvCodeRepository;
+    this.fedProvCodeMapper = fedProvCodeMapper;
   }
 
   public boolean isAllRecordsProcessed() {
@@ -312,6 +315,10 @@ public class NominalRollService {
               ));
     }
     return schoolCodeMap;
+  }
+
+  public List<FedProvSchoolCode> getFedProvCodes() {
+    return fedProvCodeMapper.toStructList(fedProvCodeRepository.findAll());
   }
 
   public String getMincodeByFedBandCode(String fedBandCode) {

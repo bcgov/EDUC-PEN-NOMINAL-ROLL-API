@@ -132,4 +132,11 @@ public interface NominalRollApiEndpoint {
   @Schema(name = "FedProvSchoolCode", implementation = FedProvSchoolCode.class)
   ResponseEntity<Void> addFedProvSchoolCode(@Validated @RequestBody FedProvSchoolCode fedProvSchoolCode);
 
+  @GetMapping("/federal-province-codes")
+  @PreAuthorize("hasAuthority('SCOPE_READ_FED_PROV_CODE')")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
+  @Transactional(readOnly = true)
+  @Tag(name = "Endpoint to get All Federal band code.", description = "Endpoint to get All Federal band code.")
+  @Schema(name = "FedProvSchoolCodes", implementation = FedProvSchoolCode.class)
+  List<FedProvSchoolCode> getFedProvCodes();
 }

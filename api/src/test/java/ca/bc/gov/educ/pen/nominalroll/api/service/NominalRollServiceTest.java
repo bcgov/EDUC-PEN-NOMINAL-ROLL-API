@@ -3,6 +3,7 @@ package ca.bc.gov.educ.pen.nominalroll.api.service;
 import ca.bc.gov.educ.pen.nominalroll.api.BaseNominalRollAPITest;
 import ca.bc.gov.educ.pen.nominalroll.api.NominalRollApiApplication;
 import ca.bc.gov.educ.pen.nominalroll.api.exception.EntityNotFoundException;
+import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.FedProvCodeMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
 import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
@@ -14,7 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -48,6 +48,8 @@ public class NominalRollServiceTest extends BaseNominalRollAPITest {
   @Autowired
   FedProvCodeRepository fedProvCodeRepository;
 
+  @Autowired
+  FedProvCodeMapper fedProvCodeMapper;
 
   @Mock
   NominalRollService service;
@@ -58,7 +60,7 @@ public class NominalRollServiceTest extends BaseNominalRollAPITest {
 
   @Before
   public void before() {
-    this.service = new NominalRollService(this.restUtils, this.messagePublisher, this.repository, this.postedStudentRepository, this.nominalRollStudentRepositoryCustom, this.nominalRollStudentValidationErrorRepository, this.fedProvCodeRepository);
+    this.service = new NominalRollService(this.restUtils, this.messagePublisher, this.repository, this.postedStudentRepository, this.nominalRollStudentRepositoryCustom, this.nominalRollStudentValidationErrorRepository, this.fedProvCodeRepository, fedProvCodeMapper);
   }
 
   @AfterEach
