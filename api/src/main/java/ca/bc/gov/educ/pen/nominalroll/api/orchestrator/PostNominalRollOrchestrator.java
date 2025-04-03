@@ -65,7 +65,6 @@ public class PostNominalRollOrchestrator extends BaseUserActionsOrchestrator<Nom
     this.stepBuilder()
       .begin(SAVE_NOMINAL_ROLL_POSTED_STUDENTS, this::saveNominalRollPostedStudents)
       .step(SAVE_NOMINAL_ROLL_POSTED_STUDENTS, NOMINAL_ROLL_POSTED_STUDENTS_SAVED, MARK_SAGA_COMPLETE, this::markSagaComplete);
-     // .step(CREATE_SLD_DIA_STUDENTS, SLD_DIA_STUDENTS_CREATED, MARK_SAGA_COMPLETE, this::markSagaComplete);
   }
 
   /**
