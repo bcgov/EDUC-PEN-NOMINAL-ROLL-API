@@ -64,8 +64,8 @@ public class PostNominalRollOrchestrator extends BaseUserActionsOrchestrator<Nom
   public void populateStepsToExecuteMap() {
     this.stepBuilder()
       .begin(SAVE_NOMINAL_ROLL_POSTED_STUDENTS, this::saveNominalRollPostedStudents)
-      .step(SAVE_NOMINAL_ROLL_POSTED_STUDENTS, NOMINAL_ROLL_POSTED_STUDENTS_SAVED, CREATE_SLD_DIA_STUDENTS, this::createDIAStudents)
-      .step(CREATE_SLD_DIA_STUDENTS, SLD_DIA_STUDENTS_CREATED, MARK_SAGA_COMPLETE, this::markSagaComplete);
+      .step(SAVE_NOMINAL_ROLL_POSTED_STUDENTS, NOMINAL_ROLL_POSTED_STUDENTS_SAVED, MARK_SAGA_COMPLETE, this::markSagaComplete);
+     // .step(CREATE_SLD_DIA_STUDENTS, SLD_DIA_STUDENTS_CREATED, MARK_SAGA_COMPLETE, this::markSagaComplete);
   }
 
   /**
@@ -89,31 +89,6 @@ public class PostNominalRollOrchestrator extends BaseUserActionsOrchestrator<Nom
       .eventOutcome(NOMINAL_ROLL_POSTED_STUDENTS_SAVED)
       .build();
     this.handleEvent(nextEvent);
-  }
-
-  /**
-   * Create DIA students
-   *
-   * @param event                   the event
-   * @param saga                    the saga
-   * @param nominalRollPostSagaData the split pen saga data
-   * @throws JsonProcessingException the json processing exception
-   */
-  public void createDIAStudents(final Event event, final Saga saga, final NominalRollPostSagaData nominalRollPostSagaData) throws JsonProcessingException {
-    final SagaEventStates eventStates = this.createEventState(saga, event.getEventType(), event.getEventOutcome(), event.getEventPayload());
-    saga.setSagaState(CREATE_SLD_DIA_STUDENTS.toString());
-    this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
-
-    final List<NominalRollPostedStudentEntity> nominalRollStudents = this.nominalRollService.findPostedStudentsByProcessingYear(nominalRollPostSagaData.getProcessingYear());
-    final List<SldDiaStudent> sldDiaStudents = nominalRollStudents.stream().map(student -> postedStudentMapper.toDiaStudent(student, this.restUtils)).collect(Collectors.toList());
-
-    final Event nextEvent = Event.builder().sagaId(saga.getSagaId())
-      .eventType(CREATE_SLD_DIA_STUDENTS)
-      .replyTo(this.getTopicToSubscribe())
-      .eventPayload(JsonUtil.getJsonStringFromObject(sldDiaStudents))
-      .build();
-    this.postMessageToTopic(SLD_API_TOPIC.toString(), nextEvent);
-    log.info("message sent to SLD_API_TOPIC for CREATE_SLD_DIA_STUDENTS Event. :: {}", saga.getSagaId());
   }
 
 }
