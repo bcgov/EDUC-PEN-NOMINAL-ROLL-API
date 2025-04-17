@@ -37,9 +37,6 @@ public class NominalRollStudentEntity {
   @Column(name = "NOMINAL_ROLL_STUDENT_ID", unique = true, updatable = false, columnDefinition = "BINARY(16)")
   UUID nominalRollStudentID; //
 
-  @Column(name = "ASSIGNED_STUDENT_ID", unique = true, updatable = false, columnDefinition = "BINARY(16)")
-  UUID assignedStudentID;
-
   @Column(name = "SCHOOL_DISTRICT_NUMBER", length = 500)
   String schoolDistrictNumber;
 
