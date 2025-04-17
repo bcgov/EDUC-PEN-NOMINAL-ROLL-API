@@ -48,6 +48,9 @@ public class ApplicationProperties {
 
   @Value("${url.api.institute}")
   private String instituteApiURL;
+
+  @Value("${url.api.sdc}")
+  private String sdcApiURL;
   @Value("${ramp.up.http}")
   private Boolean isHttpRampUp;
   @Value("${nats.server}")
