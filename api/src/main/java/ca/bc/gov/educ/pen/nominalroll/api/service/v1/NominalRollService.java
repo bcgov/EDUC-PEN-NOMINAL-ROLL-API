@@ -11,10 +11,7 @@ import ca.bc.gov.educ.pen.nominalroll.api.helpers.NominalRollHelper;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.FedProvCodeMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.v1.NominalRollStudentMapper;
 import ca.bc.gov.educ.pen.nominalroll.api.messaging.MessagePublisher;
-import ca.bc.gov.educ.pen.nominalroll.api.model.v1.FedProvCodeEntity;
-import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollPostedStudentEntity;
-import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentEntity;
-import ca.bc.gov.educ.pen.nominalroll.api.model.v1.NominalRollStudentValidationErrorEntity;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.*;
 import ca.bc.gov.educ.pen.nominalroll.api.repository.v1.*;
 import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.school.v1.FedProvSchoolCode;
@@ -265,6 +262,11 @@ public class NominalRollService {
   public List<NominalRollPostedStudentEntity> findPostedStudentsByProcessingYear(final String processingYear) {
     final Pair<LocalDateTime, LocalDateTime> firstAndLastDays = NominalRollHelper.getFirstAndLastDateTimesOfYear(processingYear);
     return this.postedStudentRepository.findAllByProcessingYearBetween(firstAndLastDays.getLeft(), firstAndLastDays.getRight());
+  }
+
+  public List<AssignedPenEntity> findAssignedPenFromPostedStudentsByProcessingYear(final String processingYear) {
+    final Pair<LocalDateTime, LocalDateTime> firstAndLastDays = NominalRollHelper.getFirstAndLastDateTimesOfYear(processingYear);
+    return this.postedStudentRepository.findAssignedPensByProcessingYearBetween(firstAndLastDays.getLeft(), firstAndLastDays.getRight());
   }
 
   public boolean hasPostedStudents(final String processingYear) {

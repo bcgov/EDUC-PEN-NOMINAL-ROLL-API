@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventOutcome.*;
 import static ca.bc.gov.educ.pen.nominalroll.api.constants.EventType.*;
@@ -75,6 +76,8 @@ public class NominalRollStudentProcessingOrchestrator extends BaseOrchestrator<N
     this.getSagaService().updateAttachedSagaWithEvents(saga, eventStates);
     val algorithmStatusCode = penMatchResult.getPenStatus();
     Optional<String> assignedPEN = Optional.empty();
+    Optional<String> assignedStudentID = Optional.empty();
+
     //system matched status.
     if (StringUtils.equalsIgnoreCase(algorithmStatusCode, "AA")
       || StringUtils.equalsIgnoreCase(algorithmStatusCode, "B1")
@@ -83,6 +86,7 @@ public class NominalRollStudentProcessingOrchestrator extends BaseOrchestrator<N
       final var penMatchRecordOptional = penMatchResult.getMatchingRecords().stream().findFirst();
       if (penMatchRecordOptional.isPresent()) {
         assignedPEN = Optional.of(penMatchRecordOptional.get().getMatchingPEN());
+        assignedStudentID = Optional.of(penMatchRecordOptional.get().getStudentID());
       } else {
         log.error("PenMatchRecord in priority queue is empty for matched status, this should not have happened.");
         throw new NominalRollAPIRuntimeException("PenMatchRecord in priority queue is empty for matched status, this should not have happened.");
@@ -93,6 +97,7 @@ public class NominalRollStudentProcessingOrchestrator extends BaseOrchestrator<N
       val nomRollStud = nomRollStudOptional.get();
       if (assignedPEN.isPresent()) {
         nomRollStud.setAssignedPEN(assignedPEN.get());
+        nomRollStud.setAssignedStudentID(UUID.fromString(assignedStudentID.get()));
         nomRollStud.setStatus(NominalRollStudentStatus.MATCHEDSYS.toString());
       } else {
         nomRollStud.setStatus(NominalRollStudentStatus.FIXABLE.toString());

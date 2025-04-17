@@ -38,4 +38,6 @@ public interface NominalRollStudentRepository extends JpaRepository<NominalRollS
   List<NominalRollStudentEntity> findTop100ByStatusOrderByCreateDate(String status);
 
   List<NominalRollStudentEntity> findAllByProcessingYear(String processingYear);
+
+  NominalRollStudentEntity findByAssignedPEN(String assignedPEN);
 }

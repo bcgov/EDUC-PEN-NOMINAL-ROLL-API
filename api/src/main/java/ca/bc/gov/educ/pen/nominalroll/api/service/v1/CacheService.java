@@ -3,6 +3,7 @@ package ca.bc.gov.educ.pen.nominalroll.api.service.v1;
 import ca.bc.gov.educ.pen.nominalroll.api.constants.CacheNames;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
 import ca.bc.gov.educ.pen.nominalroll.api.rest.RestUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.cache.CacheManager;
@@ -18,14 +19,13 @@ public class CacheService {
   private final NominalRollService service;
   private final CacheManager cacheManager;
 
-  public CacheService(final RestUtils restUtils, final ApplicationProperties applicationProperties, NominalRollService service, final CacheManager cacheManager) {
+  public CacheService(final RestUtils restUtils, final ApplicationProperties applicationProperties, NominalRollService service, final CacheManager cacheManager) throws JsonProcessingException {
     this.restUtils = restUtils;
     this.service = service;
     this.cacheManager = cacheManager;
     if (applicationProperties.getIsHttpRampUp()) {
       val genders = this.restUtils.getActiveGenderCodes();
       log.info("cached {} genders", genders.size());
-
       val grades = this.restUtils.getActiveGradeCodes();
       log.info("cached {} grades", grades.size());
 

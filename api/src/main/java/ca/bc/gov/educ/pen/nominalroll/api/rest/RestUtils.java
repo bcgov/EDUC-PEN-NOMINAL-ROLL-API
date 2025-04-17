@@ -2,13 +2,18 @@ package ca.bc.gov.educ.pen.nominalroll.api.rest;
 
 import ca.bc.gov.educ.pen.nominalroll.api.constants.CacheNames;
 import ca.bc.gov.educ.pen.nominalroll.api.mappers.LocalDateTimeMapper;
-import ca.bc.gov.educ.pen.nominalroll.api.model.v1.FedProvCodeEntity;
+import ca.bc.gov.educ.pen.nominalroll.api.model.v1.PaginatedResponse;
 import ca.bc.gov.educ.pen.nominalroll.api.properties.ApplicationProperties;
-import ca.bc.gov.educ.pen.nominalroll.api.service.v1.NominalRollService;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.external.sdc.v1.Collection;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.external.sdc.v1.SdcSchoolCollectionStudent;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GenderCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.external.student.v1.GradeCode;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.District;
+import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.IndependentAuthority;
 import ca.bc.gov.educ.pen.nominalroll.api.struct.v1.SchoolTombstone;
+import ca.bc.gov.educ.pen.nominalroll.api.util.SearchCriteriaBuilder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -17,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -24,9 +30,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -45,12 +56,16 @@ public class RestUtils {
 
   private final ReadWriteLock districtLock = new ReentrantReadWriteLock();
 
+  private final ReadWriteLock authorityLock = new ReentrantReadWriteLock();
   private final Map<String, SchoolTombstone> schoolMap = new ConcurrentHashMap<>();
-
   private final Map<String, District> districtMap = new ConcurrentHashMap<>();
 
+  private final Map<String, IndependentAuthority> authorityMap = new ConcurrentHashMap<>();
   private final Map<String, SchoolTombstone> schoolMincodeMap = new ConcurrentHashMap<>();
   private final ApplicationProperties props;
+
+  @Autowired
+  private final  ObjectMapper objectMapper;
   private final Map<String, List<UUID>> independentAuthorityToSchoolIDMap = new ConcurrentHashMap<>();
 
   @Value("${initialization.background.enabled}")
@@ -67,8 +82,9 @@ public class RestUtils {
     }
   }
 
-  public RestUtils( @Autowired final ApplicationProperties props, final WebClient webClient) {
-      this.props = props;
+  public RestUtils( @Autowired final ApplicationProperties props, final WebClient webClient, ObjectMapper objectMapper) {
+    this.objectMapper=objectMapper;
+    this.props = props;
     this.webClient = webClient;
   }
 
@@ -80,6 +96,7 @@ public class RestUtils {
     this.populateSchoolMap();
     this.populateSchoolMincodeMap();
     this.populateDistrictMap();
+    this.populateAuthorityMap();
 
   }
 
@@ -119,9 +136,6 @@ public class RestUtils {
     log.info("Loaded  {} school mincodes to memory", this.schoolMincodeMap.values().size());
   }
 
-
-
-
   public Optional<SchoolTombstone> getSchoolByMincode(final String mincode) {
     if (this.schoolMincodeMap.isEmpty()) {
       log.info("School mincode map is empty reloading schools");
@@ -129,9 +143,6 @@ public class RestUtils {
     }
     return Optional.ofNullable(this.schoolMincodeMap.get(mincode));
   }
-
-
-
 
   public void populateDistrictMap() {
     val writeLock = this.districtLock.writeLock();
@@ -146,6 +157,21 @@ public class RestUtils {
       writeLock.unlock();
     }
     log.info("Loaded  {} districts to memory", this.districtMap.values().size());
+  }
+
+  public void populateAuthorityMap() {
+    val writeLock = this.authorityLock.writeLock();
+    try {
+      writeLock.lock();
+      for (val authority : this.getAuthorities()) {
+        this.authorityMap.put(authority.getIndependentAuthorityId(), authority);
+      }
+    } catch (Exception ex) {
+      log.error("Unable to load map cache authorities {}", ex);
+    } finally {
+      writeLock.unlock();
+    }
+    log.info("Loaded  {} authorities to memory", this.authorityMap.values().size());
   }
 
   public Optional<SchoolTombstone> getSchoolBySchoolID(final String schoolId) {
@@ -214,6 +240,134 @@ public class RestUtils {
             .collectList()
             .block();
   }
+
+  public List<IndependentAuthority> getAuthorities() {
+    log.info("Calling Institute api to load authority to memory");
+    return this.webClient.get()
+            .uri(this.props.getInstituteApiURL() + "/authority")
+            .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .retrieve()
+            .bodyToFlux(IndependentAuthority.class)
+            .collectList()
+            .block();
+  }
+
+  public Optional<IndependentAuthority> getAuthorityByAuthorityID(final String authorityID) {
+    if (this.authorityMap.isEmpty()) {
+      log.info("Authority map is empty reloading authorities");
+      this.populateAuthorityMap();
+    }
+    return Optional.ofNullable(this.authorityMap.get(authorityID));
+  }
+  public Optional<District> getDistrictByDistrictID(final String districtID) {
+    if (this.districtMap.isEmpty()) {
+      log.info("District map is empty reloading schools");
+      this.populateDistrictMap();
+    }
+    return Optional.ofNullable(this.districtMap.get(districtID));
+  }
+  public PaginatedResponse<Collection> getCollections(String processingYear) throws JsonProcessingException {
+    List<Map<String, Object>> searchCriteriaList = SearchCriteriaBuilder.septemberCollectionsFromLastYear(processingYear);
+    String searchJson = objectMapper.writeValueAsString(searchCriteriaList);
+    String encodedSearchJson = URLEncoder.encode(searchJson, StandardCharsets.UTF_8);
+
+    int pageNumber = 0;
+    int pageSize= 50;
+
+    try {
+      String fullUrl = this.props.getSdcApiURL()
+              + "/collection/paginated"
+              + "?pageNumber=" + pageNumber
+              + "&pageSize=" + pageSize
+              + "&searchCriteriaList=" + encodedSearchJson;
+      return webClient.get()
+              .uri(fullUrl)
+              .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+              .retrieve()
+              .bodyToMono(new ParameterizedTypeReference<PaginatedResponse<Collection>>() {})
+              .block();
+    } catch (Exception ex) {
+      log.error("Error fetching schools on page {}", pageNumber, ex);
+      return null;
+    }
+  }
+
+  public List<SdcSchoolCollectionStudent> get1701DataForStudents(String collectionID, List<String> studentPens) throws JsonProcessingException {
+    int maxPensPerBatch = 1000;
+    int pageSize = 1000;
+
+    ExecutorService executor = Executors.newFixedThreadPool(8); // Adjust thread pool size as needed
+    List<CompletableFuture<List<SdcSchoolCollectionStudent>>> futures = new ArrayList<>();
+
+    for (int i = 0; i < studentPens.size(); i += maxPensPerBatch) {
+      int start = i;
+      int end = Math.min(i + maxPensPerBatch, studentPens.size());
+      List<String> batchPens = new ArrayList<>(studentPens.subList(start, end));
+
+      CompletableFuture<List<SdcSchoolCollectionStudent>> future = CompletableFuture.supplyAsync(() -> {
+        try {
+          return fetchStudentsForBatch(collectionID, batchPens, pageSize);
+        } catch (Exception e) {
+          log.error("Batch fetch failed", e);
+          return Collections.emptyList();
+        }
+      }, executor);
+
+      futures.add(future);
+    }
+
+    List<SdcSchoolCollectionStudent> allStudents = futures.stream()
+            .map(CompletableFuture::join)
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
+
+    executor.shutdown();
+    return allStudents;
+  }
+
+  private List<SdcSchoolCollectionStudent> fetchStudentsForBatch(String collectionID, List<String> batchPens, int pageSize) throws JsonProcessingException {
+    List<SdcSchoolCollectionStudent> students = new ArrayList<>();
+
+    List<Map<String, Object>> searchCriteriaList = SearchCriteriaBuilder.byCollectionIdAndStudentPens(collectionID, batchPens);
+    String searchJson = objectMapper.writeValueAsString(searchCriteriaList);
+    String encodedSearchJson = URLEncoder.encode(searchJson, StandardCharsets.UTF_8);
+
+    int pageNumber = 0;
+    boolean hasNextPage = true;
+
+    while (hasNextPage) {
+      try {
+        String fullUrl = this.props.getSdcApiURL()
+                + "/sdcSchoolCollectionStudent/paginated"
+                + "?pageNumber=" + pageNumber
+                + "&pageSize=" + pageSize
+                + "&sort=" // optional: add sort json or keep empty
+                + "&searchCriteriaList=" + encodedSearchJson;
+
+        PaginatedResponse<SdcSchoolCollectionStudent> response = webClient.get()
+                .uri(fullUrl)
+                .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<PaginatedResponse<SdcSchoolCollectionStudent>>() {})
+                .block();
+
+        if (response != null && response.getContent() != null) {
+          students.addAll(response.getContent());
+          hasNextPage = response.getNumber() < response.getTotalPages() - 1;
+          pageNumber++;
+        } else {
+          hasNextPage = false;
+        }
+      } catch (Exception ex) {
+        log.error("Error fetching 1701 data for page {} of batch starting at PEN {}", pageNumber, batchPens.get(0), ex);
+        break;
+      }
+    }
+
+    return students;
+  }
+
+
   @Cacheable(CacheNames.DISTRICT_CODES)
   public List<String> districtCodes() {
     return this.getDistricts().stream().map(District::getDistrictNumber).filter(Objects::nonNull).collect(Collectors.toList());

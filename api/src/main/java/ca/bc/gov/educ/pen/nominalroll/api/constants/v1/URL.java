@@ -12,6 +12,7 @@ public final class URL {
   public static final String SAGA = "/saga";
   public static final String POSTED_STUDENTS = "/nominal-roll-posted-students";
   public static final String EXIST = "/exist";
+  public static final String REPORTS = "/report";
 
   private URL() {
 

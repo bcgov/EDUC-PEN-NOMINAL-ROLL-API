@@ -39,4 +39,6 @@ public class SearchCriteria {
    * The Condition. ENUM to hold and AND OR
    */
   Condition condition;
+
+
 }
