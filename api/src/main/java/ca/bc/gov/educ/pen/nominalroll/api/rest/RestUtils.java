@@ -41,6 +41,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The type Rest utils.
@@ -65,7 +66,7 @@ public class RestUtils {
   private final ApplicationProperties props;
 
   @Autowired
-  private final  ObjectMapper objectMapper;
+  private final ObjectMapper objectMapper;
   private final Map<String, List<UUID>> independentAuthorityToSchoolIDMap = new ConcurrentHashMap<>();
 
   @Value("${initialization.background.enabled}")
@@ -259,6 +260,7 @@ public class RestUtils {
     }
     return Optional.ofNullable(this.authorityMap.get(authorityID));
   }
+
   public Optional<District> getDistrictByDistrictID(final String districtID) {
     if (this.districtMap.isEmpty()) {
       log.info("District map is empty reloading schools");
@@ -266,13 +268,14 @@ public class RestUtils {
     }
     return Optional.ofNullable(this.districtMap.get(districtID));
   }
+
   public PaginatedResponse<Collection> getCollections(String processingYear) throws JsonProcessingException {
     List<Map<String, Object>> searchCriteriaList = SearchCriteriaBuilder.septemberCollectionsFromLastYear(processingYear);
     String searchJson = objectMapper.writeValueAsString(searchCriteriaList);
     String encodedSearchJson = URLEncoder.encode(searchJson, StandardCharsets.UTF_8);
 
     int pageNumber = 0;
-    int pageSize= 50;
+    int pageSize = 50;
 
     try {
       String fullUrl = this.props.getSdcApiURL()
@@ -284,7 +287,8 @@ public class RestUtils {
               .uri(fullUrl)
               .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
               .retrieve()
-              .bodyToMono(new ParameterizedTypeReference<PaginatedResponse<Collection>>() {})
+              .bodyToMono(new ParameterizedTypeReference<PaginatedResponse<Collection>>() {
+              })
               .block();
     } catch (Exception ex) {
       log.error("Error fetching schools on page {}", pageNumber, ex);
@@ -293,8 +297,8 @@ public class RestUtils {
   }
 
   public List<SdcSchoolCollectionStudent> get1701DataForStudents(String collectionID, List<String> studentPens) throws JsonProcessingException {
-    int maxPensPerBatch = 1000;
-    int pageSize = 1000;
+    int maxPensPerBatch = 1500;
+    int pageSize = 1500;
 
     ExecutorService executor = Executors.newFixedThreadPool(8); // Adjust thread pool size as needed
     List<CompletableFuture<List<SdcSchoolCollectionStudent>>> futures = new ArrayList<>();
@@ -306,7 +310,8 @@ public class RestUtils {
 
       CompletableFuture<List<SdcSchoolCollectionStudent>> future = CompletableFuture.supplyAsync(() -> {
         try {
-          return fetchStudentsForBatch(collectionID, batchPens, pageSize);
+          List<Map<String, Object>> searchCriteriaList = SearchCriteriaBuilder.byCollectionIdAndStudentPens(collectionID, batchPens);
+          return fetchStudentsForBatch(pageSize, searchCriteriaList);
         } catch (Exception e) {
           log.error("Batch fetch failed", e);
           return Collections.emptyList();
@@ -325,10 +330,8 @@ public class RestUtils {
     return allStudents;
   }
 
-  private List<SdcSchoolCollectionStudent> fetchStudentsForBatch(String collectionID, List<String> batchPens, int pageSize) throws JsonProcessingException {
+  private List<SdcSchoolCollectionStudent> fetchStudentsForBatch(int pageSize, List<Map<String, Object>> searchCriteriaList) throws JsonProcessingException {
     List<SdcSchoolCollectionStudent> students = new ArrayList<>();
-
-    List<Map<String, Object>> searchCriteriaList = SearchCriteriaBuilder.byCollectionIdAndStudentPens(collectionID, batchPens);
     String searchJson = objectMapper.writeValueAsString(searchCriteriaList);
     String encodedSearchJson = URLEncoder.encode(searchJson, StandardCharsets.UTF_8);
 
@@ -348,7 +351,8 @@ public class RestUtils {
                 .uri(fullUrl)
                 .header(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<PaginatedResponse<SdcSchoolCollectionStudent>>() {})
+                .bodyToMono(new ParameterizedTypeReference<PaginatedResponse<SdcSchoolCollectionStudent>>() {
+                })
                 .block();
 
         if (response != null && response.getContent() != null) {
@@ -359,7 +363,7 @@ public class RestUtils {
           hasNextPage = false;
         }
       } catch (Exception ex) {
-        log.error("Error fetching 1701 data for page {} of batch starting at PEN {}", pageNumber, batchPens.get(0), ex);
+        log.error("Error fetching 1701 data for page {} of batch starting at PEN {}", pageNumber, ex);
         break;
       }
     }
@@ -373,4 +377,59 @@ public class RestUtils {
     return this.getDistricts().stream().map(District::getDistrictNumber).filter(Objects::nonNull).collect(Collectors.toList());
   }
 
+  public List<SdcSchoolCollectionStudent> get1701DataForStudentsWithFundingCode20(String collectionID) {
+    try {
+      List<Map<String, Object>> searchCriteriaFunding = SearchCriteriaBuilder.byCollectionIdAndFundingCode(collectionID);
+      return fetchStudentsForBatch(15000, searchCriteriaFunding); // One big call (or paginate inside fetch)
+    } catch (Exception e) {
+      log.error("Fetching students with funding code 20 failed", e);
+      return Collections.emptyList();
+    }
+  }
+
+  public List<SdcSchoolCollectionStudent> getAll1701Students(String collectionID, List<String> studentPens) {
+    ExecutorService executor = Executors.newFixedThreadPool(2); // Two threads: one for pens, one for fundingCode20
+
+    CompletableFuture<List<SdcSchoolCollectionStudent>> fundingFuture = CompletableFuture.supplyAsync(() -> {
+      long fundingStart = System.currentTimeMillis();
+      try {
+        return get1701DataForStudentsWithFundingCode20(collectionID);
+      } finally {
+        long fundingEnd = System.currentTimeMillis();
+        System.out.println("fundingFuture took " + (fundingEnd - fundingStart) + " ms");
+      }
+    }, executor);
+
+    CompletableFuture<List<SdcSchoolCollectionStudent>> pensFuture = CompletableFuture.supplyAsync(() -> {
+      long penStart = System.currentTimeMillis();
+      try {
+        return get1701DataForStudents(collectionID, studentPens);
+      } catch (JsonProcessingException e) {
+        throw new RuntimeException(e);
+      } finally {
+        long penEnd = System.currentTimeMillis();
+        System.out.println("pensFuture took " + (penEnd - penStart) + " ms");
+      }
+    }, executor);
+
+
+
+    List<SdcSchoolCollectionStudent> combinedStudents = Stream.concat(
+                    pensFuture.join().stream(),
+                    fundingFuture.join().stream()
+            )
+            .collect(Collectors.collectingAndThen(
+                    Collectors.toMap(
+                            SdcSchoolCollectionStudent::getAssignedPen,   // Use PEN as unique key
+                            student -> student,
+                            (existing, duplicate) -> existing      // Keep the first one if duplicates
+                    ),
+                    map -> new ArrayList<>(map.values())
+            ));
+
+    executor.shutdown();
+    return combinedStudents;
+  }
+
 }
+

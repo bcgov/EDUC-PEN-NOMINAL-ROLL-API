@@ -43,6 +43,11 @@ public enum NominalRollAllStudentsReportHeader {
     LEGAL_MIDDLE_NAME("1701 Legal Middle Name"),
     LEGAL_LAST_NAME("1701 Legal Last Name"),
 
+    USUAL_FIRST_NAME("1701 USUAL First Name"),
+    USUAL_MIDDLE_NAME("1701 USUAL Middle Name"),
+    USUAL_LAST_NAME("1701 USUAL Last Name"),
+
+    ASSIGNED_PEN_1701("1701 Assigned PEN"),
     DOB_1701("1701 DOB"),
     GENDER_1701("1701 Gender"),
     FTE_1701("1701 FTE"),
@@ -54,6 +59,7 @@ public enum NominalRollAllStudentsReportHeader {
 
     GRADE_1701("1701 Grade"),
 
+    ASSIGNED_PEN_NR("NR Assigned PEN"),
     GIVEN_NAME_NR("NR Given Name"),
     SURNAME_NR("NR Surname"),
     DOB_NR("NR DOB"),
@@ -61,6 +67,8 @@ public enum NominalRollAllStudentsReportHeader {
     FTE_NR("NR FTE"),
     GRADE_NR("NR Grade"),
     AGREEMENT_NAME_NR("NR Agreement Name"),
+
+    BAND_OF_RESIDENCE_CODE_1701("1701 Band of Residence Code"),
     RECIPIENT_BAND_CODE_NR("NR Recipient Band Code"),
     RECIPIENT_BAND_NAME_NR("NR Recipient Band Name");
     private final String code;

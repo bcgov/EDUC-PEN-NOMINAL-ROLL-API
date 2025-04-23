@@ -62,7 +62,7 @@ public class SearchCriteriaBuilder {
 
         // Second block: studentPens (IN)
         Map<String, Object> pensCriteria = new HashMap<>();
-        pensCriteria.put("key", "studentPen");
+        pensCriteria.put("key", "assignedPen");
         pensCriteria.put("operation", "in");
         pensCriteria.put("value", String.join(",", studentPens));
         pensCriteria.put("valueType", "STRING");
@@ -75,5 +75,38 @@ public class SearchCriteriaBuilder {
 
         return searchCriteriaList;
     }
+
+
+    public static List<Map<String, Object>> byCollectionIdAndFundingCode(String collectionID) {
+        List<Map<String, Object>> searchCriteriaList = new ArrayList<>();
+
+        // First block: collection ID
+        Map<String, Object> collectionIdCriteria = new HashMap<>();
+        collectionIdCriteria.put("key", "sdcSchoolCollection.collectionEntity.collectionID");
+        collectionIdCriteria.put("value", collectionID);
+        collectionIdCriteria.put("operation", "eq");
+        collectionIdCriteria.put("valueType", "UUID");
+
+        Map<String, Object> wrapper1 = new HashMap<>();
+        wrapper1.put("condition", null); // first block, no outer condition
+        wrapper1.put("searchCriteriaList", List.of(collectionIdCriteria));
+        searchCriteriaList.add(wrapper1);
+
+        // Second block: school funding code
+        Map<String, Object> schoolFundingCriteria = new HashMap<>();
+        schoolFundingCriteria.put("key", "schoolFundingCode");
+        schoolFundingCriteria.put("value", "20");
+        schoolFundingCriteria.put("operation", "eq");
+        schoolFundingCriteria.put("valueType", "STRING");
+
+        Map<String, Object> wrapper2 = new HashMap<>();
+        wrapper2.put("condition", "AND"); // outer group condition
+        wrapper2.put("searchCriteriaList", List.of(schoolFundingCriteria));
+        searchCriteriaList.add(wrapper2);
+
+        return searchCriteriaList;
+    }
+
 }
+
 

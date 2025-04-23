@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 @RequestMapping(URL.BASE_URL + URL.REPORTS)
 public interface NominalRollReportsEndpoint {
@@ -22,6 +21,6 @@ public interface NominalRollReportsEndpoint {
     @PreAuthorize("hasAuthority('SCOPE_READ_SDC_MINISTRY_REPORTS')")
     @Transactional(readOnly = true)
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"), @ApiResponse(responseCode = "400", description = "BAD REQUEST")})
-    DownloadableReportResponse getMinistryDownloadableReport(@PathVariable(name = "type") String type) throws JsonProcessingException, ExecutionException, InterruptedException;
+    DownloadableReportResponse getMinistryDownloadableReport(@PathVariable(name = "type") String type) throws JsonProcessingException;
 
 }
