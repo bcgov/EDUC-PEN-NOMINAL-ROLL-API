@@ -30,7 +30,7 @@ public class SearchCriteriaBuilder {
         // Second search criteria for openDate (>= 2024-01-01)
         Map<String, Object> openDateCriteria = new HashMap<>();
         openDateCriteria.put("key", "openDate");
-        openDateCriteria.put("value", 2023 + "-01-01");  // Start of last year
+        openDateCriteria.put("value", processingYear + "-01-01");  // Start of last year
         openDateCriteria.put("operation", "gte");
         openDateCriteria.put("valueType", "DATE");
         openDateCriteria.put("condition", "AND");  // Adding condition for this item
