@@ -47,7 +47,7 @@ public class NominalRollReportsController implements NominalRollReportsEndpoint 
 
         CompletableFuture<List<NominalRollPostedStudentEntity>> postedStudentsFuture = CompletableFuture.supplyAsync(() -> {
             long start = System.currentTimeMillis();
-            List<NominalRollPostedStudentEntity> result = nominalRollService.findPostedStudentsByProcessingYear(processingYear);
+            List<NominalRollPostedStudentEntity> result = nominalRollService.findPostedStudentsByProcessingYear(incrementProcessingYear(processingYear));
             long end = System.currentTimeMillis();
             System.out.println("Time taken to fetch posted students: " + (end - start) + " ms");
             return result;
@@ -64,5 +64,11 @@ public class NominalRollReportsController implements NominalRollReportsEndpoint 
 
 
         return reportResponse;
+    }
+
+    public String incrementProcessingYear(String processingYear) {
+        int year = Integer.parseInt(processingYear);
+        year += 1;
+        return String.valueOf(year);
     }
 }
