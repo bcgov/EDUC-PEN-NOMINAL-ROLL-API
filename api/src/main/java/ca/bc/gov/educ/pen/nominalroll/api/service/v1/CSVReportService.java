@@ -149,6 +149,47 @@ public class CSVReportService {
                         }
                     }
                 }
+                // Collect all SDC PENs for reverse lookup
+                Set<String> sdcPens = sdcStudents.stream()
+                        .map(SdcSchoolCollectionStudent::getAssignedPen)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet());
+
+                // Now check posted students that do NOT exist in SDC list
+                for (NominalRollPostedStudentEntity postedStudent : postedStudents) {
+                    String pen = postedStudent.getAssignedPEN();
+                    if (pen == null || sdcPens.contains(pen)) {
+                        continue; // Already handled in the first loop
+                    }
+
+                    Optional<String> mincodeOpt = Optional.ofNullable(
+                            nominalRollService.getFedProvSchoolCodes().get(postedStudent.getFederalSchoolNumber())
+                    );
+
+                    SchoolTombstone nrSchool = mincodeOpt
+                            .flatMap(restUtils::getSchoolByMincode)
+                            .orElse(null);
+
+                    District nrDistrict = Optional.ofNullable(nrSchool)
+                            .map(SchoolTombstone::getDistrictId)
+                            .flatMap(restUtils::getDistrictByDistrictID)
+                            .orElse(null);
+
+                    IndependentAuthority nrAuthority = Optional.ofNullable(nrSchool)
+                            .map(SchoolTombstone::getIndependentAuthorityId)
+                            .filter(Objects::nonNull)
+                            .flatMap(restUtils::getAuthorityByAuthorityID)
+                            .orElse(null);
+
+                    // Export the posted student with null SDC match
+                    List<String> csvRowData = prepareAllNominalRollDataForCsv(
+                            null, null, null, // No SDC school info
+                            nrSchool, nrDistrict, nrAuthority,
+                            null, postedStudent
+                    );
+                    csvPrinter.printRecord(csvRowData);
+                }
+
 
 
                 csvPrinter.flush();
