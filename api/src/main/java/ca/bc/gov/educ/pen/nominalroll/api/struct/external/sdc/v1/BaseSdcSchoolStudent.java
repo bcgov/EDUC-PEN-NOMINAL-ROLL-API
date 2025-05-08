@@ -28,9 +28,6 @@ public class BaseSdcSchoolStudent extends BaseRequest {
 
   private String sdcDistrictCollectionID;
 
-  @Size(max = 12)
-  private String localID;
-
   @Size(max = 9)
   private String studentPen;
 
@@ -71,41 +68,16 @@ public class BaseSdcSchoolStudent extends BaseRequest {
   @NotNull(message = "nativeAncestryInd cannot be null")
   private String nativeAncestryInd;
 
-  @Size(max = 10)
-  private String homeLanguageSpokenCode;
-
-  @Size(max = 1)
-  private String otherCourses;
-
-  @Size(max = 1)
-  private String supportBlocks;
 
   @Size(max = 10)
   @NotNull(message = "enrolledGradeCode cannot be null")
   private String enrolledGradeCode;
 
-  @Size(max = 16)
-  private String enrolledProgramCodes;
-
-  @Size(max = 10)
-  private String careerProgramCode;
-
-  @Size(max = 4)
-  private String numberOfCourses;
-
-  private BigDecimal numberOfCoursesDec;
 
   private String schoolID;
 
   @Size(max = 4)
   private String bandCode;
-
-  @Size(max = 6)
-  private String postalCode;
-
-  @Size(max = 10)
-  @NotNull(message = "sdcSchoolCollectionStudentStatusCode cannot be null")
-  private String sdcSchoolCollectionStudentStatusCode;
 
   @Size(max = 5)
   private String isAdult;
@@ -117,32 +89,6 @@ public class BaseSdcSchoolStudent extends BaseRequest {
   private BigDecimal fte;
 
   @Size(max = 10)
-  private String fteZeroReasonCode;
-
-  @Size(max = 10)
-  private String frenchProgramNonEligReasonCode;
-
-  @Size(max = 10)
-  private String ellNonEligReasonCode;
-
-  @Size(max = 10)
-  private String indigenousSupportProgramNonEligReasonCode;
-
-  @Size(max = 10)
-  private String careerProgramNonEligReasonCode;
-
-  @Size(max = 10)
-  private String specialEducationNonEligReasonCode;
-
-  @Size(max = 5)
-  private String isGraduated;
-
-  private String assignedStudentId;
-
-  @Size(max = 10)
   private String assignedPen;
 
-  private String penMatchResult;
-
-  private String yearsInEll;
 }
