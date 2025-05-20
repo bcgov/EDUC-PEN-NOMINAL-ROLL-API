@@ -415,17 +415,9 @@ public class RestUtils {
 
 
     List<SdcSchoolCollectionStudent> combinedStudents = Stream.concat(
-                    pensFuture.join().stream(),
-                    fundingFuture.join().stream()
-            )
-            .collect(Collectors.collectingAndThen(
-                    Collectors.toMap(
-                            SdcSchoolCollectionStudent::getAssignedPen,   // Use PEN as unique key
-                            student -> student,
-                            (existing, duplicate) -> existing      // Keep the first one if duplicates
-                    ),
-                    map -> new ArrayList<>(map.values())
-            ));
+            pensFuture.join().stream(),
+            fundingFuture.join().stream()
+    ).collect(Collectors.toList());
 
     executor.shutdown();
     return combinedStudents;

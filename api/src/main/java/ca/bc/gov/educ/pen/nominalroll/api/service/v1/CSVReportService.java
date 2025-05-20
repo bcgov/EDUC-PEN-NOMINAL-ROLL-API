@@ -106,9 +106,13 @@ public class CSVReportService {
                         // ➡ Case 2: Student matched to one or more posted students — export all
                         for (NominalRollPostedStudentEntity studentNR : matchedPostedStudents) {
 
-                            Optional<String> mincodeOpt = Optional.ofNullable(
-                                    nominalRollService.getFedProvSchoolCodes().get(studentNR.getFederalSchoolNumber())
-                            );
+                            String fedSchoolNumber = Optional.ofNullable(studentNR.getFederalSchoolNumber())
+                                    .map(String::trim)
+                                    .map(num -> String.format("%05d", Integer.parseInt(num)))
+                                    .orElse(null);
+
+                            Optional<String> mincodeOpt = Optional.ofNullable(fedSchoolNumber)
+                                    .map(fed -> nominalRollService.getFedProvSchoolCodes().get(fed));
 
                             SchoolTombstone nrSchool = mincodeOpt
                                     .flatMap(restUtils::getSchoolByMincode)
@@ -162,10 +166,13 @@ public class CSVReportService {
                         continue; // Already handled in the first loop
                     }
 
-                    Optional<String> mincodeOpt = Optional.ofNullable(
-                            nominalRollService.getFedProvSchoolCodes().get(postedStudent.getFederalSchoolNumber())
-                    );
+                    String fedSchoolNumber = Optional.ofNullable(postedStudent.getFederalSchoolNumber())
+                            .map(String::trim)
+                            .map(num -> String.format("%05d", Integer.parseInt(num)))
+                            .orElse(null);
 
+                    Optional<String> mincodeOpt = Optional.ofNullable(fedSchoolNumber)
+                            .map(fed -> nominalRollService.getFedProvSchoolCodes().get(fed));
                     SchoolTombstone nrSchool = mincodeOpt
                             .flatMap(restUtils::getSchoolByMincode)
                             .orElse(null);
