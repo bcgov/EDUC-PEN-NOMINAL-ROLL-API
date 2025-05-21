@@ -49,7 +49,8 @@ public class CSVReportService {
         List<SdcSchoolCollectionStudent> sdcStudents = restUtils.getAll1701Students(collectionID, studentPens);
 
         CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
-                    .setHeader(DISTRICT_NUMBER_1701.getCode(), DISTRICT_DISPLAY_NAME_1701.getCode(),
+                    .setHeader(SCHOOL_CATEGORY_CODE_1701.getCode(), SCHOOL_CATEGORY_CODE_NR.getCode(),
+                               DISTRICT_NUMBER_1701.getCode(), DISTRICT_DISPLAY_NAME_1701.getCode(),
                                DISTRICT_NUMBER_NR.getCode(),DISTRICT_DISPLAY_NAME_NR.getCode(),
                                ASSIGNED_PEN_1701.getCode(),LEGAL_FIRST_NAME.getCode(), USUAL_FIRST_NAME.getCode(), LEGAL_MIDDLE_NAME.getCode(), USUAL_MIDDLE_NAME.getCode(),LEGAL_LAST_NAME.getCode(), USUAL_LAST_NAME.getCode(),
                                ASSIGNED_PEN_NR.getCode(), GIVEN_NAME_NR.getCode(), SURNAME_NR.getCode(),
@@ -59,8 +60,8 @@ public class CSVReportService {
                                FTE_1701.getCode(),FTE_NR.getCode(),
                                AGREEMENT_NAME_NR.getCode(), SPECIAL_EDUCATION_CODE_1701.getCode(),
                                BAND_OF_RESIDENCE_CODE_1701.getCode(), RECIPIENT_BAND_CODE_NR.getCode(), RECIPIENT_BAND_NAME_NR.getCode(),
-                               SCHOOL_FUNDING_CODE_1701.getCode(), INDIGENOUS_1701.getCode(),ADULT_1701.getCode(), SCHOOL_AGED.getCode(), SCHOOL_NUMBER_1701.getCode(), SCHOOL_DISPLAY_NAME_1701.getCode(), SCHOOL_CATEGORY_CODE_1701.getCode(), SCHOOL_FACILITY_TYPE_CODE_1701.getCode(), SCHOOL_REPORTING_REQUIREMENT_CODE_1701.getCode(),
-                               SCHOOL_NUMBER_NR.getCode(), SCHOOL_DISPLAY_NAME_NR.getCode(), SCHOOL_CATEGORY_CODE_NR.getCode(), SCHOOL_FACILITY_TYPE_CODE_NR.getCode(), SCHOOL_REPORTING_REQUIREMENT_CODE_1701.getCode(),
+                               SCHOOL_FUNDING_CODE_1701.getCode(), INDIGENOUS_1701.getCode(),ADULT_1701.getCode(), SCHOOL_AGED.getCode(), SCHOOL_NUMBER_1701.getCode(), SCHOOL_DISPLAY_NAME_1701.getCode(), SCHOOL_FACILITY_TYPE_CODE_1701.getCode(), SCHOOL_REPORTING_REQUIREMENT_CODE_1701.getCode(),
+                               SCHOOL_NUMBER_NR.getCode(), SCHOOL_DISPLAY_NAME_NR.getCode(), SCHOOL_FACILITY_TYPE_CODE_NR.getCode(), SCHOOL_REPORTING_REQUIREMENT_CODE_1701.getCode(),
                                AUTHORITY_NUMBER_1701.getCode(), AUTHORITY_DISPLAY_NAME_1701.getCode(),
                                AUTHORITY_DISPLAY_NAME_NR.getCode()
                     )
@@ -229,6 +230,9 @@ public class CSVReportService {
         csvRowData.addAll(Arrays.asList(
 
                 // 1701 District
+                safe.apply(school != null ? school.getSchoolCategoryCode() : null),
+                safe.apply(nrSchool != null ? nrSchool.getSchoolCategoryCode() : null),
+
                 safe.apply(district != null ? district.getDistrictNumber() : null),
                 safe.apply(district != null ? district.getDisplayName() : null),
                 // NR District
@@ -275,13 +279,13 @@ public class CSVReportService {
                 // 1701 School
                 safe.apply(school != null ? school.getSchoolNumber() : null),
                 safe.apply(school != null ? school.getDisplayName() : null),
-                safe.apply(school != null ? school.getSchoolCategoryCode() : null),
+
                 safe.apply(school != null ? school.getFacilityTypeCode() : null),
                 safe.apply(school != null ? school.getSchoolReportingRequirementCode() : null),
                 // NR School
                 safe.apply(nrSchool != null ? nrSchool.getSchoolNumber() : null),
                 safe.apply(nrSchool != null ? nrSchool.getDisplayName() : null),
-                safe.apply(nrSchool != null ? nrSchool.getSchoolCategoryCode() : null),
+
                 safe.apply(nrSchool != null ? nrSchool.getFacilityTypeCode() : null),
                 safe.apply(nrSchool != null ? nrSchool.getSchoolReportingRequirementCode() : null),
 

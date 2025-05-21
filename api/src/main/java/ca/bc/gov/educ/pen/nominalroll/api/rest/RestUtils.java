@@ -417,7 +417,8 @@ public class RestUtils {
     List<SdcSchoolCollectionStudent> combinedStudents = Stream.concat(
             pensFuture.join().stream(),
             fundingFuture.join().stream()
-    ).collect(Collectors.toList());
+    )       .distinct()
+            .collect(Collectors.toList());
 
     executor.shutdown();
     return combinedStudents;
