@@ -308,16 +308,16 @@ public class NominalRollService {
 
   @Cacheable(CacheNames.FED_PROV_CODES)
   public Map<String, String> getFedProvSchoolCodes() {
-    if (this.schoolCodeMap.isEmpty()) {
-      List<FedProvCodeEntity> schoolCodes = fedProvCodeRepository.findAll();
-      schoolCodeMap = schoolCodes.stream()
-              .collect(Collectors.toMap(
-                      FedProvCodeEntity::getFedBandCode,
-                      entity -> restUtils.getSchoolBySchoolID(entity.getSchoolID().toString()).get().getMincode()
-              ));
-    }
-    return schoolCodeMap;
+    List<FedProvCodeEntity> schoolCodes = fedProvCodeRepository.findAll();
+    return schoolCodes.stream()
+            .collect(Collectors.toMap(
+                    FedProvCodeEntity::getFedBandCode,
+                    entity -> restUtils.getSchoolBySchoolID(entity.getSchoolID().toString())
+                            .map(SchoolTombstone::getMincode)
+                            .orElseThrow(() -> new RuntimeException("School not found for ID: " + entity.getSchoolID()))
+            ));
   }
+
 
   public List<FedProvSchoolCode> getFedProvCodes() {
     return fedProvCodeMapper.toStructList(fedProvCodeRepository.findAll());
