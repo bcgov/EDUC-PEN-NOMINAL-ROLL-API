@@ -120,8 +120,6 @@ objects:
           configMap:
             name: "${APP_NAME}-flb-sc-config-map"
     test: false
-    triggers:
-    - type: ConfigChange
 - apiVersion: v1
   kind: Service
   metadata:
