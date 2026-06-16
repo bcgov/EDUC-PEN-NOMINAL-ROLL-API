@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SearchCriteriaBuilder {
+    private static final String DELETED_SDC_STUDENT_STATUS = "DELETED";
 
     // Method to create the search criteria for SEPTEMBER collections from last year
     public static List<Map<String, Object>> septemberCollectionsFromLastYear(String processingYear) {
@@ -73,6 +74,8 @@ public class SearchCriteriaBuilder {
         wrapper2.put("searchCriteriaList", List.of(pensCriteria));
         searchCriteriaList.add(wrapper2);
 
+        addNotDeletedStudentStatusCriteria(searchCriteriaList);
+
         return searchCriteriaList;
     }
 
@@ -104,9 +107,23 @@ public class SearchCriteriaBuilder {
         wrapper2.put("searchCriteriaList", List.of(schoolFundingCriteria));
         searchCriteriaList.add(wrapper2);
 
+        addNotDeletedStudentStatusCriteria(searchCriteriaList);
+
         return searchCriteriaList;
     }
 
-}
+    private static void addNotDeletedStudentStatusCriteria(List<Map<String, Object>> searchCriteriaList) {
+        Map<String, Object> studentStatusCriteria = new HashMap<>();
+        studentStatusCriteria.put("key", "sdcSchoolCollectionStudentStatusCode");
+        studentStatusCriteria.put("value", DELETED_SDC_STUDENT_STATUS);
+        studentStatusCriteria.put("operation", "neq");
+        studentStatusCriteria.put("valueType", "STRING");
 
+        Map<String, Object> wrapper = new HashMap<>();
+        wrapper.put("condition", "AND");
+        wrapper.put("searchCriteriaList", List.of(studentStatusCriteria));
+        searchCriteriaList.add(wrapper);
+    }
+
+}
 
