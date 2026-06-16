@@ -341,7 +341,7 @@ public class RestUtils {
     while (hasNextPage) {
       try {
         String fullUrl = this.props.getSdcApiURL()
-                + "/sdcSchoolCollectionStudent/paginated-shallow"
+                + "/sdcSchoolCollectionStudent/paginated"
                 + "?pageNumber=" + pageNumber
                 + "&pageSize=" + pageSize
                 + "&sort=" // optional: add sort json or keep empty
@@ -425,4 +425,3 @@ public class RestUtils {
   }
 
 }
-
